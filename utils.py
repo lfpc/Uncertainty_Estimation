@@ -108,3 +108,21 @@ def normalize(x, min_x= None,max_x = None):
 
     normalized = (x-min_x)/(max_x-min_x)
     return normalized
+
+def freeze_params(model, name = None):
+    ''' Set requires_grad of model parameters with name in its name to False.
+    Freeze parameters to avoid training.'''
+    for n,param in model.named_parameters():
+        if name ==None:
+            param.requires_grad = False
+        elif name in n:
+            param.requires_grad = False
+            
+def unfreeze_params(model, name = None):
+    ''' Set requires_grad of model parameters with name in its name to True.
+    Freeze parameters, turning it possible to train.'''
+    for n,param in model.named_parameters():
+        if name == None:
+            param.requires_grad = True
+        elif name in n:
+            param.requires_grad = True
