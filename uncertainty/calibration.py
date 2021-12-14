@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from uncertainty.quantifications import get_MCP
 from utils import round_decimal,normalize
-from train_and_eval import correct_class
+from utils.train_and_eval import correct_class
 
 
 
@@ -17,7 +17,7 @@ def calibration_curve(model,data):
     model.eval()
     for image,label in data:
         image,label = image.to(dev), label.to(dev)
-        
+
         y = model(image)
         MCP = get_MCP(y)
         

@@ -1,9 +1,9 @@
 import pandas as pd
 import matplotlib
 from matplotlib import pyplot as plt
-from torch import nn
 import torch
 import numpy as np
+import utils.train_and_eval
 
 def dataset_cut_classes(data,indices = (0,1)):
 

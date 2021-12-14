@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from train_and_eval import correct_total
+from utils.train_and_eval import correct_total
 from utils import apply_mask
 
 def dontknow_mask(y_pred, uncertainty, coverage = 0.1):
