@@ -2,8 +2,8 @@ from collections import defaultdict
 import torch
 import numpy as np
 from uncertainty.quantifications import get_MCP
-from utils import round_decimal,normalize
-from utils.train_and_eval import correct_class
+from NN_utils import round_decimal,normalize
+from NN_utils.train_and_eval import correct_class
 
 
 

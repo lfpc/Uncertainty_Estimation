@@ -1,7 +1,7 @@
 import torch
 import numpy as np
-from utils.train_and_eval import correct_total
-from utils import apply_mask
+from NN_utils.train_and_eval import correct_total
+from NN_utils import apply_mask
 
 def dontknow_mask(y_pred, uncertainty, coverage = 0.1):
     '''Returns a DontKnow Tensor: 1 for the most (coverage most) uncertain samples
