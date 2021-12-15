@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     # Needed to silence warnings (and to be a worthwhile package)
     name='Uncertainty_Estimation',
-    url='https://github.com/lfpc/Uncertainty_Estimation',
+    url='https://github.com/lfpc/NN_torch',
     author='Luís FP Cattelan',
     author_email='luisfelipe1998@gmail.com',
     # Needed to actually package something
