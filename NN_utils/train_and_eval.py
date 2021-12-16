@@ -61,6 +61,7 @@ def model_acc(model,data):
     return (correct*100/total)
 
 
+
 class Trainer(nn.Module):
     def __init__(self,model,optimizer,loss_criterion, print_loss = True,keep_hist = True):
         # adaptar keep hist para definir oq manter\n",
