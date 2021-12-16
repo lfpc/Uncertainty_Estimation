@@ -1,6 +1,14 @@
 import numpy as np
 import torch
+<<<<<<< HEAD
+<<<<<<< HEAD
+from NN_utils import indexing_2D,round_decimal
+=======
 from utils import indexing_2D,round_decimal
+>>>>>>> 38c7beaaad146b7a125010a1f849c8364dedd4bd
+=======
+from utils import indexing_2D,round_decimal
+>>>>>>> 38c7beaaad146b7a125010a1f849c8364dedd4bd
 
 def get_MCP(y):
     ''' Returns the Maximum Class/Softmax Probability of a predicted output.
@@ -100,7 +108,15 @@ class MonteCarloDropout(torch.nn.Module):
         self.MC_array = montecarlo_pred(X,self.n)
         mean = torch.mean(self.MC_array, axis=0) 
         return mean
+<<<<<<< HEAD
+<<<<<<< HEAD
+
+=======
         
+>>>>>>> 38c7beaaad146b7a125010a1f849c8364dedd4bd
+=======
+        
+>>>>>>> 38c7beaaad146b7a125010a1f849c8364dedd4bd
     def get_var(self):
         var = MonteCarlo_var(self.MC_array)
         return var
