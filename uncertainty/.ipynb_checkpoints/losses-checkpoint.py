@@ -1,5 +1,4 @@
 import torch
-from math import log
 class LCE(torch.nn.Module):
     '''Defines LCE loss - Devries(2018)'''
     def __init__(self,criterion,lamb_init,beta,adjust_factor = 1.01):
@@ -30,7 +29,7 @@ class LCE(torch.nn.Module):
                 self.lamb = self.lamb/self.adjust_factor
 
 class penalized_uncertainty(torch.nn.Module):
-    def __init__(self,criterion, def_loss = log(10)):
+    def __init__(self,criterion, def_loss):
         super().__init__()
         self.L0 = def_loss
         self.criterion = criterion #criterion must have reduction set to 'none'

@@ -109,55 +109,20 @@ def normalize(x, min_x= None,max_x = None):
     normalized = (x-min_x)/(max_x-min_x)
     return normalized
 
-def freeze_params(model, layers = None):
-    ''' Set requires_grad of model parameters with name inlayers to False.
+def freeze_params(model, name = None):
+    ''' Set requires_grad of model parameters with name in its name to False.
     Freeze parameters to avoid training.'''
     for n,param in model.named_parameters():
-        if layers == None:
+        if name ==None:
             param.requires_grad = False
-        elif any(name in n for name in layers):
+        elif name in n:
             param.requires_grad = False
             
-def unfreeze_params(model, layers = None):
-    ''' Set requires_grad of model parameters with name in layers to True.
-    Freeze parameters, turning it possible to train. '''
-    
+def unfreeze_params(model, name = None):
+    ''' Set requires_grad of model parameters with name in its name to True.
+    Freeze parameters, turning it possible to train.'''
     for n,param in model.named_parameters():
-        if layers == None:
+        if name == None:
             param.requires_grad = True
-            
-            
-        elif any(name in n for name in layers):
+        elif name in n:
             param.requires_grad = True
-            
-def model_eval_layers(model,layers):
-    '''Set layers to eval mode'''
-    for n,p in model.named_modules():
-        #If some element in layers is a string, 
-        #implement loop in 'named_modules' and apply in those with the desired name
-        if n in layers:
-            p.eval()
-    for layer in layers: #if some element in layers is the layer module, apply train directly
-        if not isinstance(layer,str):
-            layer.eval()
-        
-def model_train_layers(model,layers):
-    '''Set layers to train mode'''
-    for n,p in model.named_modules(): 
-        #If some element in layers is a string, 
-        #implement loop in 'named_modules' and apply in those with the desired name
-        if n in layers:
-            p.train()
-    for layer in layers: #if some element in layers is the layer module, apply train directly
-        if not isinstance(layer,str):
-            layer.train()
-        
-def ignore_layers(model,layers,reset = True):
-    '''Set layers to train mode and freeze them (set requires grad to False).
-    If reset, set to train mode and unfreeza all layers of model before ignore'''
-    if reset:
-        unfreeze_params(model)
-        model.train()
-    
-    model_eval_layers(model,layers)
-    freeze_params(model,layers)

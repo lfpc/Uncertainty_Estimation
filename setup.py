@@ -2,7 +2,9 @@ from setuptools import setup, find_packages
 
 setup(
     # Needed to silence warnings (and to be a worthwhile package)
+
     name='uncertainty_estimation',
+
     url='https://github.com/lfpc/Uncertainty_Estimation',
     author='Luís FP Cattelan',
     author_email='luisfelipe1998@gmail.com',
