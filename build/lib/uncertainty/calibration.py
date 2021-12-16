@@ -4,8 +4,13 @@ import numpy as np
 from uncertainty.quantifications import get_MCP
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from NN_utils import round_decimal,normalize
 from NN_utils.train_and_eval import correct_class
+=======
+from utils import round_decimal,normalize
+from utils.train_and_eval import correct_class
+>>>>>>> 38c7beaaad146b7a125010a1f849c8364dedd4bd
 =======
 from utils import round_decimal,normalize
 from utils.train_and_eval import correct_class

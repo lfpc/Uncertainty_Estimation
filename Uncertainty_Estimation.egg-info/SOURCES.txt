@@ -4,8 +4,11 @@ NN_models/CIFAR10.py
 NN_models/__init__.py
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 NN_utils/__init__.py
 NN_utils/train_and_eval.py
+=======
+>>>>>>> 38c7beaaad146b7a125010a1f849c8364dedd4bd
 =======
 >>>>>>> 38c7beaaad146b7a125010a1f849c8364dedd4bd
 =======
@@ -21,7 +24,13 @@ uncertainty/comparison.py
 uncertainty/losses.py
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 uncertainty/quantifications.py
+=======
+uncertainty/quantifications.py
+utils/__init__.py
+utils/train_and_eval.py
+>>>>>>> 38c7beaaad146b7a125010a1f849c8364dedd4bd
 =======
 uncertainty/quantifications.py
 utils/__init__.py

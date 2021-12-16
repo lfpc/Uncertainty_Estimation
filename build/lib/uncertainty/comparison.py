@@ -2,8 +2,13 @@ import torch
 import numpy as np
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from NN_utils.train_and_eval import correct_total
 from NN_utils import apply_mask
+=======
+from utils.train_and_eval import correct_total
+from utils import apply_mask
+>>>>>>> 38c7beaaad146b7a125010a1f849c8364dedd4bd
 =======
 from utils.train_and_eval import correct_total
 from utils import apply_mask

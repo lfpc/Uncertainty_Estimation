@@ -2,7 +2,11 @@ import numpy as np
 import torch
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from NN_utils import indexing_2D,round_decimal
+=======
+from utils import indexing_2D,round_decimal
+>>>>>>> 38c7beaaad146b7a125010a1f849c8364dedd4bd
 =======
 from utils import indexing_2D,round_decimal
 >>>>>>> 38c7beaaad146b7a125010a1f849c8364dedd4bd
@@ -110,7 +114,11 @@ class MonteCarloDropout(torch.nn.Module):
         return mean
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 38c7beaaad146b7a125010a1f849c8364dedd4bd
 =======
         
 >>>>>>> 38c7beaaad146b7a125010a1f849c8364dedd4bd
