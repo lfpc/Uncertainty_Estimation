@@ -61,8 +61,6 @@ def model_acc(model,data):
 
 
 
-<<<<<<< HEAD
-#in dev --------------------------------------
 
 def model_metrics(model,loss_criterion,data):
     model.eval()
@@ -83,12 +81,7 @@ def model_metrics(model,loss_criterion,data):
             bce += loss_criterion(output,label).item()
 
     return (correct/total),g_i/total, bce/total
-
-
 class Trainer(torch.nn.Module):
-=======
-class Trainer(nn.Module):
->>>>>>> 73b562b43b2f1a7458ef879ac8005b075feb0974
     def __init__(self,model,optimizer,loss_criterion, print_loss = True,keep_hist = True):
         # adaptar keep hist para definir oq manter\n",
         super().__init__()
@@ -163,4 +156,3 @@ class Trainer(nn.Module):
         self.g_list.append(g)
         self.acc_list.append(acc)
         self.bce_list.append(bce)
-        
