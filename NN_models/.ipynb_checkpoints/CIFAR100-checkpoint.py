@@ -2,7 +2,7 @@
 import torch
 from torch import nn
 
-class Model_CNN_10(nn.Module):
+class Model_CNN(nn.Module):
     """CNN."""
 
     def __init__(self):
@@ -71,7 +71,7 @@ class Model_CNN_10(nn.Module):
 
 
 # Define model
-class Model_CNN_10_with_g(nn.Module):
+class Model_CNN_with_g(nn.Module):
     """CNN."""
 
     def __init__(self):

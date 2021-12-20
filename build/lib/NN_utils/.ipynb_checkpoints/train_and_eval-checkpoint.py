@@ -22,6 +22,11 @@ def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,s
         if print_loss:
             print('Epoch ', epoch+1, ', loss = ', running_loss/len(data))
 
+
+
+
+
+
 def predicted_class(y_pred):
     '''Returns the predicted class for a given softmax output.'''
     if y_pred.shape[-1] == 1:
