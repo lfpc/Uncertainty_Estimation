@@ -22,6 +22,11 @@ def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,s
         if print_loss:
             print('Epoch ', epoch+1, ', loss = ', running_loss/len(data))
 
+
+
+
+
+
 def predicted_class(y_pred):
     '''Returns the predicted class for a given softmax output.'''
     if y_pred.shape[-1] == 1:
@@ -61,6 +66,7 @@ def model_acc(model,data):
 
 
 
+#in dev --------------------------------------
 
 def model_metrics(model,loss_criterion,data):
     model.eval()
@@ -81,6 +87,8 @@ def model_metrics(model,loss_criterion,data):
             bce += loss_criterion(output,label).item()
 
     return (correct/total),g_i/total, bce/total
+
+
 class Trainer(torch.nn.Module):
     def __init__(self,model,optimizer,loss_criterion, print_loss = True,keep_hist = True):
         # adaptar keep hist para definir oq manter\n",
@@ -156,3 +164,4 @@ class Trainer(torch.nn.Module):
         self.g_list.append(g)
         self.acc_list.append(acc)
         self.bce_list.append(bce)
+        

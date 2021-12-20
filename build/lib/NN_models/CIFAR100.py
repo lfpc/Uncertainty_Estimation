@@ -2,7 +2,7 @@
 import torch
 from torch import nn
 
-class Model_CNN_10(nn.Module):
+class Model_CNN_100(nn.Module):
     """CNN."""
 
     def __init__(self):
@@ -44,7 +44,7 @@ class Model_CNN_10(nn.Module):
             nn.Linear(int(1024), int(512)),
             nn.ReLU(inplace=True),
             nn.Dropout(p=0.2),
-            nn.Linear(int(512), 10),
+            nn.Linear(int(512), 100),
             nn.LogSoftmax(dim=1)
         )
 
@@ -71,7 +71,7 @@ class Model_CNN_10(nn.Module):
 
 
 # Define model
-class Model_CNN_10_with_g(nn.Module):
+class Model_CNN_100_with_g(nn.Module):
     """CNN."""
 
     def __init__(self):
@@ -113,7 +113,7 @@ class Model_CNN_10_with_g(nn.Module):
             nn.Linear(int(1024), int(512)),
             nn.ReLU(inplace=True),
             nn.Dropout(p=0.2),
-            nn.Linear(int(512), 10),
+            nn.Linear(int(512), 100),
             nn.LogSoftmax(dim=1)
         )
         

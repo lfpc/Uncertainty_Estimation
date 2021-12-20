@@ -2,9 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     # Needed to silence warnings (and to be a worthwhile package)
-
-    name='uncertainty_estimation',
-
+    name='Uncertainty_Estimation',
     url='https://github.com/lfpc/Uncertainty_Estimation',
     author='Luís FP Cattelan',
     author_email='luisfelipe1998@gmail.com',
@@ -13,7 +11,7 @@ setup(
     # Needed for dependencies
     install_requires=['numpy','torch'],
     # *strongly* suggested for sharing
-    version='0.2',
+    version='0.1',
     # The license can be anything you like
     license='MIT',
     description='Neural Networks in Pytorch - utils and losses, models e uncertainty quantifications definitions',
