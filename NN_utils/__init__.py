@@ -161,3 +161,26 @@ def ignore_layers(model,layers,reset = True):
     
     model_eval_layers(model,layers)
     freeze_params(model,layers)
+
+def acumule_results(model,data):
+    model.eval()
+    dev = next(model.parameters()).device
+
+    g_list = []
+    output_list = torch.Tensor([]).to(dev)
+    label_list = torch.Tensor([]).to(dev)
+    
+    for image,label in data:
+        image,label = image.to(dev), label.to(dev)
+
+        output = model(image)
+        g = model.get_g().view(-1)
+
+        label_list = torch.cat((label_list,label))
+        output_list = torch.cat((output_list,output))
+        g_list = torch.cat((g_list,g))
+        
+    return label_list,output_list,g_list
+
+
+
