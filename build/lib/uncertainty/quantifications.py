@@ -29,7 +29,9 @@ def TCP_unc(y,label):
 
 def entropy(y_pred, reduction = 'mean'):
     '''Returns the entropy of a probabilities tensor.'''
+    
     entropy = -y_pred*torch.log(y_pred)
+    entropy = torch.min(entropy,100)
     entropy = torch.sum(entropy,-1)
     
     if reduction == 'mean':

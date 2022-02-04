@@ -1,0 +1,17 @@
+README.md
+setup.py
+NN_models/CIFAR10.py
+NN_models/CIFAR100.py
+NN_models/__init__.py
+NN_utils/__init__.py
+NN_utils/train_and_eval.py
+uncertainty/__init__.py
+uncertainty/calibration.py
+uncertainty/comparison.py
+uncertainty/losses.py
+uncertainty/quantifications.py
+uncertainty_estimation.egg-info/PKG-INFO
+uncertainty_estimation.egg-info/SOURCES.txt
+uncertainty_estimation.egg-info/dependency_links.txt
+uncertainty_estimation.egg-info/requires.txt
+uncertainty_estimation.egg-info/top_level.txt

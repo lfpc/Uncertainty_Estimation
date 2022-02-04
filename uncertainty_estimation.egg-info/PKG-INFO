@@ -1,5 +1,5 @@
 Metadata-Version: 1.0
-Name: Uncertainty-Estimation
+Name: uncertainty-estimation
 Version: 0.2
 Summary: Neural Networks in Pytorch - utils and losses, models e uncertainty quantifications definitions
 Home-page: https://github.com/lfpc/Uncertainty_Estimation

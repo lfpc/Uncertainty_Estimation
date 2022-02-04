@@ -3,8 +3,6 @@ import matplotlib
 from matplotlib import pyplot as plt
 import torch
 import numpy as np
-import NN_utils.train_and_eval
-
 def dataset_cut_classes(data,indices = (0,1)):
 
     '''Get a dataset (in default form from Pytorch) and returns only the ones with label (target)
@@ -101,9 +99,9 @@ def round_decimal(y,n_digits = 1):
     return rounded
 def normalize(x, min_x= None,max_x = None):
     '''Normalize an array to be in 0 to 1 interval'''
-    if min_x == None:
+    if min_x is None:
         min_x = torch.min(x)
-    if max_x == None:
+    if max_x is None:
         max_x = torch.max(x)
 
     normalized = (x-min_x)/(max_x-min_x)
@@ -113,7 +111,7 @@ def freeze_params(model, layers = None):
     ''' Set requires_grad of model parameters with name inlayers to False.
     Freeze parameters to avoid training.'''
     for n,param in model.named_parameters():
-        if layers == None:
+        if layers is None:
             param.requires_grad = False
         elif any(name in n for name in layers):
             param.requires_grad = False
@@ -123,7 +121,7 @@ def unfreeze_params(model, layers = None):
     Freeze parameters, turning it possible to train. '''
     
     for n,param in model.named_parameters():
-        if layers == None:
+        if layers is None:
             param.requires_grad = True
             
             
@@ -158,29 +156,14 @@ def ignore_layers(model,layers,reset = True):
     if reset:
         unfreeze_params(model)
         model.train()
-    
     model_eval_layers(model,layers)
     freeze_params(model,layers)
 
-def acumule_results(model,data):
-    model.eval()
-    dev = next(model.parameters()).device
+def pond_sum(a,b,alpha,beta):
+    return a*alpha+b*beta
 
-    g_list = []
-    output_list = torch.Tensor([]).to(dev)
-    label_list = torch.Tensor([]).to(dev)
-    
-    for image,label in data:
-        image,label = image.to(dev), label.to(dev)
-
-        output = model(image)
-        g = model.get_g().view(-1)
-
-        label_list = torch.cat((label_list,label))
-        output_list = torch.cat((output_list,output))
-        g_list = torch.cat((g_list,g))
-        
-    return label_list,output_list,g_list
+def pond_mean(a,b,alpha,beta):
+    return pond_sum(a,b,alpha,beta)/(alpha+beta)
 
 
 
