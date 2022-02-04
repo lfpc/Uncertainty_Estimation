@@ -105,27 +105,31 @@ class Model_CNN_with_g(nn.Module):
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
-
-        self.fc_x_layer = nn.Sequential(
+        
+        self.fc_layer = nn.Sequential(
             nn.Dropout(p=0.2),
             nn.Linear(4096, int(1024)),
             nn.ReLU(inplace=True),
             nn.Linear(int(1024), int(512)),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=0.2),
+            nn.Dropout(p=0.2))
+
+        self.fc_x_layer = nn.Sequential(
+            
             nn.Linear(int(512), n_classes),
             nn.LogSoftmax(dim=1)
         )
         
-        self.fc_g_layer = nn.Sequential(
-            nn.Dropout(p=0.2),
-            nn.Linear(4096, int(1024)),
-            nn.ReLU(inplace=True),
-            nn.Linear(int(1024), int(512)),
-            nn.ReLU(inplace=True),
-            nn.Dropout(p=0.2),
+        '''self.fc_g_layer = nn.Sequential(
+            
             nn.Linear(int(512), 1),
             nn.Sigmoid()
+        )'''
+        
+        self.fc_g_layer = nn.Sequential(
+            
+            nn.Linear(int(512), n_classes),
+            nn.Softmax(dim=1)
         )
 
 
@@ -139,12 +143,13 @@ class Model_CNN_with_g(nn.Module):
         x = x.view(x.size(0), -1)
         
         # fc layer
-        #x = self.fc_layer(x)
+        x = self.fc_layer(x)
 
 
         y = self.fc_x_layer(x)
 
         self.g = self.fc_g_layer(x)
+        self.g =  torch.max(self.g,dim=1).values
 
         #x = torch.stack((self.x1,self.g))
         self.g = (self.g).float()

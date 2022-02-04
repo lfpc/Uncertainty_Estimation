@@ -37,6 +37,7 @@ class penalized_uncertainty(torch.nn.Module):
         
     def forward(self, y_pred,g,y_true):
         
+        g = g.view(-1)
         loss = g*self.criterion(y_pred,y_true)+(1-g)*self.L0
         loss = torch.mean(loss)
         
