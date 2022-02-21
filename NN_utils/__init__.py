@@ -123,8 +123,6 @@ def unfreeze_params(model, layers = None):
     for n,param in model.named_parameters():
         if layers is None:
             param.requires_grad = True
-            
-            
         elif any(name in n for name in layers):
             param.requires_grad = True
             
@@ -164,6 +162,15 @@ def pond_sum(a,b,alpha,beta):
 
 def pond_mean(a,b,alpha,beta):
     return pond_sum(a,b,alpha,beta)/(alpha+beta)
+
+def is_probabilities(y, tol = 1e-5, dim = -1):
+    '''Check if tensor y can be considered as a probabilite tensor, i.e., 
+    if it sums to 1 (with float tol) and have all values greater than 0'''
+
+    is_prob = torch.logical_and(torch.all(torch.abs((torch.sum(y,dim=dim) - 1)) < tol),
+    torch.all(y>0)) 
+
+    return is_prob
 
 
 
