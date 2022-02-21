@@ -1,10 +1,32 @@
 import numpy as np
 import torch
-from NN_utils import indexing_2D,round_decimal
+from NN_utils import indexing_2D, is_probabilities,round_decimal
+
+
+def entropy(y, reduction = 'none'):
+    '''Returns the entropy of a probabilities tensor.'''
+    
+    if not is_probabilities(y): #if y is not a probabilities tensor
+        y = torch.nn.functional.softmax(y) #apply softmax
+    
+    entropy = torch.special.entr(y) #entropy element wise
+    entropy = torch.sum(entropy,-1)
+    
+    
+    if reduction == 'mean':
+        entropy = torch.mean(entropy)
+    elif reduction == 'sum':
+        entropy = torch.sum(entropy)
+        
+    return entropy
+
 
 def get_MCP(y):
     ''' Returns the Maximum Class/Softmax Probability of a predicted output.
     Returns the value of the probability of the class with more probability'''
+    if not is_probabilities(y): #if y is not a probabilities tensor
+        y = torch.nn.functional.softmax(y) #apply softmax
+
     return torch.max(y,-1).values
 
 def MCP_unc(y):
@@ -17,7 +39,10 @@ def MCP_unc(y):
 def get_TCP(y_pred,y_true):
     ''' Returns the True Class/Softmax Probability of a predicted output.
     Returns the value of the probability of the class that is true'''
+    if not is_probabilities(y_pred): #if y is not a probabilities tensor
+        y = torch.nn.functional.softmax(y_pred) #apply softmax
     TCP = indexing_2D(y_pred,y_true)
+
     return TCP
 
 def TCP_unc(y,label):
@@ -26,20 +51,6 @@ def TCP_unc(y,label):
     '''
     return (1-get_TCP(y,label))
 
-
-def entropy(y_pred, reduction = 'mean'):
-    '''Returns the entropy of a probabilities tensor.'''
-    
-    entropy = -y_pred*torch.log(y_pred)
-    entropy = torch.min(entropy,100)
-    entropy = torch.sum(entropy,-1)
-    
-    if reduction == 'mean':
-        entropy = torch.mean(entropy)
-    elif reduction == 'sum':
-        entropy = torch.sum(entropy)
-        
-    return entropy
 
 def mutual_info(pred_array):
     '''Returns de Mutual Information (Gal, 2016) of a probability tensor'''
@@ -90,22 +101,3 @@ def get_MCD(model,X,n=10):
     MI = mutual_info(MC_array) 
 
     return mean, var, MI
-
-class MonteCarloDropout(torch.nn.Module):
-
-    def __init__(self, model, n=10):
-        super().__init__()
-        self.model = model
-        self.n = n
-
-    def forward(self,X):
-        self.MC_array = montecarlo_pred(X,self.n)
-        mean = torch.mean(self.MC_array, axis=0) 
-        return mean
-
-    def get_var(self):
-        var = MonteCarlo_var(self.MC_array)
-        return var
-    def get_MI(self):
-        MI = mutual_info(self.MC_array)
-        return MI
