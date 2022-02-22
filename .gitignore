@@ -1,1 +1,3 @@
-notebooks-scripts/data
+notebooks-scripts/data/
+notebooks-scripts/data/*
+
