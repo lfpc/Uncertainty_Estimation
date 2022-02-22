@@ -25,7 +25,7 @@ def get_MCP(y):
     ''' Returns the Maximum Class/Softmax Probability of a predicted output.
     Returns the value of the probability of the class with more probability'''
     if not is_probabilities(y): #if y is not a probabilities tensor
-        y = torch.nn.functional.softmax(y) #apply softmax
+        y = torch.nn.functional.softmax(y,dim=-1) #apply softmax
 
     return torch.max(y,-1).values
 
