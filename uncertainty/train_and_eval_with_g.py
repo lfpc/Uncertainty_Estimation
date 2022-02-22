@@ -84,7 +84,9 @@ class hist_train_g(TE.hist_train):
             y_pred,g = output
             g = g.view(-1)
             
-            loss = self.loss_criterion(output,label).item()
+            try:
+                loss = self.loss_criterion(output,label).item()
+            except: loss = TE.calc_loss_batch(self.model,self.loss_criterion,self.data)
             acc = TE.correct_total(y_pred,label)/label.size(0)
             self.acc_list.append(acc)
             self.loss_list.append(loss)

@@ -25,6 +25,17 @@ def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,s
             
     return running_loss/len(data)
 
+def calc_loss_batch(model,loss_criterion,data):
+    '''Calculate the average loss over a dataset.'''
+    dev = next(model.parameters()).device
+    running_loss = 0
+    for image,label in data:
+        image,label = image.to(dev), label.to(dev)
+        output = model(image)
+        loss = loss_criterion(output,label)
+        running_loss += loss.item()            
+    return running_loss/len(data)
+
 def predicted_class(y_pred):
     '''Returns the predicted class for a given softmax output.'''
     if y_pred.shape[-1] == 1:

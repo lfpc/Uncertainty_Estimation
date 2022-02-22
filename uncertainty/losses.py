@@ -81,7 +81,7 @@ class selective_net_2(torch.nn.Module):
     def get_loss(self,y_pred,w,y_true):
         
         loss = w*self.criterion(y_pred,y_true)
-        loss = torch.sum(loss)
+        loss = torch.sum(loss) #sum? mean? When w is a normalization, is must be sum. How to generalize?
 
         return loss
 
@@ -108,9 +108,11 @@ class selective_net_2(torch.nn.Module):
             w = self.w_fn(torch.ones([torch.numel(g)])).to(y_pred.device)
             if self.head == 'y':
                 loss_h = self.get_loss(y_pred,w,y_true)
+            elif self.head is None:
+                loss_h = 0
             else: 
                 h = self.head()
-                loss_h = self.get_loss(h,w,y_true) if (h.size(0) == y_true.size(0)) else 0
+                loss_h = self.get_loss(h,w,y_true)
             loss = self.alpha*loss + (1-self.alpha)*loss_h
             
 

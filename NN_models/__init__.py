@@ -4,7 +4,7 @@ from torch import nn
 
  
 def construct_conv_layer(blocks):
-    #to develop
+    #to elaborate
     #iterate over blocks and append to conv_layer conv2d with blocks_i size
     k = 0
     conv_layer = []
