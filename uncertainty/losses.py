@@ -2,6 +2,24 @@ import torch
 from math import log
 import NN_utils as utils
 from uncertainty.quantifications import entropy
+from NN_utils.train_and_eval import correct_class
+
+
+class aux_loss_fs(torch.nn.Module):
+    '''Cross Entropy between g (uncertainty variable) and a 'right' vector,
+    with 1 to the samples that the classifier gets correct and 0 if it gets wrong.'''
+    def __init__(self,loss_criterion = torch.nn.BCELoss()):
+        super().__init__()
+        self.criterion = loss_criterion
+    def forward(self, output,y_true):
+        y_pred,g = output
+        g = g.view(-1)
+        right = correct_class(y_pred,y_true).float()
+        loss = self.criterion(g,right)
+        loss = torch.mean(loss)
+        return loss
+
+
 
 class LCE(torch.nn.Module):
     '''Defines LCE loss - Devries(2018)'''

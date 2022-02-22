@@ -80,14 +80,14 @@ class Model_CNN(nn.Module):
 class Model_CNN_with_g(Model_CNN):
     """CNN."""
 
-    def __init__(self,n_classes=10, blocks = None, g_arq = 'parallel'):
+    def __init__(self,n_classes=10,input = (32,32),blocks = None, g_arq = 'parallel'):
         """CNN Builder."""
         '''g_arq:
         parallel: head that gets as input x, the output of the main layer.
         Gets no information of the classificer layer
         softmax: input is y, the classifier softmax. 
         mixed: input is a concatenation between x and y.'''
-        super().__init__(n_classes,blocks)
+        super().__init__(n_classes,input,blocks)
         self.g_arq = g_arq
         
         self.return_g = True
@@ -149,14 +149,14 @@ class Model_CNN_with_g(Model_CNN):
 class Model_CNN_with_g_and_h(Model_CNN_with_g):
     """CNN."""
 
-    def __init__(self,n_classes=10, blocks = None, g_arq = 'parallel'):
+    def __init__(self,n_classes=10,input = (32,32),blocks = None, g_arq = 'parallel'):
         """CNN Builder."""
         '''g_arq:
         parallel: head that gets as input x, the output of the main layer.
         Gets no information of the classificer layer
         softmax: input is y, the classifier softmax. 
         mixed: input is a concatenation between x and y.'''
-        super().__init__(n_classes,blocks,g_arq)
+        super().__init__(n_classes,input,blocks,g_arq)
 
         self.h_layer  = nn.Sequential(
             nn.Linear(int(512), n_classes),
