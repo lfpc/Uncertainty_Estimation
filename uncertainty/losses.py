@@ -55,8 +55,8 @@ class penalized_uncertainty(torch.nn.Module):
 def entropy_const(w):
     H = torch.exp(entropy(w,reduction = 'sum'))/w.size(0)
     return H
-normalize_tensor = (lambda x: torch.nn.functional.normalize(x, p=1,dim=-1))
-mean_const = (lambda x: torch.mean(x, dim=-1))
+normalize_tensor = (lambda x,dim=-1: torch.nn.functional.normalize(x, p=1,dim=dim))
+mean_const = (lambda x,dim=-1: torch.mean(x, dim=dim))
 
 def IPM_selectivenet(r,const,lamb = 32):
     #optimize x such that const >0
@@ -86,7 +86,7 @@ class selective_net_2(torch.nn.Module):
         return loss
 
     def get_constraint(self,w): 
-        H = self.c_fn(w) #must be >= c
+        H = self.c_fn(w,dim=-1) #must be >= c
         constraint = self.c - H #must be <=0
         return constraint
 
@@ -94,7 +94,7 @@ class selective_net_2(torch.nn.Module):
         
         y_pred,g = output
         g = g.view(-1)
-        w = self.w_fn(g)
+        w = self.w_fn(g,dim=-1)
         
         loss = self.get_loss(y_pred,w,y_true)
         if self.const_var == 'w':
@@ -105,7 +105,7 @@ class selective_net_2(torch.nn.Module):
             loss = self.optim_method(loss, const)
             
         if self.alpha != 1.0:
-            w = self.w_fn(torch.ones([torch.numel(g)])).to(y_pred.device)
+            w = self.w_fn(torch.ones([torch.numel(g)]),dim=-1).to(y_pred.device)
             if self.head == 'y':
                 loss_h = self.get_loss(y_pred,w,y_true)
             elif self.head is None:
