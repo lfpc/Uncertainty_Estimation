@@ -33,7 +33,7 @@ class Model_CNN(nn.Module):
         """CNN Builder."""
         super().__init__()
         
-        if blocks in None:
+        if blocks is None:
             conv_layer = [
                 nn.Conv2d(in_channels=3, out_channels=int(16), kernel_size=3, padding='same'),
                 nn.BatchNorm2d(int(16)),
@@ -44,14 +44,14 @@ class Model_CNN(nn.Module):
                 nn.MaxPool2d(kernel_size=2, stride=2),
 
             ]
-            k = 32/4
+            k = int(32/4)
         else:
             conv_layer,k = construct_conv_layer(blocks)
 
         
         fc_layer = [
             nn.Flatten(),
-            nn.Linear(input[0]*input[1]*k, int(1024)),
+            nn.Linear(int(input[0]*input[1]*k), int(1024)),
             nn.Dropout(p=0.4),
             nn.ReLU(inplace=True),
             nn.Linear(int(1024), int(512)),
