@@ -146,7 +146,7 @@ class Model_CNN_with_g(Model_CNN):
         return self.g
 
 # Define model
-class Model_CNN_with_g_and_h(Model_CNN):
+class Model_CNN_with_g_and_h(Model_CNN_with_g):
     """CNN."""
 
     def __init__(self,n_classes=10, blocks = None, g_arq = 'parallel'):
@@ -156,39 +156,8 @@ class Model_CNN_with_g_and_h(Model_CNN):
         Gets no information of the classificer layer
         softmax: input is y, the classifier softmax. 
         mixed: input is a concatenation between x and y.'''
-        super().__init__(n_classes,blocks)
-        self.g_arq = g_arq
-        
-        self.return_g = True
-        if g_arq == 'mixed':
-            self.g_layer_1 = nn.Sequential(
-            nn.Linear(512, 64),
-            nn.ReLU(inplace=True),
-            nn.Linear(64, 10)
-            )
-            self.g_layer_2 = nn.Sequential(
-            nn.Linear(20, 32),
-            nn.ReLU(inplace=True),
-            nn.Linear(32, 1),
-            nn.Sigmoid()
-            )
-        
-        elif g_arq == 'softmax':
-            self.g_layer = nn.Sequential(
-            
-            nn.Linear(n_classes, 64),
-            nn.ReLU(inplace=True),
-            nn.Linear(64, 1),
-            nn.Sigmoid()
-            )
-        else:
-            self.g_layer = nn.Sequential(
-                
-                nn.Linear(512, 32),
-                nn.ReLU(inplace=True),
-                nn.Linear(32, 1),
-                nn.Sigmoid()
-            )
+        super().__init__(n_classes,blocks,g_arq)
+
         self.h_layer  = nn.Sequential(
             nn.Linear(int(512), n_classes),
             nn.LogSoftmax(dim=1)
@@ -217,7 +186,5 @@ class Model_CNN_with_g_and_h(Model_CNN):
         else:
             return y
 
-    def get_g(self):
-        return self.g
     def get_h(self):
         return self.h
