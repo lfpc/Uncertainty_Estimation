@@ -1,7 +1,7 @@
 from NN_utils import train_and_eval as TE
 import torch
-import quantifications as unc
-import comparison as unc_comp
+import uncertainty.quantifications as unc
+import uncertainty.comparison as unc_comp
 import NN_utils as utils
 
 def accumulate_results_g(model,data):
@@ -58,12 +58,11 @@ def train_NN_with_g(model,optimizer,data,loss_criterion,n_epochs=1, print_loss =
 
 
 class hist_train_g(TE.hist_train):
-
-     '''Accumulates results while training. Every time update_hist() is called, 
+    '''Accumulates results while training. Every time update_hist() is called, 
     it evaluates the usefull metrics over the dataset data and stores it in a list.
     Equal to hist_train class, but keeps g (uncertainty estimation) values'''
-
-     def __init__(self,model,loss_criterion,data,c = 1.0):
+    
+    def __init__(self,model,loss_criterion,data,c = 1.0):
         super().__init__(model,loss_criterion,data)
         
         self.c = c
@@ -73,7 +72,7 @@ class hist_train_g(TE.hist_train):
             self.acc_c_mcp = []
             self.acc_c_entropy = []
             
-     def update_hist(self):
+    def update_hist(self):
         '''Update acc_list's and loss_list.
         Redefined so it update also g_list and (possibly) acc_c_g'''
         self.model.eval()
