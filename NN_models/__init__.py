@@ -144,3 +144,80 @@ class Model_CNN_with_g(Model_CNN):
     
     def get_g(self):
         return self.g
+
+# Define model
+class Model_CNN_with_g_and_h(Model_CNN):
+    """CNN."""
+
+    def __init__(self,n_classes=10, blocks = None, g_arq = 'parallel'):
+        """CNN Builder."""
+        '''g_arq:
+        parallel: head that gets as input x, the output of the main layer.
+        Gets no information of the classificer layer
+        softmax: input is y, the classifier softmax. 
+        mixed: input is a concatenation between x and y.'''
+        super().__init__(n_classes,blocks)
+        self.g_arq = g_arq
+        
+        self.return_g = True
+        if g_arq == 'mixed':
+            self.g_layer_1 = nn.Sequential(
+            nn.Linear(512, 64),
+            nn.ReLU(inplace=True),
+            nn.Linear(64, 10)
+            )
+            self.g_layer_2 = nn.Sequential(
+            nn.Linear(20, 32),
+            nn.ReLU(inplace=True),
+            nn.Linear(32, 1),
+            nn.Sigmoid()
+            )
+        
+        elif g_arq == 'softmax':
+            self.g_layer = nn.Sequential(
+            
+            nn.Linear(n_classes, 64),
+            nn.ReLU(inplace=True),
+            nn.Linear(64, 1),
+            nn.Sigmoid()
+            )
+        else:
+            self.g_layer = nn.Sequential(
+                
+                nn.Linear(512, 32),
+                nn.ReLU(inplace=True),
+                nn.Linear(32, 1),
+                nn.Sigmoid()
+            )
+        self.h_layer  = nn.Sequential(
+            nn.Linear(int(512), n_classes),
+            nn.LogSoftmax(dim=1)
+        )
+
+
+    def forward(self, x):
+        """Perform forward."""
+    
+        x = self.main_layer(x)
+        y = self.classifier_layer(x).float()
+
+        if self.g_arq == 'mixed':
+            self.g = self.g_layer_1(x)
+            self.g = torch.cat((self.g,y),dim=1)
+            self.g = self.g_layer_2(self.g).float()
+        elif self.g_arq == 'softmax':
+            self.g = self.g_layer(y).float()
+        else:
+            self.g = self.g_layer(x).float()
+
+        self.h = self.h_layer(x)
+
+        if self.return_g:
+            return y,self.g
+        else:
+            return y
+
+    def get_g(self):
+        return self.g
+    def get_h(self):
+        return self.h

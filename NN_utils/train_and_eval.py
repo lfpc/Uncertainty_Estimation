@@ -25,17 +25,6 @@ def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,s
             
     return running_loss/len(data)
 
-def calc_loss_batch(model,loss_criterion,data):
-    '''Calculate the average loss over a dataset.'''
-    dev = next(model.parameters()).device
-    running_loss = 0
-    for image,label in data:
-        image,label = image.to(dev), label.to(dev)
-        output = model(image)
-        loss = loss_criterion(output,label)
-        running_loss += loss.item()            
-    return running_loss/len(data)
-
 def predicted_class(y_pred):
     '''Returns the predicted class for a given softmax output.'''
     if y_pred.shape[-1] == 1:
@@ -60,9 +49,19 @@ def correct_total(y_pred,y_true):
     correct_total = torch.sum(correct).item()
     return correct_total
 
+def calc_loss_batch(model,loss_criterion,data):
+    '''Calculate the average loss over a dataset.'''
+    dev = next(model.parameters()).device
+    running_loss = 0
+    for image,label in data:
+        image,label = image.to(dev), label.to(dev)
+        output = model(image)
+        loss = loss_criterion(output,label)
+        running_loss += loss.item()            
+    return running_loss/len(data)
+
 def model_acc(model,data):
     '''Returns the total accuracy of model in some dataset'''
-    model.eval()
     dev = next(model.parameters()).device
     total = 0
     correct= 0
@@ -72,6 +71,24 @@ def model_acc(model,data):
         total += label.size(0)
         correct += correct_total(output,label)
     return (correct*100/total)
+
+def model_acc_and_loss(model,loss_criterion,data):
+    '''Calculate the average loss and the accuracy over a dataset.'''
+    dev = next(model.parameters()).device
+    running_loss = 0
+    total = 0
+    correct= 0
+    for image,label in data:
+        image,label = image.to(dev), label.to(dev)
+        output = model(image)
+        loss = loss_criterion(output,label)
+        running_loss += loss.item()
+        total += label.size(0)
+        correct += correct_total(output,label) 
+    loss = running_loss/len(data)
+    acc = (correct*100/total)
+    return acc,loss
+
 
 def accumulate_results(model,data):
     '''Accumulate output (of model) and label of a entire dataset.'''
@@ -110,28 +127,41 @@ class hist_train():
             self.acc_c_entropy = []
 
     
+    def update_hist_c(self):
+
+        #y_pred and label are accumulated for all dataset so that accuracy by coverage can by calculated
+        y_pred,label = accumulate_results(self.model,self.data)
+        
+        loss = self.loss_criterion(y_pred,label).item()
+        acc = correct_total(y_pred,label)/label.size(0) #accuracy
+        self.acc_list.append(acc)
+        self.loss_list.append(loss)
+        
+        #acc_c represents accuracy when the c most uncertain samples are ignored
+        mcp = unc.MCP_unc(y_pred) #maximum softmax value
+        ent = unc.entropy(y_pred) #entropy of softmax
+        self.acc_c_mcp.append(unc_comp.acc_coverage(y_pred,label,mcp,1-self.c))
+        self.acc_c_entropy.append(unc_comp.acc_coverage(y_pred,label,ent,1-self.c))
+
+
     def update_hist(self):
         '''Update acc_list's and loss_list.
         If coverage is defined (different than 1), updates acc_c lists'''
-        
-        dev = next(self.model.parameters()).device
         self.model.eval()
-            
         with torch.no_grad():
-            #y_pred and label are accumulated for all dataset so that accuracy by coverage can by calculated
-            y_pred,label = accumulate_results(self.model,self.data)
-            
-            loss = self.loss_criterion(y_pred,label).item()
-            acc = correct_total(y_pred,label)/label.size(0) #accuracy
-            self.acc_list.append(acc)
-            self.loss_list.append(loss)
-            
             if self.c<1:
-                #acc_c represents accuracy when the c most uncertain samples are ignored
-                mcp = unc.MCP_unc(y_pred) #maximum softmax value
-                ent = unc.entropy(y_pred) #entropy of softmax
-                self.acc_c_mcp.append(unc_comp.acc_coverage(y_pred,label,mcp,1-self.c))
-                self.acc_c_entropy.append(unc_comp.acc_coverage(y_pred,label,ent,1-self.c))
+                self.update_hist_c()
+            else:
+                #There is no theorical difference between getting acc and loss with accumulate
+                #results (_c) and with function with a loop. Using the acc and loss function,
+                #looping over the dataset, requires less memory. In the case where c is defined 
+                # (minor than 1), the accumulate results is needed, so there is no need to loop
+                # over the dataset 2 times. 
+                acc, loss = model_acc_and_loss(self.model,self.loss_criterion,self.data)
+                self.acc_list.append(acc)
+                self.loss_list.append(loss)
+                
+
 
             
 class Trainer():
