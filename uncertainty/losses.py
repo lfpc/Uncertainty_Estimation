@@ -74,7 +74,6 @@ def entropy_const(w):
     H = torch.exp(entropy(w,reduction = 'sum'))/w.size(0)
     return H
 normalize_tensor = (lambda x,dim=-1: torch.nn.functional.normalize(x, p=1,dim=dim))
-mean_const = (lambda x: torch.mean(x))
 
 def IPM_selectivenet(r,const,lamb = 32):
     #optimize x such that const >0
@@ -83,7 +82,7 @@ def IPM_selectivenet(r,const,lamb = 32):
     return objective
 
 class selective_net_2(torch.nn.Module):
-    def __init__(self,criterion,w_fn = normalize_tensor,c_fn = entropy_const,optim_method = IPM_selectivenet, c = 0.8,
+    def __init__(self,criterion,w_fn = normalize_tensor,c_fn = torch.mean,optim_method = IPM_selectivenet, c = 0.8,
                  alpha = 1.0, head = None,const_var = 'g'):
         super().__init__()
 
@@ -112,7 +111,7 @@ class selective_net_2(torch.nn.Module):
         
         y_pred,g = output
         g = g.view(-1)
-        w = self.w_fn(g,dim=-1)
+        w = self.w_fn(g)
         
         loss = self.get_loss(y_pred,w,y_true)
         if self.optim_method is not None:

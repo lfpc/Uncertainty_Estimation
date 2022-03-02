@@ -113,7 +113,7 @@ class hist_train():
 
     '''Accumulate results while training. Every time update_hist() is called, 
     it evaluates the usefull metrics over the dataset data and stores it in a list.'''
-    def __init__(self,model,loss_criterion,data, c = 1.0,risk_dict = None):
+    def __init__(self,model,loss_criterion,data,c = 1.0,risk_dict = None):
         
         self.model = model
         self.loss_criterion = loss_criterion

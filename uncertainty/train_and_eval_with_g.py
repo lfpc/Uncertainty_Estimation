@@ -64,16 +64,11 @@ class hist_train_g(TE.hist_train):
     Equal to hist_train class, but keeps g (uncertainty estimation) values'''
     
     def __init__(self,model,loss_criterion,data,c = 1.0, risk_dict = None):
-        super().__init__(model,loss_criterion,data,risk_dict)
+        super().__init__(model,loss_criterion,data,c,risk_dict)
         
-        self.risk_dict = risk_dict
-        self.c = c
         self.g_list = []
-        self.risk = defaultdict(list)
-        if c>0:
+        if c<1:
             self.acc_c_g = []
-            self.acc_c_mcp = []
-            self.acc_c_entropy = []
             
     def update_hist_c(self):
         '''Update acc_list's and loss_list.
