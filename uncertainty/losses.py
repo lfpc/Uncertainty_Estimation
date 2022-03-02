@@ -3,7 +3,7 @@ from math import log
 import NN_utils as utils
 from uncertainty.quantifications import entropy
 from NN_utils.train_and_eval import correct_class
-
+import uncertainty.comparison as unc_comp
 
 class aux_loss_fs(torch.nn.Module):
     '''Cross Entropy between g (uncertainty variable) and a 'right' vector,
@@ -84,7 +84,7 @@ def IPM_selectivenet(r,const,lamb = 32):
 
 class selective_net_2(torch.nn.Module):
     def __init__(self,criterion,w_fn = normalize_tensor,c_fn = entropy_const,optim_method = IPM_selectivenet, c = 0.8,
-                 alpha = 1.0, head = 'y',const_var = 'w'):
+                 alpha = 1.0, head = None,const_var = 'g'):
         super().__init__()
 
         self.criterion = criterion #criterion must have reduction set to 'none'
@@ -115,23 +115,22 @@ class selective_net_2(torch.nn.Module):
         w = self.w_fn(g,dim=-1)
         
         loss = self.get_loss(y_pred,w,y_true)
-        if self.const_var == 'w':
-            const = self.get_constraint(w)
-        elif self.const_var == 'g':
-            const = self.get_constraint(g)
         if self.optim_method is not None:
+            if self.const_var == 'w':
+                const = self.get_constraint(w)
+            elif self.const_var == 'g':
+                const = self.get_constraint(g)
             loss = self.optim_method(loss, const)
-            
-        if self.alpha != 1.0:
+
+        if self.head is None:
+            loss_h = 0
+        else:
             w = self.w_fn(torch.ones([torch.numel(g)]),dim=-1).to(y_pred.device)
             if self.head == 'y':
                 loss_h = self.get_loss(y_pred,w,y_true)
-            elif self.head is None:
-                loss_h = 0
             else: 
                 h = self.head()
                 loss_h = self.get_loss(h,w,y_true)
-            loss = self.alpha*loss + (1-self.alpha)*loss_h
-            
+        loss = self.alpha*loss + (1-self.alpha)*loss_h
 
         return loss

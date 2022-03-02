@@ -64,3 +64,17 @@ def acc_coverage_per_batch(model,data,unc_fn,c):
         correct += correct_total(y,label)
 
     return (correct/total)
+
+def selective_risk(y_pred,label,loss_fn = torch.nn.NLLLoss(),c=0.8,unc_type = None):
+
+    if unc_type is None:
+        return 0
+    elif unc_type == 'g':
+        y_pred,g = y_pred
+        unc = 1-g
+    else:
+        unc = unc_type(y_pred)
+    dk_mask = dontknow_mask(unc, 1-c)
+    y_pred, label = apply_mask(y_pred,label,1-dk_mask)
+    risk = loss_fn(y_pred,label)
+    return risk

@@ -3,6 +3,7 @@ import torch
 import uncertainty.quantifications as unc
 import uncertainty.comparison as unc_comp
 import NN_utils as utils
+from collections import defaultdict
 
 def accumulate_results_g(model,data):
     '''Accumulate output (of model) and label of a entire dataset.'''
@@ -62,13 +63,13 @@ class hist_train_g(TE.hist_train):
     it evaluates the usefull metrics over the dataset data and stores it in a list.
     Equal to hist_train class, but keeps g (uncertainty estimation) values'''
     
-    def __init__(self,model,loss_criterion,data,c = 1.0, risk = None):
+    def __init__(self,model,loss_criterion,data,c = 1.0, risk_dict = None):
         super().__init__(model,loss_criterion,data)
         
-        self.risk = risk
+        self.risk_dict = risk_dict
         self.c = c
         self.g_list = []
-        self.risk_list = []
+        self.risk = defaultdict(list)
         if c>0:
             self.acc_c_g = []
             self.acc_c_mcp = []
@@ -92,9 +93,10 @@ class hist_train_g(TE.hist_train):
             acc = TE.correct_total(y_pred,label)/label.size(0)
             self.acc_list.append(acc)
             self.loss_list.append(loss)
-            if self.risk is not None:
-                risk = self.risk(output,label).item()
-                self.risk_list.append(risk)
+            if self.risk_dict is not None:
+                for name, risk_fn in self.risk_dict.items():
+                    risk = risk_fn(output,label).item() 
+                    self.risk[name].append(risk)
             
             self.g_list.append(torch.mean(g).item())
 
@@ -111,13 +113,12 @@ class Trainer_with_g(TE.Trainer):
     '''Class for easily training/fitting a Pytorch's NN model. Creates 2 'hist' classes,
     keeping usefull metrics and values.
     Identical to Trainer class but with method for training only g's layers.'''
-    def __init__(self,model,optimizer,loss_fn,training_data,validation_data = None, c = 0.8, risk = None):
+    def __init__(self,model,optimizer,loss_fn,training_data,validation_data = None, c = 0.8, risk_dict = None):
         super().__init__(model,optimizer,loss_fn,training_data,validation_data)
         
-        self.hist_train = hist_train_g(model,loss_fn,training_data, c=c,risk = risk)
+        self.hist_train = hist_train_g(model,loss_fn,training_data, c=c,risk_dict = risk_dict)
         if validation_data is not None:
-            self.hist_val = hist_train_g(model,loss_fn,validation_data,c=c,risk = risk)
-        self.risk = risk
+            self.hist_val = hist_train_g(model,loss_fn,validation_data,c=c,risk_dict = risk_dict)
 
     def fit_g(self,data,n_epochs,ignored_layers = ['main_layer','classifier_layer']):
         '''Train only the layer specific for g, freezing (disables grad and set eval mode) the rest'''
