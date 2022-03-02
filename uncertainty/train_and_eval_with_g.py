@@ -64,7 +64,7 @@ class hist_train_g(TE.hist_train):
     Equal to hist_train class, but keeps g (uncertainty estimation) values'''
     
     def __init__(self,model,loss_criterion,data,c = 1.0, risk_dict = None):
-        super().__init__(model,loss_criterion,data)
+        super().__init__(model,loss_criterion,data,risk_dict)
         
         self.risk_dict = risk_dict
         self.c = c
@@ -75,7 +75,7 @@ class hist_train_g(TE.hist_train):
             self.acc_c_mcp = []
             self.acc_c_entropy = []
             
-    def update_hist(self):
+    def update_hist_c(self):
         '''Update acc_list's and loss_list.
         Redefined so it update also g_list and (possibly) acc_c_g'''
         self.model.eval()
@@ -93,10 +93,6 @@ class hist_train_g(TE.hist_train):
             acc = TE.correct_total(y_pred,label)/label.size(0)
             self.acc_list.append(acc)
             self.loss_list.append(loss)
-            if self.risk_dict is not None:
-                for name, risk_fn in self.risk_dict.items():
-                    risk = risk_fn(output,label).item() 
-                    self.risk[name].append(risk)
             
             self.g_list.append(torch.mean(g).item())
 
@@ -107,6 +103,10 @@ class hist_train_g(TE.hist_train):
                 self.acc_c_g.append(unc_comp.acc_coverage(y_pred,label,1-g,1-self.c))
                 self.acc_c_mcp.append(unc_comp.acc_coverage(y_pred,label,mcp,1-self.c))
                 self.acc_c_entropy.append(unc_comp.acc_coverage(y_pred,label,ent,1-self.c))
+            if self.risk_dict is not None:
+                for name, risk_fn in self.risk_dict.items():
+                    risk = risk_fn(output,label).item() 
+                    self.risk[name].append(risk)
 
 
 class Trainer_with_g(TE.Trainer):

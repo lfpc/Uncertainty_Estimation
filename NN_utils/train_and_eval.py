@@ -4,6 +4,7 @@ import copy
 import NN_utils as utils
 import uncertainty.quantifications as unc
 import uncertainty.comparison as unc_comp
+from collections import defaultdict
 
 def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,set_train_mode = True):
     '''Train a Neural Network'''
@@ -112,12 +113,14 @@ class hist_train():
 
     '''Accumulate results while training. Every time update_hist() is called, 
     it evaluates the usefull metrics over the dataset data and stores it in a list.'''
-    def __init__(self,model,loss_criterion,data, c = 1.0):
+    def __init__(self,model,loss_criterion,data, c = 1.0,risk_dict = None):
         
         self.model = model
         self.loss_criterion = loss_criterion
         self.data = data
         self.c = c #coverage
+        self.risk_dict = risk_dict
+        self.risk = defaultdict(list)
         
         self.acc_list = []
         self.loss_list = []
@@ -142,6 +145,10 @@ class hist_train():
         ent = unc.entropy(y_pred) #entropy of softmax
         self.acc_c_mcp.append(unc_comp.acc_coverage(y_pred,label,mcp,1-self.c))
         self.acc_c_entropy.append(unc_comp.acc_coverage(y_pred,label,ent,1-self.c))
+        if self.risk_dict is not None:
+            for name, risk_fn in self.risk_dict.items():
+                risk = risk_fn(y_pred,label).item() 
+                self.risk[name].append(risk)
 
 
     def update_hist(self):
@@ -160,6 +167,10 @@ class hist_train():
                 acc, loss = model_acc_and_loss(self.model,self.loss_criterion,self.data)
                 self.acc_list.append(acc)
                 self.loss_list.append(loss)
+                if self.risk_dict is not None:
+                    for name, risk_fn in self.risk_dict.items():
+                        risk = risk_fn(self.model,self.data).item() 
+                        self.risk[name].append(risk)
                 
 
 
