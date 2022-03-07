@@ -174,7 +174,6 @@ class hist_train():
                 
 
 
-            
 class Trainer():
     '''Class for easily training/fitting a Pytorch's NN model. Creates 2 'hist' classes,
     keeping usefull metrics and values.'''
@@ -195,10 +194,7 @@ class Trainer():
             self.epoch += 1
             loss = train_NN(self.model,self.optimizer,data,self.loss_fn,1, print_loss = False) #model.train applied internally here
             print('Epoch ', self.epoch, ', loss = ', loss)
-
-            self.hist_train.update_hist()
-            try: self.hist_val.update_hist() #with try/except in case there is no validation hist class
-            except: pass
+            self.update_hist()
             
     def update_hist(self):
         '''Updates hist classes.

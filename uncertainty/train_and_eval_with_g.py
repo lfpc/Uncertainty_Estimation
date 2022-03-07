@@ -122,11 +122,7 @@ class Trainer_with_g(TE.Trainer):
             self.model.train()
             #ignore_layers is applied every iteration because 'update_hist method set model to eval mode'
             utils.ignore_layers(self.model,ignored_layers, reset = False) 
-            TE.train_NN(self.model,self.optimizer,data,self.loss_fn,n_epochs=1, print_loss = True,set_train_mode = False)
-            self.hist_train.update_hist()
-            try: self.hist_val.update_hist() #with try/except in case there is no validation hist class
-            except: pass
+            loss = TE.train_NN(self.model,self.optimizer,data,self.loss_fn,n_epochs=1, print_loss = False,set_train_mode = False)
+            print('Epoch ', self.epoch, ', loss = ', loss)
+            self.update_hist()
         utils.unfreeze_params(self.model) #unfreeze params to avoid future mistakes
-
-
-
