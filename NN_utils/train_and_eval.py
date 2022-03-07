@@ -58,7 +58,7 @@ def calc_loss_batch(model,loss_criterion,data):
         image,label = image.to(dev), label.to(dev)
         output = model(image)
         loss = loss_criterion(output,label)
-        running_loss += loss.item()            
+        running_loss += loss            
     return running_loss/len(data)
 
 def model_acc(model,data):
