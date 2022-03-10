@@ -44,23 +44,23 @@ class Model_CNN(nn.Module):
                 nn.MaxPool2d(kernel_size=2, stride=2),
 
             ]
+            fc_layer = [
+                nn.Flatten(),
+                nn.Linear(int(input[0]*input[1]*k), int(1024)),
+                nn.Dropout(p=0.4),
+                nn.ReLU(inplace=True),
+                nn.Linear(int(1024), int(512)),
+                nn.ReLU(inplace=True),
+                nn.Dropout(p=0.4)]
+                
             k = int(32/4)
+            main_layer = conv_layer+fc_layer
+            self.main_layer = nn.Sequential(*main_layer)
+        elif isinstance(blocks,list):
+            self.main_layer = nn.Sequential(*blocks)
         else:
-            conv_layer,k = construct_conv_layer(blocks)
+            self.main_layer = blocks
 
-        
-        fc_layer = [
-            nn.Flatten(),
-            nn.Linear(int(input[0]*input[1]*k), int(1024)),
-            nn.Dropout(p=0.4),
-            nn.ReLU(inplace=True),
-            nn.Linear(int(1024), int(512)),
-            nn.ReLU(inplace=True),
-            nn.Dropout(p=0.4)]
-        
-        main_layer = conv_layer+fc_layer
-        
-        self.main_layer = nn.Sequential(*main_layer)
         
         self.classifier_layer = nn.Sequential(
             nn.Linear(int(512), n_classes),
