@@ -41,9 +41,10 @@ class Model_CNN(nn.Module):
                 nn.Conv2d(in_channels=int(16), out_channels=int(32), kernel_size=3, padding='same'),
                 nn.Dropout(p=0.2),
                 nn.ReLU(inplace=True),
-                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.MaxPool2d(kernel_size=2, stride=2)
 
             ]
+            k = int(32/4)
             fc_layer = [
                 nn.Flatten(),
                 nn.Linear(int(input[0]*input[1]*k), int(1024)),
@@ -53,7 +54,7 @@ class Model_CNN(nn.Module):
                 nn.ReLU(inplace=True),
                 nn.Dropout(p=0.4)]
                 
-            k = int(32/4)
+            
             main_layer = conv_layer+fc_layer
             self.main_layer = nn.Sequential(*main_layer)
         elif isinstance(blocks,list):
