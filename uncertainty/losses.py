@@ -90,7 +90,7 @@ def IPM_log_adap(r,const, t = 32):
     if const <= -(1/(t**2)):
         gama = IPM_log(r,const,t)
     else:
-        gama = t*const-(1/t)*torch.log(1/(t**2))+(1/t)
+        gama = t*const-(1/t)*log(1/(t**2))+(1/t)
     return r+gama
 
 
