@@ -4,6 +4,7 @@ import NN_utils as utils
 from uncertainty.quantifications import entropy
 from NN_utils.train_and_eval import correct_class
 import uncertainty.comparison as unc_comp
+from scipy.optimize import root_scalar
 
 class aux_loss_fs(torch.nn.Module):
     '''Cross Entropy between g (uncertainty variable) and a 'right' vector,
@@ -76,10 +77,23 @@ def entropy_const(w):
 normalize_tensor = (lambda x,dim=-1: torch.nn.functional.normalize(x, p=1,dim=dim))
 
 def IPM_selectivenet(r,const,lamb = 32):
-    #optimize x such that const >0
+    #optimize x such that const >0 with quadratic penalty
     gama = lamb*torch.square(torch.maximum(torch.tensor([0]).cuda(),const))
     objective = r + gama
     return objective
+
+def IPM_log(r,const,t = 32):
+    #optimize x such that const >0 with log barrier
+    gama = -(1/t)*torch.log(-const)
+    return r+gama
+def IPM_log_adap(r,const, t = 32):
+    if const <= -(1/(t**2)):
+        gama = IPM_log(r,const,t)
+    else:
+        gama = t*const-(1/t)*torch.log(1/(t**2))+(1/t)
+    return r+gama
+
+
 
 class selective_net_2(torch.nn.Module):
     def __init__(self,criterion,w_fn = normalize_tensor,c_fn = torch.mean,optim_method = IPM_selectivenet, c = 0.8,
@@ -120,6 +134,65 @@ class selective_net_2(torch.nn.Module):
             elif self.const_var == 'g':
                 const = self.get_constraint(g)
             loss = self.optim_method(loss, const)
+
+        if self.head is None:
+            loss_h = 0
+        else:
+            w = self.w_fn(torch.ones([torch.numel(g)]),dim=-1).to(y_pred.device)
+            if self.head == 'y':
+                loss_h = self.get_loss(y_pred,w,y_true)
+            else: 
+                h = self.head()
+                loss_h = self.get_loss(h,w,y_true)
+        loss = self.alpha*loss + (1-self.alpha)*loss_h
+
+        return loss
+
+def w_fn(g,lamb = 1):
+    lamb = torch.as_tensor(lamb)
+    w = torch.nn.softmax(lamb*g,dim=-1)
+    return w
+def H_fn(g,lamb = 1):
+    w = w_fn(g,lamb)
+    H = entropy(w)
+    return H
+def H_const(lamb,*args):
+    g,c = args
+    H = H_fn(g,lamb)
+    const = (torch.exp(H)/torch.numel(g))-c
+    return const
+
+class selective_net_lambda(torch.nn.Module):
+    def __init__(self,criterion,w_fn = w_fn, c_fn = H_const,c = 0.8,alpha = 1.0, head = None):
+        super().__init__()
+
+        self.criterion = criterion #criterion must have reduction set to 'none'
+        self.w_fn = w_fn #transform applied to g
+        self.c_fn = c_fn #transform applied to w that goes onto constraint
+        self.c = c #coverage
+        self.alpha = alpha
+        self.head = head
+        self.lamb = 1
+
+    
+    def get_loss(self,y_pred,w,y_true):
+        
+        loss = w*self.criterion(y_pred,y_true)
+        loss = torch.sum(loss) #sum? mean? When w is a normalization, is must be sum. How to generalize?
+        return loss
+
+    def update_lambda(self,g):
+        self.lamb = root_scalar(self.c_fn,bracket=[0, 100],args = (g,self.c)).root
+        return self.lamb
+
+    def forward(self,output,y_true):
+        
+        y_pred,g = output
+        g = g.view(-1)
+        self.update_lambda(g)
+        w = self.w_fn(g,self.lamb)
+        
+        loss = self.get_loss(y_pred,w,y_true)
 
         if self.head is None:
             loss_h = 0
