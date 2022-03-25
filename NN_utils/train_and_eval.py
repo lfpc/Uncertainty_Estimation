@@ -173,17 +173,22 @@ class hist_train():
                         self.risk[name].append(risk)
                 
 
+def update_optim_lr(optimizer,rate):
+    optimizer.param_groups[0]['lr'] /= rate
 
 class Trainer():
     '''Class for easily training/fitting a Pytorch's NN model. Creates 2 'hist' classes,
     keeping usefull metrics and values.'''
-    def __init__(self,model,optimizer,loss_criterion,training_data,validation_data = None, c=1.0,risk_dict = None):
+    def __init__(self,model,optimizer,loss_criterion,training_data,validation_data = None,
+                        c=1.0,update_lr = (0,1),risk_dict = None):
 
         self.model = model
         self.optimizer = optimizer
         self.loss_fn = loss_criterion
         self.epoch = 0
-        
+        self.update_lr_epochs = update_lr[0]
+        self.update_lr_rate = update_lr[1]
+
         self.hist_train = hist_train(model,loss_criterion,training_data, c=c, risk_dict = risk_dict)
         if validation_data is not None:
             self.hist_val = hist_train(model,loss_criterion,validation_data,c=c, risk_dict = risk_dict)
@@ -195,7 +200,8 @@ class Trainer():
             loss = train_NN(self.model,self.optimizer,data,self.loss_fn,1, print_loss = False) #model.train applied internally here
             print('Epoch ', self.epoch, ', loss = ', loss)
             self.update_hist()
-            
+            if (self.update_lr_epochs>0) and (e%self.update_lr_epochs == 0):
+                update_optim_lr(self.optimizer,self.lr_rate)
     def update_hist(self):
         '''Updates hist classes.
         Usefull to use before training to keep pre-training values.'''
