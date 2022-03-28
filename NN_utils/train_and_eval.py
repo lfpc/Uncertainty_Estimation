@@ -201,7 +201,7 @@ class Trainer():
             print('Epoch ', self.epoch, ', loss = ', loss)
             self.update_hist()
             if (self.update_lr_epochs>0) and (e%self.update_lr_epochs == 0):
-                update_optim_lr(self.optimizer,self.lr_rate)
+                update_optim_lr(self.optimizer,self.update_lr_rate)
     def update_hist(self):
         '''Updates hist classes.
         Usefull to use before training to keep pre-training values.'''
