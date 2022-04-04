@@ -108,7 +108,7 @@ class Trainer_with_g(TE.Trainer):
     '''Class for easily training/fitting a Pytorch's NN model. Creates 2 'hist' classes,
     keeping usefull metrics and values.
     Identical to Trainer class but with method for training only g's layers.'''
-    def __init__(self,model,optimizer,loss_fn,training_data,validation_data = None, c = 0.8, risk_dict = None,update_lr = 0):
+    def __init__(self,model,optimizer,loss_fn,training_data,validation_data = None, c = 0.8, risk_dict = None,update_lr = (0,1)):
         super().__init__(model,optimizer,loss_fn,training_data,validation_data,update_lr = update_lr)
         
         self.hist_train = hist_train_g(model,loss_fn,training_data, c=c,risk_dict = risk_dict)

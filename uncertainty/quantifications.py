@@ -40,7 +40,7 @@ def get_TCP(y_pred,y_true):
     ''' Returns the True Class/Softmax Probability of a predicted output.
     Returns the value of the probability of the class that is true'''
     if not is_probabilities(y_pred): #if y is not a probabilities tensor
-        y = torch.nn.functional.softmax(y_pred,dim=-1) #apply softmax
+        y_pred = torch.nn.functional.softmax(y_pred,dim=-1) #apply softmax
     TCP = indexing_2D(y_pred,y_true)
 
     return TCP
