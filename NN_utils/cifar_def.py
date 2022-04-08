@@ -36,7 +36,7 @@ train=False,
 download=True,
 transform=transforms_test)
 
-def split_data(data = training_data, method = 'range'):
+def split_data(training_data = training_data, method = 'range'):
     '''to develop'''
     assert method == 'range' or method == 'random' or method == 'idx'
     val_size = int(params['validation_size']*len(training_data))
