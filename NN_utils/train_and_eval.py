@@ -5,6 +5,8 @@ import NN_utils as utils
 import uncertainty.quantifications as unc
 import uncertainty.comparison as unc_comp
 from collections import defaultdict
+import pickle
+import pandas as pd
 
 def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,set_train_mode = True):
     '''Train a Neural Network'''
@@ -171,6 +173,49 @@ class hist_train():
                     for name, risk_fn in self.risk_dict.items():
                         risk = risk_fn(self.model,self.data).item() 
                         self.risk[name].append(risk)
+
+    def load_hist(self,hist):
+        if isinstance(hist,pd.DataFrame):
+            for name,at in hist:
+                self.__dict__[name] = at.tolist()
+        else:
+            for name,at in hist.__dict__.items():
+                if not isinstance(at,list): continue
+                self.__dict__[name] = at
+            self.risk = hist.risk
+
+    def clean(self):
+        self.model = None
+        self.loss_criterion = None
+        self.data = None
+        self.risk_dict = None
+
+    def to_dataframe(self):
+        d = {}
+        for name,at in self.__dict__.items():
+            #if isinstance(at,dict): d.update()
+            if not isinstance(at,list): continue
+            else: d[name] = at
+        d.update(self.risk)
+
+        return pd.DataFrame(d)
+
+    def save_class(self, name: str,clean = True): 
+        #Não vale a pena já salvar tudo como um dicionário em vez de classe?
+        if clean: self.clean()
+        name = name + '.pk'
+        with open(name, "wb") as output_file:
+            pickle.dump(self,output_file)
+
+    def save_df(self, name: str, method:str = 'pickle'):
+        assert method == 'pickle' or method == 'csv'
+        if method == 'pickle':
+            name = name + '.pk'
+            pd.to_pickle(name)
+        elif method == 'csv':
+            name = name + '.csv'
+            pd.to_csv(name)
+    
                 
 
 def update_optim_lr(optimizer,rate):
@@ -208,3 +253,16 @@ class Trainer():
         self.hist_train.update_hist()
         try: self.hist_val.update_hist() #with try/except in case there is no validation hist class
         except: pass
+
+    def save_hist(self,path, name = None, method = 'pickle-df'):
+        assert method == 'pickle-class'  or method == 'pickle-df' or method == 'csv'
+        if name is None: name = self.model.name
+        pass
+        #salvar todas hist daqui
+        self.hist_train.save_df(path+r'/'+name+'train_hist', method)
+        self.hist_val.save_df(path+r'/'+name+'val_hist', method)
+
+    def save_all(self, path_model, path_hist, name = None):
+        self.save_hist(path_hist, name)
+        self.model.save_state_dict(path_model, name)
+        

@@ -1,8 +1,16 @@
-import pandas as pd
+
 import matplotlib
 from matplotlib import pyplot as plt
 import torch
 import numpy as np
+import sys
+# insert at 1, 0 is the script path (or '' in REPL)
+sys.path.insert(1, '..')
+import NN_models
+import pkgutil
+import warnings
+
+
 def dataset_cut_classes(data,indices = (0,1)):
 
     '''Get a dataset (in default form from Pytorch) and returns only the ones with label (target)
@@ -172,5 +180,48 @@ def is_probabilities(y, tol = 1e-5, dim = -1):
 
     return is_prob
 
+def get_defined_models(module = NN_models):
+    '''Gets all classes defined in package'''
+    d = dict([(name, cls) for name, cls in module.__dict__.items() if isinstance(cls, type)])
+    #gets classes defined in __init__ in package
+
+    if '__path__' in module.__dict__.keys():
+        #check if package is a package (can be a module)
+        for _, modname, ispkg in pkgutil.iter_modules(module.__path__):
+            #get modules inside package
+            try: mod = module.__dict__[modname]
+            except:
+                sys.path.insert(1, module.__path__[0])
+                mod = __import__(modname)
+            d.update(get_defined_models(mod))
+    return d
+
+def identify_from_statedict(state_dict, models_dict = None, name = None):
+    '''Given a state dict, identify which model in models_dict corresponds to it'''
+    if models_dict is None:
+        models_dict = get_defined_models()
+    for model_name,model_class in models_dict.items():
+        model = model_class(name=model_name) if name is None else model_class(name=name)
+        try: 
+            model.load_state_dict(torch.load(state_dict),strict = True)
+            print('Loaded model: ', model_name)
+            return model
+        except: continue
+    else: 
+        warnings.warn("No defined model matched totally")
+        for model_name,model_class in models_dict.items():
+            model = model_class(name=model_name) if name is None else model_class(name=name)
+            try: 
+                model.load_state_dict(torch.load(state_dict),strict = False)
+                print('Loaded model: ', model_name)
+                return model
+            except: continue
+        else : warnings.warn("No defined model matched even with no strict")
+
+        
+    
+
+if __name__ == '__main__':
+    pass
 
 

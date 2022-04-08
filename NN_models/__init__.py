@@ -4,7 +4,6 @@ from torch import nn
 import torchvision
 
 
- 
 def construct_conv_layer(blocks):
     #to elaborate
     #iterate over blocks and append to conv_layer conv2d with blocks_i size
@@ -31,9 +30,10 @@ def construct_conv_layer(blocks):
 class Model_CNN(nn.Module):
     """CNN."""
 
-    def __init__(self,n_classes=10,input = (32,32),blocks = None):
+    def __init__(self,n_classes=10,input = (32,32),blocks = None, name = 'Model_CNN'):
         """CNN Builder."""
         super().__init__()
+        self.name = name
         
         if blocks is None:
             conv_layer = [
@@ -43,9 +43,8 @@ class Model_CNN(nn.Module):
                 nn.Conv2d(in_channels=int(16), out_channels=int(32), kernel_size=3, padding='same'),
                 nn.Dropout(p=0.2),
                 nn.ReLU(inplace=True),
-                nn.MaxPool2d(kernel_size=2, stride=2)
+                nn.MaxPool2d(kernel_size=2, stride=2)]
 
-            ]
             k = int(32/4)
             fc_layer = [
                 nn.Flatten(),
@@ -78,19 +77,22 @@ class Model_CNN(nn.Module):
 
         return y
 
+    def save_state_dict(self,path, name = None):
+        if name is None: name = self.name
+        torch.save(self.state_dict(), path + r'/' + name + '.pt')
 
 # Define model
 class Model_CNN_with_g(Model_CNN):
     """CNN."""
 
-    def __init__(self,n_classes=10,input = (32,32),blocks = None, g_arq = 'parallel'):
+    def __init__(self,n_classes=10,input = (32,32),blocks = None, g_arq = 'parallel', name = 'Model_CNN_with_g'):
         """CNN Builder."""
         '''g_arq:
         parallel: head that gets as input x, the output of the main layer.
         Gets no information of the classificer layer
         softmax: input is y, the classifier softmax. 
         mixed: input is a concatenation between x and y.'''
-        super().__init__(n_classes,input,blocks)
+        super().__init__(n_classes,input,blocks,name)
         self.g_arq = g_arq
         
         self.return_g = True
@@ -152,14 +154,14 @@ class Model_CNN_with_g(Model_CNN):
 class Model_CNN_with_g_and_h(Model_CNN_with_g):
     """CNN."""
 
-    def __init__(self,n_classes=10,input = (32,32),blocks = None, g_arq = 'parallel'):
+    def __init__(self,n_classes=10,input = (32,32),blocks = None, g_arq = 'parallel', name = 'Model_CNN_g_and_h'):
         """CNN Builder."""
         '''g_arq:
         parallel: head that gets as input x, the output of the main layer.
         Gets no information of the classificer layer
         softmax: input is y, the classifier softmax. 
         mixed: input is a concatenation between x and y.'''
-        super().__init__(n_classes,input,blocks,g_arq)
+        super().__init__(n_classes,input,blocks,g_arq,name)
 
         self.h_layer  = nn.Sequential(
             nn.Linear(int(512), n_classes),
@@ -193,37 +195,4 @@ class Model_CNN_with_g_and_h(Model_CNN_with_g):
         return self.h
 
 
-def get_vgg_layers():
-    #create entries for set model_cnn as vgg_16 + dropouts
-    i=0
-    conv_layer = []
-    for layer in torchvision.models.vgg16(pretrained=True).features:
-        conv_layer.append(layer)
-        if isinstance(layer,nn.Conv2d):
-            layer.padding = 'same'
-            out_channels = layer.out_channels 
-            i+=1
-        if isinstance(layer,nn.ReLU):
-            conv_layer.extend([nn.BatchNorm2d(out_channels)])
-            if i%2==1:
-                conv_layer.append(nn.Dropout(0.3))
-        
-        
-    fc_layer = [nn.Flatten(),
-        nn.Linear(512, 512),
-        nn.ReLU(inplace = True),
-        nn.BatchNorm1d(512),
-        nn.Dropout(0.5)]
-    main_layer = conv_layer + fc_layer
-    return main_layer
 
-def transform_in_selective_vgg(model):
-    #g_layer as defined in selective_net paper
-    model.g_layer = nn.Sequential(
-                nn.Linear(512, 512),
-                nn.ReLU(inplace=True),
-                nn.BatchNorm1d(512),
-                nn.Linear(512, 1),
-                nn.Sigmoid())
-    return model
-    
