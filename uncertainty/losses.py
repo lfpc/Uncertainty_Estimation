@@ -1,7 +1,7 @@
 import torch
 from math import log
 import NN_utils as utils
-from uncertainty.quantifications import entropy
+from uncertainty.quantifications import entropy,get_TCP
 from NN_utils.train_and_eval import correct_class
 import uncertainty.comparison as unc_comp
 from scipy.optimize import root_scalar
@@ -205,4 +205,16 @@ class selective_net_lambda(torch.nn.Module):
                 loss_h = self.get_loss(h,w,y_true)
         loss = self.alpha*loss + (1-self.alpha)*loss_h
 
+        return loss
+
+class confid_loss(torch.nn.Module):
+    def __init__(self,criterion):
+        super().__init__()
+        self.criterion = criterion
+        
+    def forward(self,output,y_true):
+        y_pred,g = output
+        g = g.view(-1)
+        tcp = get_TCP(y_pred,y_true)
+        loss = self.criterion(g,tcp)
         return loss
