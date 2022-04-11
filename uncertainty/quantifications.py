@@ -73,10 +73,12 @@ def dropout_pred(model,X):
 
 def montecarlo_pred(model,X,n=10):
     '''Returns an array with n evaluations of the model with dropout enabled.'''
-    with torch.no_grad():  
+    model.eval()
+    enable_dropout(model)
+    with torch.no_grad(): 
         MC_array = []
         for i in range(n):
-            pred = dropout_pred(model,X)
+            pred = model(X)
             MC_array.append(pred)
         MC_array = torch.stack(MC_array)
     return MC_array
