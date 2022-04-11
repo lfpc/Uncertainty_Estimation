@@ -203,7 +203,7 @@ def identify_from_statedict(state_dict, models_dict = None, name = None):
     for model_name,model_class in models_dict.items():
         model = model_class(name=model_name) if name is None else model_class(name=name)
         try: 
-            model.load_state_dict(torch.load(state_dict),strict = True)
+            model.load_state_dict(state_dict,strict = True)
             print('Loaded model: ', model_name)
             return model
         except: continue
@@ -212,7 +212,7 @@ def identify_from_statedict(state_dict, models_dict = None, name = None):
         for model_name,model_class in models_dict.items():
             model = model_class(name=model_name) if name is None else model_class(name=name)
             try: 
-                model.load_state_dict(torch.load(state_dict),strict = False)
+                model.load_state_dict(state_dict,strict = False)
                 print('Loaded model: ', model_name)
                 return model
             except: continue
