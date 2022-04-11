@@ -208,13 +208,14 @@ class hist_train():
             pickle.dump(self,output_file)
 
     def save_df(self, name: str, method:str = 'pickle'):
-        assert method == 'pickle' or method == 'csv'
-        if method == 'pickle':
+        assert method == 'pickle' or method == 'csv' or method == 'pickle-df'
+        df = self.to_dataframe()
+        if method == 'pickle' or method == 'pickle-df':
             name = name + '.pk'
-            pd.to_pickle(name)
+            df.to_pickle(name)
         elif method == 'csv':
             name = name + '.csv'
-            pd.to_csv(name)
+            df.to_csv(name)
     
                 
 
