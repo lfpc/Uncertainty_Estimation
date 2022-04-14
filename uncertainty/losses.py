@@ -208,7 +208,7 @@ class selective_net_lambda(torch.nn.Module):
         return loss
 
 class confid_loss(torch.nn.Module):
-    def __init__(self,criterion):
+    def __init__(self, criterion = torch.nn.MSELoss() ):
         super().__init__()
         self.criterion = criterion
         

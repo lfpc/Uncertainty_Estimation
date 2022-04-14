@@ -218,6 +218,12 @@ def identify_from_statedict(state_dict, models_dict = None, name = None):
             except: continue
         else : warnings.warn("No defined model matched even with no strict")
 
+def get_n_biggest(vec,n):
+    if 0<n<1:
+        n = int(n*len(vec))
+    unc = torch.argsort(vec, descending = True)
+    return unc[0:n]
+
         
     
 

@@ -1,21 +1,36 @@
 import torch
 import numpy as np
 from NN_utils.train_and_eval import correct_total
-from NN_utils import apply_mask
+from NN_utils import apply_mask,get_n_biggest
 
-def dontknow_mask(uncertainty, coverage = 0.1):
+
+def get_most_uncertain(data,uncertainty_method, n = 1):
+    if not isinstance(uncertainty_method,(torch.Tensor,list,np.ndarray)):
+        uncertainty_method = uncertainty_method(data)
+    dk_vec = get_n_biggest(uncertainty_method,n)
+    unc_data = data[dk_vec]
+    return unc_data
+
+def get_most_certain(data,uncertainty_method, n = 1):
+    if not isinstance(uncertainty_method,(torch.Tensor,list,np.ndarray)):
+        uncertainty_method = uncertainty_method(data)
+    know_vec = get_n_biggest(-uncertainty_method,n)
+    unc_data = data[know_vec]
+    return unc_data
+
+def dontknow_mask(uncertainty, coverage = 0.8):
     '''Returns a DontKnow Tensor: 1 for the most (coverage most) uncertain samples
     and 0 for the rest'''
     with torch.no_grad():
         n_pred = uncertainty.shape[0]
 
-
-        num_cut = int((coverage)*n_pred)
+        num_cut = round((1-coverage)*n_pred)
         dontknow = torch.zeros(n_pred)
-        argsort_uncertainty = torch.argsort(uncertainty, descending=True)
-        for i in range(num_cut):
-            p = argsort_uncertainty[i]
-            dontknow[p] = 1
+        biggest_unc = get_n_biggest(uncertainty,num_cut)
+        dontknow[biggest_unc] = 1
+        #for i in range(num_cut):
+        #    p = argsort_uncertainty[i]
+        #    dontknow[p] = 1
 
         return dontknow
 
