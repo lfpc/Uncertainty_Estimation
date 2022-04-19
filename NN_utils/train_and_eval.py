@@ -162,7 +162,7 @@ class hist_train():
             if self.c<1:
                 self.update_hist_c()
             else:
-                #There is no theorical difference between getting acc and loss with accumulate
+                #There is no difference between getting acc and loss with accumulate
                 #results (_c) and with function with a loop. Using the acc and loss function,
                 #looping over the dataset, requires less memory. In the case where c is defined 
                 # (minor than 1), the accumulate results is needed, so there is no need to loop
@@ -243,9 +243,9 @@ class Trainer():
             
 
     def fit(self,data,n_epochs, live_plot = True):
-        progress_epoch = trange(n_epochs,position=0, leave=True)
+        progress_epoch = trange(n_epochs,position=2, leave=False)
         for e in progress_epoch:
-            progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]} | Acc_train: {self.hist_train.acc_list[-1]} | Acc_val: {self.hist_val.acc_list[-1]} \n | Epochs progress:')
+            progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]} | Acc_train: {self.hist_train.acc_list[-1]} | Acc_val: {self.hist_val.acc_list[-1]} | Epochs progress:')
             self.epoch += 1
             progress = tqdm(data,position=1, leave=False)
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
@@ -258,6 +258,7 @@ class Trainer():
                 'Validation loss': self.hist_val.loss_list})
             elif live_plot == 'print':
                 print('Epoch ', self.epoch, ', loss = ', loss)
+            progress.leave = True
 
 
     def update_hist(self):
