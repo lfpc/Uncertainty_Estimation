@@ -7,6 +7,7 @@ import uncertainty.comparison as unc_comp
 from collections import defaultdict
 import pickle
 import pandas as pd
+from tqdm import tqdm
 
 def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,set_train_mode = True):
     '''Train a Neural Network'''
@@ -240,14 +241,24 @@ class Trainer():
             self.hist_val = hist_train(model,loss_criterion,validation_data,c=c, risk_dict = risk_dict)
             
 
-    def fit(self,data,n_epochs):
-        for e in range(1,n_epochs+1):
+    def fit(self,data,n_epochs, live_plot = True):
+        progress_epoch = range(n_epochs)
+        for e in progress_epoch:
+            progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]} | Acc_train: {self.hist_train.acc_list[-1]} | Acc_val: {self.hist_val.acc_list[-1]}')
             self.epoch += 1
-            loss = train_NN(self.model,self.optimizer,data,self.loss_fn,1, print_loss = False) #model.train applied internally here
-            print('Epoch ', self.epoch, ', loss = ', loss)
+            progress = tqdm(data)
+            loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
+            progress.set_description(f'Loss: {loss}')
             self.update_hist()
-            if (self.update_lr_epochs>0) and (e%self.update_lr_epochs == 0):
+            if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
                 update_optim_lr(self.optimizer,self.update_lr_rate)
+            if live_plot:
+                utils.live_plot({'Train loss': self.hist_train.loss_list,
+                'Validation loss': self.hist_val.loss_list})
+            elif live_plot == 'print':
+                print('Epoch ', self.epoch, ', loss = ', loss)
+
+
     def update_hist(self):
         '''Updates hist classes.
         Usefull to use before training to keep pre-training values.'''

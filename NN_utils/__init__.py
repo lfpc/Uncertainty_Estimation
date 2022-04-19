@@ -9,6 +9,18 @@ sys.path.insert(1, '..')
 import NN_models
 import pkgutil
 import warnings
+from IPython.display import clear_output
+
+def live_plot(data_dict, figsize=(7,5), title=''):
+    clear_output(wait=True)
+    plt.figure(figsize=figsize)
+    for label,data in data_dict.items():
+        plt.plot(data, label=label)
+    plt.title(title)
+    plt.grid(True)
+    plt.xlabel('epoch')
+    plt.legend(loc='center left') # the plot evolves to the right
+    plt.show()
 
 
 def dataset_cut_classes(data,indices = (0,1)):
