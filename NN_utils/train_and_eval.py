@@ -239,6 +239,7 @@ class Trainer():
         self.hist_train = hist_train(model,loss_criterion,training_data, c=c, risk_dict = risk_dict)
         if validation_data is not None:
             self.hist_val = hist_train(model,loss_criterion,validation_data,c=c, risk_dict = risk_dict)
+        self.update_hist()
             
 
     def fit(self,data,n_epochs, live_plot = True):
