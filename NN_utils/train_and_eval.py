@@ -7,7 +7,7 @@ import uncertainty.comparison as unc_comp
 from collections import defaultdict
 import pickle
 import pandas as pd
-from tqdm import tqdm
+from tqdm.notebook import tqdm,trange
 
 def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,set_train_mode = True):
     '''Train a Neural Network'''
@@ -243,12 +243,11 @@ class Trainer():
             
 
     def fit(self,data,n_epochs, live_plot = True):
-        progress_epoch = tqdm(range(n_epochs),position=0, leave=True, desc = 'Total progress:')
+        progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Total progress:')
         for e in progress_epoch:
             self.epoch += 1
-            progress = tqdm(data,position=1, leave=True, desc = 'Epoch progress:')
+            progress = tqdm(data,position=1, leave=False, desc = 'Epoch progress:')
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
-            progress.set_description(f'Loss: {loss}')
             self.update_hist()
             if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
                 update_optim_lr(self.optimizer,self.update_lr_rate)
