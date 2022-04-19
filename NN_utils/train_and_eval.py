@@ -246,7 +246,7 @@ class Trainer():
         if live_plot:
             utils.live_plot({'Train loss': self.hist_train.loss_list,
             'Validation loss': self.hist_val.loss_list})
-        progress_epoch = trange(n_epochs,position=2, leave=True)
+        progress_epoch = trange(n_epochs,position=0, leave=True)
         for e in progress_epoch:
             progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]} | Acc_train: {self.hist_train.acc_list[-1]} | Acc_val: {self.hist_val.acc_list[-1]} | \n Epochs progress:')
             self.epoch += 1
