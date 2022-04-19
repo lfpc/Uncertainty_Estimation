@@ -243,9 +243,12 @@ class Trainer():
             
 
     def fit(self,data,n_epochs, live_plot = True):
-        progress_epoch = trange(n_epochs,position=2, leave=False)
+        if live_plot:
+            utils.live_plot({'Train loss': self.hist_train.loss_list,
+            'Validation loss': self.hist_val.loss_list})
+        progress_epoch = trange(n_epochs,position=2, leave=True)
         for e in progress_epoch:
-            progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]} | Acc_train: {self.hist_train.acc_list[-1]} | Acc_val: {self.hist_val.acc_list[-1]} | Epochs progress:')
+            progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]} | Acc_train: {self.hist_train.acc_list[-1]} | Acc_val: {self.hist_val.acc_list[-1]} | \n Epochs progress:')
             self.epoch += 1
             progress = tqdm(data,position=1, leave=False)
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
@@ -258,7 +261,6 @@ class Trainer():
                 'Validation loss': self.hist_val.loss_list})
             elif live_plot == 'print':
                 print('Epoch ', self.epoch, ', loss = ', loss)
-            progress.leave = True
 
 
     def update_hist(self):
