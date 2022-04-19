@@ -7,7 +7,7 @@ import uncertainty.comparison as unc_comp
 from collections import defaultdict
 import pickle
 import pandas as pd
-from tqdm.notebook import tqdm,trange
+from tqdm import tqdm
 
 def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,set_train_mode = True):
     '''Train a Neural Network'''
@@ -243,14 +243,10 @@ class Trainer():
             
 
     def fit(self,data,n_epochs, live_plot = True):
-        if live_plot:
-            utils.live_plot({'Train loss': self.hist_train.loss_list,
-            'Validation loss': self.hist_val.loss_list})
-        progress_epoch = trange(n_epochs,position=0, leave=True)
+        progress_epoch = tqdm(range(n_epochs),position=0, leave=True, desc = 'Total progress:')
         for e in progress_epoch:
-            progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]} | Acc_train: {self.hist_train.acc_list[-1]} | Acc_val: {self.hist_val.acc_list[-1]} | \n Epochs progress:')
             self.epoch += 1
-            progress = tqdm(data,position=1, leave=False)
+            progress = tqdm(data,position=0, leave=False, desc = 'Epoch progress:')
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
             progress.set_description(f'Loss: {loss}')
             self.update_hist()
@@ -259,6 +255,7 @@ class Trainer():
             if live_plot:
                 utils.live_plot({'Train loss': self.hist_train.loss_list,
                 'Validation loss': self.hist_val.loss_list})
+                print(f'Loss: {self.hist_train.loss_list[-1]} | Acc_train: {self.hist_train.acc_list[-1]} | Acc_val: {self.hist_val.acc_list[-1]}')
             elif live_plot == 'print':
                 print('Epoch ', self.epoch, ', loss = ', loss)
 
