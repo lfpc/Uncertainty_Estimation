@@ -243,11 +243,11 @@ class Trainer():
             
 
     def fit(self,data,n_epochs, live_plot = True):
-        progress_epoch = tqdm(range(n_epochs))
+        progress_epoch = tqdm(range(n_epochs),position=0, leave=True)
         for e in progress_epoch:
             progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]} | Acc_train: {self.hist_train.acc_list[-1]} | Acc_val: {self.hist_val.acc_list[-1]}')
             self.epoch += 1
-            progress = tqdm(data)
+            progress = tqdm(data,position=0, leave=True)
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
             progress.set_description(f'Loss: {loss}')
             self.update_hist()
