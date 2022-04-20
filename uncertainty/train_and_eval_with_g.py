@@ -3,7 +3,8 @@ import torch
 import uncertainty.quantifications as unc
 import uncertainty.comparison as unc_comp
 import NN_utils as utils
-from collections import defaultdict
+from tqdm.notebook import tqdm,trange
+from IPython.display import display
 
 def accumulate_results_g(model,data):
     '''Accumulate output (of model) and label of a entire dataset.'''
@@ -115,14 +116,26 @@ class Trainer_with_g(TE.Trainer):
         if validation_data is not None:
             self.hist_val = hist_train_g(model,loss_fn,validation_data,c=c,risk_dict = risk_dict)
 
-    def fit_g(self,data,n_epochs,ignored_layers = ['main_layer','classifier_layer']):
+    def fit_g(self,data,n_epochs,ignored_layers = ['main_layer','classifier_layer'], live_plot = True):
         '''Train only the layer specific for g, freezing (disables grad and set eval mode) the rest'''
-        for e in range(1,n_epochs+1):
+        progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Total progress:')
+        for e in range(n_epochs):
+            progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} | Acc_val: {self.hist_val.acc_list[-1]:.2f} | Progress:')
             self.epoch += 1
             self.model.train()
             #ignore_layers is applied every iteration because 'update_hist method set model to eval mode'
             utils.ignore_layers(self.model,ignored_layers, reset = False) 
-            loss = TE.train_NN(self.model,self.optimizer,data,self.loss_fn,n_epochs=1, print_loss = False,set_train_mode = False)
-            print('Epoch ', self.epoch, ', loss = ', loss)
+            progress = tqdm(data,position=0, leave=False, desc = 'Epoch progress:')
+            loss = TE.train_NN(self.model,self.optimizer,progress,self.loss_fn,n_epochs=1, print_loss = False,set_train_mode = False)
+            if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
+                TE.update_optim_lr(self.optimizer,self.update_lr_rate)
+            if live_plot:
+                utils.live_plot({'Train loss': self.hist_train.loss_list,
+                'Validation loss': self.hist_val.loss_list})
+                display(progress_epoch.container)
+            elif live_plot == 'print':
+                print('Epoch ', self.epoch, ', loss = ', loss)
             self.update_hist()
         utils.unfreeze_params(self.model) #unfreeze params to avoid future mistakes
+            
+            

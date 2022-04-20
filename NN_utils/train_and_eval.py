@@ -8,6 +8,7 @@ from collections import defaultdict
 import pickle
 import pandas as pd
 from tqdm.notebook import tqdm,trange
+from IPython.display import display
 
 def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,set_train_mode = True):
     '''Train a Neural Network'''
@@ -241,12 +242,12 @@ class Trainer():
             self.hist_val = hist_train(model,loss_criterion,validation_data,c=c, risk_dict = risk_dict)
         self.update_hist()
             
-
     def fit(self,data,n_epochs, live_plot = True):
         progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Total progress:')
         for e in progress_epoch:
+            progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} | Acc_val: {self.hist_val.acc_list[-1]:.2f} | Progress:')
             self.epoch += 1
-            progress = tqdm(data,position=1, leave=False, desc = 'Epoch progress:')
+            progress = tqdm(data,position=0, leave=False, desc = 'Epoch progress:')
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
             self.update_hist()
             if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
@@ -254,10 +255,9 @@ class Trainer():
             if live_plot:
                 utils.live_plot({'Train loss': self.hist_train.loss_list,
                 'Validation loss': self.hist_val.loss_list})
-                print(f'Loss: {self.hist_train.loss_list[-1]} | Acc_train: {self.hist_train.acc_list[-1]} | Acc_val: {self.hist_val.acc_list[-1]}')
+                display(progress_epoch.container)
             elif live_plot == 'print':
                 print('Epoch ', self.epoch, ', loss = ', loss)
-
 
     def update_hist(self):
         '''Updates hist classes.
