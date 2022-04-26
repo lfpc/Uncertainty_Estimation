@@ -173,7 +173,7 @@ class hist_train():
                 self.loss_list.append(loss)
                 if self.risk_dict is not None:
                     for name, risk_fn in self.risk_dict.items():
-                        risk = risk_fn(self.model,self.data).item() 
+                        risk = risk_fn(self.model,self.data).item()  #consertar isso. entrar model em risk_fn?
                         self.risk[name].append(risk)
 
     def load_hist(self,hist):
@@ -227,7 +227,7 @@ def update_optim_lr(optimizer,rate):
 class Trainer():
     '''Class for easily training/fitting a Pytorch's NN model. Creates 2 'hist' classes,
     keeping usefull metrics and values.'''
-    def __init__(self,model,optimizer,loss_criterion,training_data,validation_data = None,
+    def __init__(self,model,optimizer,loss_criterion,training_data = None,validation_data = None,
                         c=1.0,update_lr = (0,1),risk_dict = None):
 
         self.model = model
@@ -236,13 +236,15 @@ class Trainer():
         self.epoch = 0
         self.update_lr_epochs = update_lr[0]
         self.update_lr_rate = update_lr[1]
-
-        self.hist_train = hist_train(model,loss_criterion,training_data, c=c, risk_dict = risk_dict)
+        if training_data is not None:
+            self.hist_train = hist_train(model,loss_criterion,training_data, c=c, risk_dict = risk_dict)
         if validation_data is not None:
             self.hist_val = hist_train(model,loss_criterion,validation_data,c=c, risk_dict = risk_dict)
         self.update_hist()
             
-    def fit(self,data,n_epochs, live_plot = True):
+    def fit(self,data = None,n_epochs = 1, live_plot = True):
+        if data is None:
+            data = self.training_data
         progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Total progress:')
         for e in progress_epoch:
             progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} | Acc_val: {self.hist_val.acc_list[-1]:.2f} | Progress:')
@@ -262,7 +264,8 @@ class Trainer():
     def update_hist(self):
         '''Updates hist classes.
         Usefull to use before training to keep pre-training values.'''
-        self.hist_train.update_hist()
+        try: self.hist_train.update_hist()
+        except: pass
         try: self.hist_val.update_hist() #with try/except in case there is no validation hist class
         except: pass
 
