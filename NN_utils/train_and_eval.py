@@ -252,6 +252,7 @@ class Trainer():
             self.epoch += 1
             progress.refresh()
             progress.reset()
+            display(progress.container)
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
             self.update_hist()
             if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
