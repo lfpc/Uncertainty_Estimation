@@ -249,7 +249,7 @@ class Trainer():
         for e in progress_epoch:
             progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} | Acc_val: {self.hist_val.acc_list[-1]:.2f} | Progress:')
             self.epoch += 1
-            progress = tqdm(data,position=0, leave=False, desc = 'Epoch progress:')
+            progress = tqdm(data,position=0, leave=True, desc = 'Epoch progress:')
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
             self.update_hist()
             if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
@@ -264,6 +264,7 @@ class Trainer():
     def update_hist(self):
         '''Updates hist classes.
         Usefull to use before training to keep pre-training values.'''
+        # adicionar modo para criar hist caso o dataset tenha sido adicionado posteriormente
         try: self.hist_train.update_hist()
         except: pass
         try: self.hist_val.update_hist() #with try/except in case there is no validation hist class
