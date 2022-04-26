@@ -249,8 +249,9 @@ class Trainer():
         for e in progress_epoch:
             progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} | Acc_val: {self.hist_val.acc_list[-1]:.2f} | Progress:')
             self.epoch += 1
-            progress = tqdm(data,position=0, leave=True, desc = 'Epoch progress:')
+            progress = tqdm(data,position=0, leave=False, desc = 'Epoch progress:')
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
+            progress.close()
             self.update_hist()
             if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
                 update_optim_lr(self.optimizer,self.update_lr_rate)
