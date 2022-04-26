@@ -246,10 +246,12 @@ class Trainer():
         if data is None:
             data = self.training_data
         progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Total progress:')
+        progress = tqdm(data,position=1, leave=False, desc = 'Epoch progress:')
         for e in progress_epoch:
             progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} | Acc_val: {self.hist_val.acc_list[-1]:.2f} | Progress:')
             self.epoch += 1
-            progress = tqdm(data,position=1, leave=False, desc = 'Epoch progress:')
+            progress.refresh()
+            progress.reset()
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
             self.update_hist()
             if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
