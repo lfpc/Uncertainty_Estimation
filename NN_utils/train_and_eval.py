@@ -245,7 +245,7 @@ class Trainer():
     def fit(self,data = None,n_epochs = 1, live_plot = True):
         if data is None:
             data = self.training_data
-        progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Total progress:')
+        progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
         progress = tqdm(data,position=1, leave=True, desc = 'Epoch progress:')
         for e in progress_epoch:
             progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} | Acc_val: {self.hist_val.acc_list[-1]:.2f} | Progress:')
