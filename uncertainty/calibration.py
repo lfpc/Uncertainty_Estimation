@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from uncertainty.quantifications import get_MCP
 from NN_utils import round_decimal,normalize
-from NN_utils.train_and_eval import correct_class
+from NN_utils.train_and_eval import correct_total
 
 
 
@@ -23,7 +23,7 @@ def calibration_curve(model,data):
         
         for n in p_list:
             p = round_decimal(MCP)
-            correct = correct_class(y[p==n],label[p==n])
+            correct = correct_total(y[p==n],label[p==n])
             d[n][0] += correct
             d[n][1] += (p==n).sum().item()
     acc = []

@@ -115,6 +115,7 @@ class Trainer_with_g(TE.Trainer):
         self.hist_train = hist_train_g(model,loss_fn,training_data, c=c,risk_dict = risk_dict)
         if validation_data is not None:
             self.hist_val = hist_train_g(model,loss_fn,validation_data,c=c,risk_dict = risk_dict)
+        self.update_hist()
 
     def fit_g(self,data,n_epochs,ignored_layers = ['main_layer','classifier_layer'], live_plot = True):
         '''Train only the layer specific for g, freezing (disables grad and set eval mode) the rest'''
