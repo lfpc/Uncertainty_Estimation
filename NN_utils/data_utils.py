@@ -52,12 +52,13 @@ def corrupt_label(dataset,noise_size = 0.2,copy_ = True):
 
     if isinstance(dataset,DataLoader):
         dataset = dataset.dataset
-    if isinstance(dataset,torch.utils.data.Dataset):
-        targets = dataset.targets
-        idx = 0
-    elif isinstance(dataset,Subset):
+    if isinstance(dataset,Subset):
         targets = dataset.dataset.targets
         idx = dataset.indices[0]
+    elif isinstance(dataset,torch.utils.data.Dataset):
+        targets = dataset.targets
+        idx = 0
+    
 
     for i,label in enumerate(targets[idx:]):
         if i==int((len(dataset)*noise_size)):
