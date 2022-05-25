@@ -110,7 +110,7 @@ class Noisy_CIFAR_10(Cifar_10_data):
 
 
     def get_clean_subset(self):
-        clean_data = Subset(self.training_data, list(range(int((len(self.train_dataloader.dataset)*self.noisy_size)),len(self.train_dataloader.dataset))))
+        clean_data = Subset(self.training_data, list(range(int((len(self.train_dataloader.dataset)*self.noise_size)),len(self.train_dataloader.dataset))))
         self.clean_data = DataLoader(clean_data,batch_size=self.params['train_batch_size'],shuffle = True)
         return self.clean_data
 
