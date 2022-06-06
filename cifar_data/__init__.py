@@ -11,7 +11,8 @@ import NN_utils.data_utils as data_utils
 import torch
 from random import randrange
 
-class Cifar_10_data():
+
+class DataGenerator():
 
     params = {'train_batch_size':128,'validation_size':0.1,'test_batch_size': 100}
     transforms_train = transforms.Compose([
@@ -24,23 +25,20 @@ class Cifar_10_data():
     transforms.ToTensor(),
     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),])
 
-    training_data = datasets.CIFAR10(
-    root="data",
-    train=True,
-    download=False,
-    transform=transforms_train)
+    def __init__(self,
+                    params = params, 
+                    download = False, 
+                    name = 'DataGenerator',
+                    training_data = None,
+                    test_data = None):
 
-    test_data = datasets.CIFAR10(
-    root="data",
-    train=False,
-    download=False,
-    transform=transforms_test)
-
-    classes = ('plane', 'car', 'bird', 'cat',
-           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-
-
-    def __init__(self,params = params, download = True):
+        self.name = name
+        if training_data is not None:
+            self.training_data = training_data
+        if test_data is not None:
+            self.test_data = test_data
+        assert (hasattr(self, 'training_data') and hasattr(self, 'test_data') and 
+                self.training_data is not None and self.test_data is not None, "no datasets defined")
         if download:
             self.training_data.download()
             self.test_data.download()
@@ -76,43 +74,129 @@ class Cifar_10_data():
     def change_transforms(self,transforms_train,transforms_test):
             self.transforms_train = transforms_train
             self.transforms_test = transforms_test
-            self.training_data = datasets.CIFAR10(
-            root="data",
-            train=True,
-            download=True,
-            transform=transforms_train)
 
-            self.test_data = datasets.CIFAR10(
-            root="data",
-            train=False,
-            download=True,
-            transform=transforms_test)
+            self.training_data.transform = transforms_train
+            self.test_data.transform = transforms_test
 
             self.generate_dataloaders()
 
     def get_complete_training_dataloader(self):
         return DataLoader(self.training_data, batch_size=self.params['train_batch_size'],shuffle = True)
     def __repr__(self):
-        infos = f"CIFAR 10 DATASET : \n Trainining data length = {self.train_len} \n"
+        infos = f"{self.name} DATASET : \n Trainining data length = {self.train_len} \n"
         infos += f"Validation data length = {self.val_len} \n Test data length = {self.test_len}"
         return infos
-        
 
-class Noisy_CIFAR_10(Cifar_10_data):
+class Noisy_DataGenerator(DataGenerator):
 
-    def __init__(self,noise_size,noisy_val = False,params = Cifar_10_data.params, download = True):
-        super().__init__(params,download)
-
+    def __init__(self,noise_size,noisy_val = False,params = DataGenerator.params,
+                download = True, name = 'Noisy DataGenerator',
+                n_classes = None,training_data = None, test_data = None):
+        super().__init__(params, 
+                    download, 
+                    name,
+                    training_data,
+                    test_data)
+        if n_classes is not None:
+            self.n_classes = n_classes
+        elif not hasattr(self, 'n_classes'):
+            self.n_classes = max(self.test_dataloader.dataset.targets)+1
         self.noise_size = noise_size
-        data_utils.corrupt_label(self.train_dataloader.dataset,noise_size,copy_ = False)
-        if noisy_val:
-            data_utils.corrupt_label(self.validation_dataloader.dataset,noise_size,copy_ = False)
-
-
+        self.noisy_val = noisy_val
+        data_utils.corrupt_label(self.train_dataloader.dataset,noise_size,self.n_classes,copy_ = False)
+        if noisy_val and hasattr(self, 'validation_dataloader'):
+            data_utils.corrupt_label(self.validation_dataloader.dataset,noise_size,self.n_classes,copy_ = False)
     def get_clean_subset(self):
         clean_data = Subset(self.training_data, list(range(int((len(self.train_dataloader.dataset)*self.noise_size)),len(self.train_dataloader.dataset))))
         self.clean_data = DataLoader(clean_data,batch_size=self.params['train_batch_size'],shuffle = True)
         return self.clean_data
+
+    def __repr__(self):
+        infos = f"{self.name} DATASET : \n Trainining data length = {self.train_len} \n"
+        infos += f"Noisy training data = {self.train_len*self.noise_size} \n"
+        if self.noisy_val:
+            infos += f"Noisy validation data = {self.val_len*self.noise_size} \n"
+        infos += f"Validation data length = {self.val_len} \n Test data length = {self.test_len}"
+        return infos    
+
+class Cifar_10_data(DataGenerator):
+
+    training_data = datasets.CIFAR10(
+    root="data",
+    train=True,
+    download=False,
+    transform=DataGenerator.transforms_train)
+
+    test_data = datasets.CIFAR10(
+    root="data",
+    train=False,
+    download=False,
+    transform=DataGenerator.transforms_test)
+
+    classes = training_data.classes
+    n_classes = 10   
+
+
+    def __init__(self,params = DataGenerator.params, 
+                download = True, 
+                name = 'CIFAR 10',
+                data_dir = "data"):
+        self.training_data.root = data_dir
+        self.test_data.root = data_dir
+        super().__init__(params,
+                    download, 
+                    name)
+        
+
+class Cifar_100_data(DataGenerator):
+
+    training_data = datasets.CIFAR100(
+    root="data",
+    train=True,
+    download=False,
+    transform=DataGenerator.transforms_train)
+
+    test_data = datasets.CIFAR100(
+    root="data",
+    train=False,
+    download=False,
+    transform=DataGenerator.transforms_test)
+
+    classes = training_data.classes
+    n_classes = 100
+
+
+    def __init__(self,params = DataGenerator.params, 
+                download = True, 
+                name = 'CIFAR 10',
+                data_dir = "data"):
+        self.training_data.root = data_dir
+        self.test_data.root = data_dir
+        super().__init__(params,
+                    download, 
+                    name, 
+                    data_dir)
+        
+
+class Noisy_CIFAR_10(Noisy_DataGenerator,Cifar_10_data):
+
+
+    def __init__(self,noise_size,noisy_val = False,params = DataGenerator.params,
+                download = True, name = 'Noisy CIFAR 10', data_dir = 'data'):
+        self.training_data.root = data_dir
+        self.test_data.root = data_dir
+        super().__init__(noise_size,noisy_val,params,download, name)
+
+class Noisy_CIFAR_100(Noisy_DataGenerator,Cifar_100_data):
+
+
+    def __init__(self,noise_size,noisy_val = False,params = DataGenerator.params,
+                download = True, name = 'Noisy CIFAR 100', data_dir = 'data'):
+        self.training_data.root = data_dir
+        self.test_data.root = data_dir
+        super().__init__(noise_size,noisy_val,params,
+                download, name)
+
 
 
        

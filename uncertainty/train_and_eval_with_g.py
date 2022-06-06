@@ -1,6 +1,6 @@
 from NN_utils import train_and_eval as TE
 import torch
-import uncertainty.quantifications as unc
+import uncertainty.metrics as unc
 import uncertainty.comparison as unc_comp
 import NN_utils as utils
 from tqdm.notebook import tqdm,trange

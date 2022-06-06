@@ -47,7 +47,7 @@ def imshow(img):
     #print(' '.join(f'{classes[labels[j]]:5s}' for j in range(5)))
 
 
-def corrupt_label(dataset,noise_size = 0.2,copy_ = True):
+def corrupt_label(dataset,noise_size,n_classes,copy_ = True):
     if copy_: dataset = copy.deepcopy(dataset)
 
     if isinstance(dataset,DataLoader):
@@ -63,9 +63,9 @@ def corrupt_label(dataset,noise_size = 0.2,copy_ = True):
     for i,label in enumerate(targets[idx:]):
         if i==int((len(dataset)*noise_size)):
             break
-        new_label = randrange(10)
+        new_label = randrange(n_classes)
         while new_label == label:
-            new_label = randrange(10)
+            new_label = randrange(n_classes)
         targets[i+idx] = new_label
         
     return dataset
