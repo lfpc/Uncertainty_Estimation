@@ -1,9 +1,6 @@
 import torch
 import numpy as np
-import copy
 import NN_utils as utils
-import uncertainty.quantifications as unc
-import uncertainty.comparison as unc_comp
 from collections import defaultdict
 import pickle
 import pandas as pd
@@ -134,7 +131,7 @@ class hist_train():
             self.acc_c_entropy = []
 
     
-    def update_hist_c(self):
+    '''def update_hist_c(self):
 
         #y_pred and label are accumulated for all dataset so that accuracy by coverage can by calculated
         y_pred,label = accumulate_results(self.model,self.data)
@@ -147,12 +144,12 @@ class hist_train():
         #acc_c represents accuracy when the c most uncertain samples are ignored
         mcp = unc.MCP_unc(y_pred) #maximum softmax value
         ent = unc.entropy(y_pred) #entropy of softmax
-        self.acc_c_mcp.append(unc_comp.acc_coverage(y_pred,label,mcp,1-self.c))
-        self.acc_c_entropy.append(unc_comp.acc_coverage(y_pred,label,ent,1-self.c))
+        self.acc_c_mcp.append(unc_utils.acc_coverage(y_pred,label,mcp,1-self.c))
+        self.acc_c_entropy.append(unc_utils.acc_coverage(y_pred,label,ent,1-self.c))
         if self.risk_dict is not None:
             for name, risk_fn in self.risk_dict.items():
                 risk = risk_fn(y_pred,label).item() 
-                self.risk[name].append(risk)
+                self.risk[name].append(risk)'''
 
 
     def update_hist(self):

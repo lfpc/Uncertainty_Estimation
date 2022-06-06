@@ -1,7 +1,7 @@
 from NN_utils import train_and_eval as TE
 import torch
-import uncertainty.metrics as unc
-import uncertainty.comparison as unc_comp
+import uncertainty as unc
+import uncertainty.utils as unc_utils
 import NN_utils as utils
 from tqdm.notebook import tqdm,trange
 from IPython.display import display
@@ -96,9 +96,9 @@ class hist_train_g(TE.hist_train):
                 #acc_c represents accuracy when the c most uncertain samples are ignored
                 mcp = unc.MCP_unc(y_pred) #maximum softmax value
                 ent = unc.entropy(y_pred) #entropy of softmax
-                self.acc_c_g.append(unc_comp.acc_coverage(y_pred,label,1-g,1-self.c))
-                self.acc_c_mcp.append(unc_comp.acc_coverage(y_pred,label,mcp,1-self.c))
-                self.acc_c_entropy.append(unc_comp.acc_coverage(y_pred,label,ent,1-self.c))
+                self.acc_c_g.append(unc_utils.acc_coverage(y_pred,label,1-g,1-self.c))
+                self.acc_c_mcp.append(unc_utils.acc_coverage(y_pred,label,mcp,1-self.c))
+                self.acc_c_entropy.append(unc_utils.acc_coverage(y_pred,label,ent,1-self.c))
             if self.risk_dict is not None:
                 for name, risk_fn in self.risk_dict.items():
                     risk = risk_fn(output,label).item() 
