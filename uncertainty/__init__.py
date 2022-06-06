@@ -1,6 +1,6 @@
 import torch
 from NN_utils import indexing_2D, is_probabilities,round_decimal
-import utils
+import uncertainty.utils as utils
 
 def entropy(y, reduction = 'none'):
     '''Returns the entropy of a probabilities tensor.'''
