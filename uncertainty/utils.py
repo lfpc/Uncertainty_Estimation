@@ -1,4 +1,3 @@
-from uncertainty import mutual_info
 import torch
 from NN_utils import apply_mask,get_n_biggest
 import numpy as np
