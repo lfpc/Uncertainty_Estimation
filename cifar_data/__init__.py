@@ -142,8 +142,8 @@ class Cifar_10_data(DataGenerator):
 
 
     def __init__(self,params = DataGenerator.params, 
-                download = True, 
                 name = 'CIFAR 10',
+                download = True, 
                 data_dir = "data"):
         self.training_data = self.training_data(root=data_dir,
                                                 train=True,
@@ -179,14 +179,14 @@ class Cifar_100_data(DataGenerator):
 
 
     def __init__(self,params = DataGenerator.params, 
-                download = True, 
                 name = 'CIFAR 100',
+                download = True, 
                 data_dir = "data"):
         self.training_data = self.training_data(root=data_dir,
                                                 train=True,
                                                 download=download,
                                                 transform=self.transforms_train)
-        self.test_data = self.test_data(root="data",
+        self.test_data = self.test_data(root=data_dir,
                                         train=False,
                                         download=download,
                                         transform=self.transforms_test)
