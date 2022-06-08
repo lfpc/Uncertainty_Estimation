@@ -14,20 +14,10 @@ from random import randrange
 
 class DataGenerator():
 
-    params = {'train_batch_size':128,'validation_size':0.1,'test_batch_size': 100}
-    transforms_train = transforms.Compose([
-                    transforms.ToTensor(),
-                    transforms.RandomCrop(32, padding=4),
-                    transforms.RandomHorizontalFlip(),
-                    transforms.RandomRotation(15),
-                    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])
-    transforms_test = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),])
+    params = {'train_batch_size':128,'validation_size':0.05,'test_batch_size': 100}
 
     def __init__(self,
-                    params = params, 
-                    download = False, 
+                    params = params,
                     name = 'DataGenerator',
                     training_data = None,
                     test_data = None):
@@ -37,11 +27,7 @@ class DataGenerator():
             self.training_data = training_data
         if test_data is not None:
             self.test_data = test_data
-        assert (hasattr(self, 'training_data') and hasattr(self, 'test_data') and 
-                self.training_data is not None and self.test_data is not None, "no datasets defined")
-        if download:
-            self.training_data.download()
-            self.test_data.download()
+            
         self.params = params
         self.generate_dataloaders()
 
@@ -90,10 +76,8 @@ class DataGenerator():
 class Noisy_DataGenerator(DataGenerator):
 
     def __init__(self,noise_size,noisy_val = False,params = DataGenerator.params,
-                download = True, name = 'Noisy DataGenerator',
-                n_classes = None,training_data = None, test_data = None):
-        super().__init__(params, 
-                    download, 
+                 name = 'Noisy DataGenerator',n_classes = None,training_data = None, test_data = None):
+        super().__init__(params,
                     name,
                     training_data,
                     test_data)
@@ -121,17 +105,21 @@ class Noisy_DataGenerator(DataGenerator):
 
 class Cifar_10_data(DataGenerator):
 
-    training_data = datasets.CIFAR10(
-    root="data",
-    train=True,
-    download=False,
-    transform=DataGenerator.transforms_train)
+    MEAN = (0.4914, 0.4822, 0.4465)
+    STD = (0.2023, 0.1994, 0.2010)
+    transforms_train = transforms.Compose([
+                    transforms.ToTensor(),
+                    transforms.RandomCrop(32, padding=4),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.RandomRotation(15),
+                    transforms.Normalize(MEAN, STD)])
+    transforms_test = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(MEAN, STD),])
 
-    test_data = datasets.CIFAR10(
-    root="data",
-    train=False,
-    download=False,
-    transform=DataGenerator.transforms_test)
+    training_data = datasets.CIFAR10
+
+    test_data = datasets.CIFAR10
 
     classes = training_data.classes
     n_classes = 10   
@@ -141,26 +129,34 @@ class Cifar_10_data(DataGenerator):
                 download = True, 
                 name = 'CIFAR 10',
                 data_dir = "data"):
-        self.training_data.root = data_dir
-        self.test_data.root = data_dir
+        self.training_data = self.training_data(root=data_dir,
+                                                train=True,
+                                                download=download,
+                                                transform=self.transforms_train)
+        self.test_data = self.test_data(root="data",
+                                        train=False,
+                                        download=download,
+                                        transform=self.transforms_test)
         super().__init__(params,
-                    download, 
                     name)
         
 
 class Cifar_100_data(DataGenerator):
+    MEAN = (0.5070751592371323, 0.48654887331495095, 0.4409178433670343)
+    STD = (0.2673342858792401, 0.2564384629170883, 0.27615047132568404)
+    transforms_train = transforms.Compose([
+                    transforms.ToTensor(),
+                    transforms.RandomCrop(32, padding=4),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.RandomRotation(15),
+                    transforms.Normalize(MEAN, STD)])
+    transforms_test = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(MEAN, STD),])
 
-    training_data = datasets.CIFAR100(
-    root="data",
-    train=True,
-    download=False,
-    transform=DataGenerator.transforms_train)
+    training_data = datasets.CIFAR100
 
-    test_data = datasets.CIFAR100(
-    root="data",
-    train=False,
-    download=False,
-    transform=DataGenerator.transforms_test)
+    test_data = datasets.CIFAR100
 
     classes = training_data.classes
     n_classes = 100
@@ -170,8 +166,14 @@ class Cifar_100_data(DataGenerator):
                 download = True, 
                 name = 'CIFAR 10',
                 data_dir = "data"):
-        self.training_data.root = data_dir
-        self.test_data.root = data_dir
+        self.training_data = self.training_data(root=data_dir,
+                                                train=True,
+                                                download=download,
+                                                transform=self.transforms_train)
+        self.test_data = self.test_data(root="data",
+                                        train=False,
+                                        download=download,
+                                        transform=self.transforms_test)
         super().__init__(params,
                     download, 
                     name, 

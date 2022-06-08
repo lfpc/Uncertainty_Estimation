@@ -239,7 +239,7 @@ class Trainer():
             self.hist_val = hist_train(model,loss_criterion,validation_data,c=c, risk_dict = risk_dict)
         self.update_hist()
             
-    def fit(self,data = None,n_epochs = 1, live_plot = True):
+    def fit(self,data = None,n_epochs = 1, live_plot = True,update_hist = True):
         if data is None:
             data = self.training_data
         progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
@@ -250,7 +250,9 @@ class Trainer():
             progress.disable = False
             progress.reset()
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
-            self.update_hist()
+            self.update_hist(dataset = update_hist)
+            
+
             if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
                 update_optim_lr(self.optimizer,self.update_lr_rate)
             if live_plot:
@@ -260,20 +262,24 @@ class Trainer():
             elif live_plot == 'print':
                 print('Epoch ', self.epoch, ', loss = ', loss)
 
-    def update_hist(self):
+    def update_hist(self, dataset = 'all'):
         '''Updates hist classes.
         Usefull to use before training to keep pre-training values.'''
         # adicionar modo para criar hist caso o dataset tenha sido adicionado posteriormente
-        try: self.hist_train.update_hist()
-        except: pass
-        try: self.hist_val.update_hist() #with try/except in case there is no validation hist class
-        except: pass
+        if dataset == 'all' or dataset == 'train' or dataset == True:
+            try: self.hist_train.update_hist()
+            except: pass
+        if dataset == 'all' or dataset == 'val' or dataset == True:
+            try: self.hist_val.update_hist() 
+            #with try/except in case there is no validation hist class
+            except: pass
 
     def save_hist(self,path, name = None, method = 'pickle-df'):
         assert method == 'pickle-class'  or method == 'pickle-df' or method == 'csv'
         if name is None: name = self.model.name
         pass
         #salvar todas hist daqui
+
         self.hist_train.save_df(path+r'/'+name+'train_hist', method)
         self.hist_val.save_df(path+r'/'+name+'val_hist', method)
 
