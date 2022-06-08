@@ -245,7 +245,13 @@ class Trainer():
         progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
         progress = tqdm(data,position=1, leave=True, desc = 'Epoch progress:')
         for e in progress_epoch:
-            progress_epoch.set_description(f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} | Acc_val: {self.hist_val.acc_list[-1]:.2f} | Progress:')
+            desc = 'Progress:'
+            if hasattr(self,'hist_train'):
+                desc = f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} |' +desc
+            if hasattr(self,'hist_val'):
+                desc = f'Acc_val: {self.hist_val.acc_list[-1]:.2f} | ' + desc
+                
+            progress_epoch.set_description(desc)
             self.epoch += 1
             progress.disable = False
             progress.reset()

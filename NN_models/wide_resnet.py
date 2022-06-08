@@ -85,7 +85,7 @@ class Wide_ResNet(nn.Module):
         out = self.linear(out)
         if self.softmax:
             out = F.softmax(out,dim = -1)
-        elif self.softmax.lower() == 'log':
+        elif self.softmax == 'log':
             out = F.log_softmax(out,dim=-1)
 
         return out
