@@ -9,18 +9,26 @@ from sklearn.model_selection import train_test_split
 import copy
 import NN_utils.data_utils as data_utils
 import torch
+import random
+import numpy as np
 from random import randrange
 
+def seed_worker(worker_id):
+    worker_seed = torch.initial_seed() % 2**32
+    np.random.seed(worker_seed)
+    random.seed(worker_seed)
 
 class DataGenerator():
 
     params = {'train_batch_size':128,'validation_size':0.05,'test_batch_size': 100}
+    pre_seed = 42
 
     def __init__(self,
                     params = params,
                     name = 'DataGenerator',
                     training_data = None,
-                    test_data = None):
+                    test_data = None,
+                    seed = pre_seed):
 
         self.name = name
         if training_data is not None:
@@ -29,14 +37,22 @@ class DataGenerator():
             self.test_data = test_data
 
         self.params = params
-        self.generate_dataloaders()
+        self.generate_dataloaders(seed)
 
-    def generate_dataloaders(self):
+    def generate_dataloaders(self,seed = None):
+
         if self.params['validation_size'] > 0:
             train_subset, val_subset = data_utils.split_data(self.training_data,self.params['validation_size'],self.transforms_test)
             self.validation_dataloader = DataLoader(val_subset, batch_size=self.params['train_batch_size'],shuffle = False)
-    
-        self.train_dataloader = DataLoader(train_subset, batch_size=self.params['train_batch_size'],shuffle = True)
+        if seed is not None:
+            g = torch.Generator()
+            g.manual_seed(seed)
+            self.train_dataloader = DataLoader(train_subset, batch_size=self.params['train_batch_size'],
+                                            shuffle = True,worker_init_fn=seed_worker,generator=g)
+        
+        
+        else:
+            self.train_dataloader = DataLoader(train_subset, batch_size=self.params['train_batch_size'],shuffle = True)
         self.test_dataloader = DataLoader(self.test_data, batch_size=self.params['test_batch_size'])
 
         self.train_len = len(train_subset)

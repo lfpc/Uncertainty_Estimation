@@ -8,13 +8,17 @@ import numpy as np
 from random import randrange
 import torch
 
-def split_data(training_data,val_size,val_transforms, method = 'range'):
+def split_data(training_data,val_size,val_transforms, method = 'range', seed = None):
     '''to develop'''
     assert method == 'range' or method == 'random' or method == 'idx'
-    val_size = int(val_size*len(training_data))
-    train_size = len(training_data) - val_size
+    
     if method == 'random':
-        training_data, validation_data = random_split(training_data, [train_size, val_size])
+        val_size = int(val_size*len(training_data))
+        train_size = len(training_data) - val_size
+        if seed is not None:
+            train_subset, val_subset = random_split(training_data, [train_size, val_size],generator=torch.Generator().manual_seed(seed))
+        else:
+            train_subset, val_subset = random_split(training_data, [train_size, val_size])
     elif method == 'range':
         train_idx, val_idx = train_test_split(list(range(len(training_data))), test_size=val_size, shuffle = False)
         train_subset = Subset(training_data, train_idx)
