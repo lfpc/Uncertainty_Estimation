@@ -24,8 +24,8 @@ def split_data(training_data,val_size,val_transforms, method = 'range', seed = N
         train_subset = Subset(training_data, train_idx)
         val_subset = Subset(training_data, val_idx)
 
-
     val_subset = copy.deepcopy(val_subset)
+    print(val_subset)
     val_subset.dataset.transform = val_transforms
 
     return train_subset, val_subset
