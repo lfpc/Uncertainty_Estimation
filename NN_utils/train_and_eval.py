@@ -266,22 +266,21 @@ class Trainer():
         '''Updates hist classes.
         Usefull to use before training to keep pre-training values.'''
         # adicionar modo para criar hist caso o dataset tenha sido adicionado posteriormente
-        if dataset == 'all' or dataset == 'train' or dataset == True:
-            try: self.hist_train.update_hist()
-            except: pass
-        if dataset == 'all' or dataset == 'val' or dataset == True:
-            try: self.hist_val.update_hist() 
-            #with try/except in case there is no validation hist class
-            except: pass
+        if (dataset == 'all' or dataset == 'train' or dataset == True) and hasattr(self,'hist_train'):
+            self.hist_train.update_hist()
+
+        if (dataset == 'all' or dataset == 'val' or dataset == True) and hasattr(self,'hist_val'):
+            self.hist_val.update_hist() 
 
     def save_hist(self,path, name = None, method = 'pickle-df'):
         assert method == 'pickle-class'  or method == 'pickle-df' or method == 'csv'
         if name is None: name = self.model.name
         pass
         #salvar todas hist daqui
-
-        self.hist_train.save_df(path+r'/'+name+'train_hist', method)
-        self.hist_val.save_df(path+r'/'+name+'val_hist', method)
+        if hasattr(self,'hist_train'):
+            self.hist_train.save_df(path+r'/'+name+'train_hist', method)
+        if hasattr(self,'hist_val'):
+            self.hist_val.save_df(path+r'/'+name+'val_hist', method)
 
     def save_all(self, path_model, path_hist, name = None):
         self.save_hist(path_hist, name)
