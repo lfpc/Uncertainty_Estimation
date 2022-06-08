@@ -42,7 +42,7 @@ class DataGenerator():
     def generate_dataloaders(self,seed = None):
 
         if self.params['validation_size'] > 0:
-            train_subset, val_subset = data_utils.split_data(self.training_data,self.params['validation_size'],self.transforms_test)
+            train_subset, val_subset = data_utils.split_data(self.training_data,self.params['validation_size'],self.transforms_test,seed)
             self.validation_dataloader = DataLoader(val_subset, batch_size=self.params['train_batch_size'],shuffle = False)
         if seed is not None:
             g = torch.Generator()
