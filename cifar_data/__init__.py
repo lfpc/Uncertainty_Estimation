@@ -180,7 +180,7 @@ class Cifar_100_data(DataGenerator):
 
     def __init__(self,params = DataGenerator.params, 
                 download = True, 
-                name = 'CIFAR 10',
+                name = 'CIFAR 100',
                 data_dir = "data"):
         self.training_data = self.training_data(root=data_dir,
                                                 train=True,
@@ -191,11 +191,9 @@ class Cifar_100_data(DataGenerator):
                                         download=download,
                                         transform=self.transforms_test)
         super().__init__(params,
-                    download, 
-                    name, 
-                    data_dir)
+                    name)
         
-
+#ARRUMAR NOISY CLASSES. PRECISAM CHAMAR CIFAR 10 ANTES  PARA DEFINIR A DATA E TAL
 class Noisy_CIFAR_10(Noisy_DataGenerator,Cifar_10_data):
 
 
