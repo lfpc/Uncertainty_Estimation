@@ -229,8 +229,12 @@ class Trainer():
             if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
                 update_optim_lr(self.optimizer,self.update_lr_rate)
             if live_plot:
-                utils.live_plot({'Train loss': self.hist_train.loss_list,
-                'Validation loss': self.hist_val.loss_list})
+                desc_dict = {}
+                if hasattr(self,'hist_train'):
+                    desc_dict['Train loss'] = self.hist_train.loss_list
+                if hasattr(self,'hist_val'):
+                    desc_dict['Validation loss'] = self.hist_val.loss_list
+                utils.live_plot(desc_dict)
                 display(progress_epoch.container)
             elif live_plot == 'print':
                 print('Epoch ', self.epoch, ', loss = ', loss)
