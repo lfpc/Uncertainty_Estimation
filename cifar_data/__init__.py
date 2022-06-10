@@ -129,7 +129,7 @@ class Cifar_10_data(DataGenerator):
                     transforms.ToTensor(),
                     transforms.RandomCrop(32, padding=4),
                     transforms.RandomHorizontalFlip(),
-                    transforms.RandomRotation(15),
+                    #transforms.RandomRotation(15),
                     transforms.Normalize(MEAN, STD)])
     transforms_test = transforms.Compose([
     transforms.ToTensor(),
@@ -166,7 +166,7 @@ class Cifar_100_data(DataGenerator):
                     transforms.ToTensor(),
                     transforms.RandomCrop(32, padding=4),
                     transforms.RandomHorizontalFlip(),
-                    transforms.RandomRotation(15),
+                    #transforms.RandomRotation(15),
                     transforms.Normalize(MEAN, STD)])
     transforms_test = transforms.Compose([
     transforms.ToTensor(),
