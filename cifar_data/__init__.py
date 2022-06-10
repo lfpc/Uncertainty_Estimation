@@ -58,7 +58,7 @@ class DataGenerator():
         self.test_dataloader = DataLoader(self.test_data, batch_size=self.params['test_batch_size'])
 
         self.train_len = len(train_subset)
-        self.val_len = len(val_subset)
+        self.val_len = len(self.training_data)- self.train_len
         self.test_len = len(self.test_data)
 
 
