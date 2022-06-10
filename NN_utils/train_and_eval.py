@@ -114,42 +114,16 @@ class hist_train():
 
     '''Accumulate results while training. Every time update_hist() is called, 
     it evaluates the usefull metrics over the dataset data and stores it in a list.'''
-    def __init__(self,model,loss_criterion,data,c = 1.0,risk_dict = None):
+    def __init__(self,model,loss_criterion,data,risk_dict = None):
         
         self.model = model
         self.loss_criterion = loss_criterion
         self.data = data
-        self.c = c #coverage
         self.risk_dict = risk_dict
         self.risk = defaultdict(list)
         
         self.acc_list = []
         self.loss_list = []
-        if c<1:
-            #acc_c represents accuracy when the c most uncertain samples are ignored
-            self.acc_c_mcp = [] 
-            self.acc_c_entropy = []
-
-    
-    '''def update_hist_c(self):
-
-        #y_pred and label are accumulated for all dataset so that accuracy by coverage can by calculated
-        y_pred,label = accumulate_results(self.model,self.data)
-        
-        loss = self.loss_criterion(y_pred,label).item()
-        acc = correct_total(y_pred,label)/label.size(0) #accuracy
-        self.acc_list.append(acc)
-        self.loss_list.append(loss)
-        
-        #acc_c represents accuracy when the c most uncertain samples are ignored
-        mcp = unc.MCP_unc(y_pred) #maximum softmax value
-        ent = unc.entropy(y_pred) #entropy of softmax
-        self.acc_c_mcp.append(unc_utils.acc_coverage(y_pred,label,mcp,1-self.c))
-        self.acc_c_entropy.append(unc_utils.acc_coverage(y_pred,label,ent,1-self.c))
-        if self.risk_dict is not None:
-            for name, risk_fn in self.risk_dict.items():
-                risk = risk_fn(y_pred,label).item() 
-                self.risk[name].append(risk)'''
 
 
     def update_hist(self):
@@ -157,21 +131,13 @@ class hist_train():
         If coverage is defined (different than 1), updates acc_c lists'''
         self.model.eval()
         with torch.no_grad():
-            if self.c<1:
-                self.update_hist_c()
-            else:
-                #There is no difference between getting acc and loss with accumulate
-                #results (_c) and with function with a loop. Using the acc and loss function,
-                #looping over the dataset, requires less memory. In the case where c is defined 
-                # (minor than 1), the accumulate results is needed, so there is no need to loop
-                # over the dataset 2 times. 
-                acc, loss = model_acc_and_loss(self.model,self.loss_criterion,self.data)
-                self.acc_list.append(acc)
-                self.loss_list.append(loss)
-                if self.risk_dict is not None:
-                    for name, risk_fn in self.risk_dict.items():
-                        risk = risk_fn(self.model,self.data).item()  #consertar isso. entrar model em risk_fn?
-                        self.risk[name].append(risk)
+            acc, loss = model_acc_and_loss(self.model,self.loss_criterion,self.data)
+            self.acc_list.append(acc)
+            self.loss_list.append(loss)
+            if self.risk_dict is not None:
+                for name, risk_fn in self.risk_dict.items():
+                    risk = risk_fn(self.model,self.data).item()
+                    self.risk[name].append(risk)
 
     def load_hist(self,hist):
         if isinstance(hist,pd.DataFrame):
@@ -225,7 +191,7 @@ class Trainer():
     '''Class for easily training/fitting a Pytorch's NN model. Creates 2 'hist' classes,
     keeping usefull metrics and values.'''
     def __init__(self,model,optimizer,loss_criterion,training_data = None,validation_data = None,
-                        c=1.0,update_lr = (0,1),risk_dict = None):
+                    update_lr = (0,1),risk_dict = None):
 
         self.model = model
         self.optimizer = optimizer
@@ -233,10 +199,11 @@ class Trainer():
         self.epoch = 0
         self.update_lr_epochs = update_lr[0]
         self.update_lr_rate = update_lr[1]
+
         if training_data is not None:
-            self.hist_train = hist_train(model,loss_criterion,training_data, c=c, risk_dict = risk_dict)
+            self.hist_train = hist_train(model,loss_criterion,training_data, risk_dict = risk_dict)
         if validation_data is not None:
-            self.hist_val = hist_train(model,loss_criterion,validation_data,c=c, risk_dict = risk_dict)
+            self.hist_val = hist_train(model,loss_criterion,validation_data, risk_dict = risk_dict)
         self.update_hist()
             
     def fit(self,data = None,n_epochs = 1, live_plot = True,update_hist = True):
@@ -250,7 +217,7 @@ class Trainer():
                 desc = f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} |' +desc
             if hasattr(self,'hist_val'):
                 desc = f'Acc_val: {self.hist_val.acc_list[-1]:.2f} | ' + desc
-                
+
             progress_epoch.set_description(desc)
             self.epoch += 1
             progress.disable = False
