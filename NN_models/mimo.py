@@ -61,7 +61,7 @@ class Trainer_MIMO(TE.Trainer):
 
                 self.optimizer.zero_grad()
                 outputs = self.model(model_inputs)
-                loss = self.loss_criterion(outputs.transpose(2, 1), targets)
+                loss = self.loss_fn(outputs.transpose(2, 1), targets)
                 loss.backward()
                 self.optimizer.step()
 
@@ -80,7 +80,7 @@ class Trainer_MIMO(TE.Trainer):
 
                 outputs = self.model(model_inputs)
                 output = torch.mean(outputs, axis=0)
-                test_loss += self.loss_criterion(output, target, reduction="sum").item()
+                test_loss += self.loss_fn(output, target, reduction="sum").item()
                 pred = output.argmax(dim=1, keepdim=True)
                 correct += pred.eq(target.view_as(pred)).sum().item()
 
