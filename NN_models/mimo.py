@@ -38,12 +38,11 @@ class Trainer_MIMO(TE.Trainer):
 
     def fit(self,train_dataloader,n_epochs = 1):
         train_dataloaders = [
-        train_dataloader
-        for _ in range(self.model.ensemble_num)
-    ]
+        train_dataloader for _ in range(self.model.ensemble_num)]
+
         self.model.train()
         progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
-        progress = tqdm(zip(train_dataloaders),position=1, leave=True, desc = 'Epoch progress:')
+        progress = tqdm(zip(*train_dataloaders),position=1, leave=True, desc = 'Epoch progress:')
         for epoch in progress_epoch:
             desc = 'Progress:'
             desc = f'Loss: {self.loss[-1]:.4f} |' +desc
