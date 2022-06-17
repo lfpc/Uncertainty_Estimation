@@ -31,9 +31,10 @@ class Trainer_MIMO(TE.Trainer):
     def __init__(self, model, optimizer, loss_criterion, training_data=None, validation_data=None, update_lr=(0,1), risk_dict=None):
         super().__init__(model, optimizer, loss_criterion, None, None, update_lr, risk_dict)
         
+        self.test_dataloader = validation_data 
         self.val_acc = []
         self.loss = []
-        self.test_dataloader = validation_data 
+        self.validate(plot = False)
 
     def fit(self,train_dataloader,n_epochs = 1):
         train_dataloaders = [
