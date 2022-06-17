@@ -1,5 +1,5 @@
 import torch
-from NN_utils import apply_mask,get_n_biggest
+from NN_utils import apply_mask,get_n_biggest,indexing_3D
 import numpy as np
 from operator import xor
 from NN_utils.train_and_eval import correct_total
@@ -12,29 +12,17 @@ def enable_dropout(model):
         if m.__class__.__name__.startswith('Dropout'):
             m.train()
 
-def dropout_pred(model,X):
-    '''Enable Dropout in the model and evaluate one prediction'''
-    model.eval()
-    enable_dropout(model)
-    output = (model(X))
-    return output
-
-def montecarlo_pred(model,X,n=10):
-    '''Returns an array with n evaluations of the model with dropout enabled.'''
-    model.eval()
-    enable_dropout(model)
-    with torch.no_grad(): 
-        MC_array = []
-        for i in range(n):
-            pred = model(X)
-            MC_array.append(pred)
-        MC_array = torch.stack(MC_array)
-    return MC_array
-
-def MonteCarlo_var(MC_array):
+def MonteCarlo_meanvar(MC_array):
     '''Returns the average variance of a tensor'''
     var = torch.var(MC_array, axis=0) 
     var = torch.mean(var,axis= -1)
+    return var
+
+def MonteCarlo_maxvar(MC_array, y = None):
+    '''Returns the average variance of a tensor'''
+    if y is None:
+        y = torch.argmax(torch.mean(MC_array,dim=0),dim = -1)
+    var = torch.var(indexing_3D(MC_array,y), axis=0)
     return var
 
 def get_most_uncertain(data,uncertainty_method, n = 1):
@@ -130,3 +118,24 @@ def selective_risk(y_pred,label,c,loss_fn = torch.nn.NLLLoss(),unc_type = None):
     y_pred, label = apply_mask(y_pred,label,1-dk_mask)
     risk = loss_fn(y_pred,label)
     return risk
+
+def accumulate_results_mcd(model,data):
+    '''Accumulate output (of model) and label of a entire dataset.'''
+    dev = next(model.parameters()).device
+
+    output_list = torch.Tensor([]).to(dev)
+    var_list = torch.Tensor([]).to(dev)
+    MI_list = torch.Tensor([]).to(dev)
+    label_list = torch.Tensor([]).to(dev)
+    for image,label in data:
+        with torch.no_grad():
+            image,label = image.to(dev), label.to(dev)
+            output = torch.exp(model(image)[0])
+            var = model(image)[1]
+            MI = model(image)[2]
+
+            label_list = torch.cat((label_list,label))
+            var_list = torch.cat((var_list,var))
+            MI_list = torch.cat((MI_list,MI))
+            output_list = torch.cat((output_list,output))
+    return output_list,label_list.long(),var_list,MI_list

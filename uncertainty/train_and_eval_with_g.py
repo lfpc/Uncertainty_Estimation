@@ -94,7 +94,12 @@ class hist_train_selective(TE.hist_train):
 
             for c in self.c:
                 #aplicar risk em todos os c e salvar em dicionario de dicionario
-                pass
+                if c == 1:
+                    continue
+                if self.risk_dict is not None:
+                    for name, risk_fn in self.risk_dict.items():
+                        risk = risk_fn(output,label).item() 
+                        self.risk[name+'_'+str(c)].append(risk)
 
 
 
@@ -116,6 +121,9 @@ class hist_train_with_g(hist_train_selective):
     '''Accumulates results while training. Every time update_hist() is called, 
     it evaluates the usefull metrics over the dataset data and stores it in a list.
     Equal to hist_train class, but keeps g (uncertainty estimation) values'''
+
+
+    #to develop
     estimators_dict = {
     }
     def __init__(self,model,loss_criterion,data,
@@ -160,7 +168,10 @@ class hist_train_with_g(hist_train_selective):
                     self.risk[name].append(risk)
 
 
-class Trainer_selective(TE.Trainer):
+class Trainer_with_g(TE.Trainer):
+
+
+    #to develop
     '''Class for easily training/fitting a Pytorch's NN model. Creates 2 'hist' classes,
     keeping usefull metrics and values.
     Identical to Trainer class but with method for training only g's layers.'''

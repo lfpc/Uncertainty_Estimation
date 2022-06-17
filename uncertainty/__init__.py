@@ -56,18 +56,3 @@ def mutual_info(pred_array):
     ent = entropy(torch.mean(pred_array, axis=0))
     MI = ent - torch.mean(entropy(pred_array), axis=0) 
     return MI
-
-def get_MCD(model,X,n=10):
-
-    '''Evaluates n predictions on input with dropout enabled and
-     returns the mean, variance and mutual information
-    of them. '''
-    MC_array = utils.montecarlo_pred(model,X,n = n)
-    
-    mean = torch.mean(MC_array, axis=0)
-    
-    var = utils.MonteCarlo_var(MC_array)
-        
-    MI = mutual_info(MC_array) 
-
-    return mean, var, MI

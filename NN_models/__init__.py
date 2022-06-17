@@ -3,7 +3,6 @@ import torch
 from torch import nn
 import torchvision
 
-
 def construct_conv_layer(blocks):
     #to elaborate
     #iterate over blocks and append to conv_layer conv2d with blocks_i size
@@ -30,7 +29,7 @@ def construct_conv_layer(blocks):
 class Model_CNN(nn.Module):
     """CNN."""
 
-    def __init__(self,n_classes=10,input = (32,32),blocks = None, name = 'Model_CNN'):
+    def __init__(self,num_classes=10,input = (32,32),blocks = None, name = 'Model_CNN'):
         """CNN Builder."""
         super().__init__()
         self.name = name
@@ -65,7 +64,7 @@ class Model_CNN(nn.Module):
 
         
         self.classifier_layer = nn.Sequential(
-            nn.Linear(int(512), n_classes),
+            nn.Linear(int(512), num_classes),
             nn.LogSoftmax(dim=1)
         )
 
@@ -85,14 +84,14 @@ class Model_CNN(nn.Module):
 class Model_CNN_with_g(Model_CNN):
     """CNN."""
 
-    def __init__(self,n_classes=10,input = (32,32),blocks = None, g_arq = 'parallel', name = 'Model_CNN_with_g'):
+    def __init__(self,num_classes=10,input = (32,32),blocks = None, g_arq = 'parallel', name = 'Model_CNN_with_g'):
         """CNN Builder."""
         '''g_arq:
         parallel: head that gets as input x, the output of the main layer.
         Gets no information of the classificer layer
         softmax: input is y, the classifier softmax. 
         mixed: input is a concatenation between x and y.'''
-        super().__init__(n_classes,input,blocks,name)
+        super().__init__(num_classes,input,blocks,name)
         self.g_arq = g_arq
         
         self.return_g = True
@@ -112,7 +111,7 @@ class Model_CNN_with_g(Model_CNN):
         elif g_arq == 'softmax':
             self.g_layer = nn.Sequential(
             
-            nn.Linear(n_classes, 64),
+            nn.Linear(num_classes, 64),
             nn.ReLU(inplace=True),
             nn.Linear(64, 1),
             nn.Sigmoid()
@@ -154,17 +153,17 @@ class Model_CNN_with_g(Model_CNN):
 class Model_CNN_with_g_and_h(Model_CNN_with_g):
     """CNN."""
 
-    def __init__(self,n_classes=10,input = (32,32),blocks = None, g_arq = 'parallel', name = 'Model_CNN_g_and_h'):
+    def __init__(self,num_classes=10,input = (32,32),blocks = None, g_arq = 'parallel', name = 'Model_CNN_g_and_h'):
         """CNN Builder."""
         '''g_arq:
         parallel: head that gets as input x, the output of the main layer.
         Gets no information of the classificer layer
         softmax: input is y, the classifier softmax. 
         mixed: input is a concatenation between x and y.'''
-        super().__init__(n_classes,input,blocks,g_arq,name)
+        super().__init__(num_classes,input,blocks,g_arq,name)
 
         self.h_layer  = nn.Sequential(
-            nn.Linear(int(512), n_classes),
+            nn.Linear(int(512), num_classes),
             nn.LogSoftmax(dim=1)
         )
 

@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.init as init
 import torch.nn.functional as F
 from torch.autograd import Variable
+import NN_utils as utils
 
 import sys
 import numpy as np
@@ -43,13 +44,16 @@ class wide_basic(nn.Module):
         out += self.shortcut(x)
 
         return out
+    
 
 class Wide_ResNet(nn.Module):
-    def __init__(self,num_classes, depth = 28, widen_factor = 10, dropout_rate = 0.3, softmax = False):
+    def __init__(self,num_classes, depth = 28, widen_factor = 10, dropout_rate = 0.3, 
+                    softmax = False, name = 'WideResnet'):
         super(Wide_ResNet, self).__init__()
         self.in_planes = 16
         self.softmax = softmax
-
+        self.name = name
+        
         assert ((depth-4)%6 ==0), 'Wide-resnet depth should be 6n+4'
         n = (depth-4)/6
         k = widen_factor
@@ -62,7 +66,8 @@ class Wide_ResNet(nn.Module):
         self.layer2 = self._wide_layer(wide_basic, nStages[2], n, dropout_rate, stride=2)
         self.layer3 = self._wide_layer(wide_basic, nStages[3], n, dropout_rate, stride=2)
         self.bn1 = nn.BatchNorm2d(nStages[3], momentum=0.9)
-        self.linear = nn.Linear(nStages[3], num_classes)
+        self.classifier_layer = nn.Sequential(
+            nn.Linear(nStages[3], num_classes)) 
 
     def _wide_layer(self, block, planes, num_blocks, dropout_rate, stride):
         strides = [stride] + [1]*(int(num_blocks)-1)
@@ -82,13 +87,17 @@ class Wide_ResNet(nn.Module):
         out = F.relu(self.bn1(out))
         out = F.avg_pool2d(out, 8)
         out = out.view(out.size(0), -1)
-        out = self.linear(out)
+        out = self.classifier_layer(out)
         if self.softmax:
             out = F.softmax(out,dim = -1)
         elif self.softmax == 'log':
             out = F.log_softmax(out,dim=-1)
 
         return out
+
+    def save_state_dict(self,path, name = None):
+        if name is None: name = self.name
+        torch.save(self.state_dict(), path + r'/' + name + '.pt')
 
 if __name__ == '__main__':
     net=Wide_ResNet(10,28, 10, 0.3)

@@ -11,6 +11,9 @@ import pkgutil
 import warnings
 from IPython.display import clear_output
 
+def save_state_dict(model,path, name):
+    torch.save(model.state_dict(), path + r'/' + name + '.pt')
+
 def live_plot(data_dict, figsize=(7,5), title=''):
     clear_output(wait=True)
     plt.figure(figsize=figsize)
@@ -42,7 +45,14 @@ def dataset_cut_classes(data,indices = (0,1)):
 
 def indexing_2D(ar,idx):
     ''' Index a 2D tensor by a 1D tensor along dimension 1.'''
+    #generalizar para dimensão qualquer.
+    # para 3d é return ar[:,np.arange(100),idx]
     return ar[np.arange(len(ar)), idx]
+
+def indexing_3D(ar,idx):
+    ''' Index a 2D tensor by a 1D tensor along dimension 1.'''
+    #generalizar para dimensão qualquer.
+    return ar[:,np.arange(ar.shape[1]),idx]
     
 def array_to_binary(ar, invert = False):
     '''Convert an array (ar) with 2 classes to an binary array - Change the value assigned to the classes

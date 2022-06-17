@@ -13,7 +13,7 @@ setup(
     # Needed for dependencies
     install_requires=['numpy','torch'],
     # *strongly* suggested for sharing
-    version='2.3.3',
+    version='3',
     # The license can be anything you like
     license='MIT',
     description='Neural Networks in Pytorch - utils and losses, models e uncertainty quantifications definitions',

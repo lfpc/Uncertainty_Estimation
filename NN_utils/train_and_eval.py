@@ -64,14 +64,15 @@ def calc_loss_batch(model,loss_criterion,data):
 
 def model_acc(model,data):
     '''Returns the total accuracy of model in some dataset'''
-    dev = next(model.parameters()).device
-    total = 0
-    correct= 0
-    for image,label in data:
-        image,label = image.to(dev), label.to(dev)
-        output = model(image)
-        total += label.size(0)
-        correct += correct_total(output,label)
+    with torch.no_grad():
+        dev = next(model.parameters()).device
+        total = 0
+        correct= 0
+        for image,label in data:
+            image,label = image.to(dev), label.to(dev)
+            output = model(image)
+            total += label.size(0)
+            correct += correct_total(output,label)
     return (correct*100/total)
 
 def model_acc_and_loss(model,loss_criterion,data):
@@ -101,12 +102,12 @@ def accumulate_results(model,data):
     label_list = torch.Tensor([]).to(dev)
 
     for image,label in data:
+        with torch.no_grad():
+            image,label = image.to(dev), label.to(dev)
+            output = model(image)
 
-        image,label = image.to(dev), label.to(dev)
-        output = model(image)
-
-        label_list = torch.cat((label_list,label))
-        output_list = torch.cat((output_list,output))
+            label_list = torch.cat((label_list,label))
+            output_list = torch.cat((output_list,output))
         
     return output_list,label_list.long()
 
@@ -228,7 +229,7 @@ class Trainer():
 
             if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
                 update_optim_lr(self.optimizer,self.update_lr_rate)
-            if live_plot:
+            if live_plot is True:
                 desc_dict = {}
                 if hasattr(self,'hist_train'):
                     desc_dict['Train loss'] = self.hist_train.loss_list
