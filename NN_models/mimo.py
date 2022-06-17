@@ -87,7 +87,7 @@ class Trainer_MIMO(TE.Trainer):
         test_loss /= len(self.test_dataloader)
         self.loss.append(test_loss)
         acc = 100.0 * correct / len(self.test_dataloader.dataset)
-        self.acc.append(acc)
+        self.val_acc.append(acc)
         if plot:
             print(f"[Valid] Average loss: {test_loss:.4f} \t Accuracy:{acc:2.2f}%")
 
