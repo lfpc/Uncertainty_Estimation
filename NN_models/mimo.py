@@ -45,7 +45,7 @@ class Trainer_MIMO(TE.Trainer):
         progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
         progress = tqdm(zip(train_dataloaders),position=1, leave=True, desc = 'Epoch progress:')
         for epoch in progress_epoch:
-
+            desc = 'Progress:'
             desc = f'Loss: {self.loss[-1]:.4f} |' +desc
 
             desc = f'Acc_val: {self.val_acc[-1]:.2f} | ' + desc
