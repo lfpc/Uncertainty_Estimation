@@ -42,7 +42,6 @@ class Trainer_MIMO(TE.Trainer):
 
         self.model.train()
         progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
-        progress = tqdm(zip(*train_dataloaders),position=1, leave=True, desc = 'Epoch progress:')
         for epoch in progress_epoch:
             desc = 'Progress:'
             desc = f'Loss: {self.loss[-1]:.4f} |' +desc
@@ -51,10 +50,8 @@ class Trainer_MIMO(TE.Trainer):
 
             progress_epoch.set_description(desc)
             self.epoch += 1
-            progress.disable = False
-            progress.reset()
 
-            for datum in progress:
+            for datum in zip(*train_dataloaders):
                 model_inputs = torch.stack([data[0] for data in datum]).cuda()
                 targets = torch.stack([data[1] for data in datum]).cuda()
 
