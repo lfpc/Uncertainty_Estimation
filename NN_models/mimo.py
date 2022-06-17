@@ -75,7 +75,7 @@ class Trainer_MIMO(TE.Trainer):
         correct = 0
         with torch.no_grad():
             for data in self.test_dataloader:
-                model_inputs = torch.stack([data[0]] * self.config.ensemble_num).to(self.device)
+                model_inputs = torch.stack([data[0]] * self.model.ensemble_num).to(self.device)
                 target = data[1].to(self.device)
 
                 outputs = self.model(model_inputs)
