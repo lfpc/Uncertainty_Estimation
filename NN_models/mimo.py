@@ -80,11 +80,11 @@ class Trainer_MIMO(TE.Trainer):
 
                 outputs = self.model(model_inputs)
                 output = torch.mean(outputs, axis=0)
-                test_loss += self.loss_fn(output, target, reduction="sum").item()
+                test_loss += self.loss_fn(output, target).item()
                 pred = output.argmax(dim=1, keepdim=True)
                 correct += pred.eq(target.view_as(pred)).sum().item()
 
-        test_loss /= len(self.test_dataloader.dataset)
+        test_loss /= len(self.test_dataloader)
         self.loss.append(test_loss)
         acc = 100.0 * correct / len(self.test_dataloader.dataset)
         self.acc.append(acc)
