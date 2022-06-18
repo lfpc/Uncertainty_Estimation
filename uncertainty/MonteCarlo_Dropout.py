@@ -72,7 +72,7 @@ class MonteCarloDropout(torch.nn.Module):
         else:
             return mean
 
-def accumulate_results_mcd(model,data):
+def accumulate_results_ensemble(model,data):
     '''Accumulate output (of model) and label of a entire dataset.'''
     dev = next(model.parameters()).device
     output_list = torch.Tensor([]).to(dev)

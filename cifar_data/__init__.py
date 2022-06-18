@@ -28,7 +28,7 @@ class DataGenerator():
                     name = 'DataGenerator',
                     training_data = None,
                     test_data = None,
-                    seed = pre_seed):
+                    seed = None):
 
         self.name = name
         if training_data is not None:
@@ -42,7 +42,7 @@ class DataGenerator():
     def generate_dataloaders(self,seed = None):
 
         if self.params['validation_size'] > 0:
-            train_subset, val_subset = data_utils.split_data(self.training_data,self.params['validation_size'],self.transforms_test,seed = seed)
+            train_subset, val_subset = data_utils.split_data(self.training_data,self.params['validation_size'],self.transforms_test)
             self.validation_dataloader = DataLoader(val_subset, batch_size=self.params['train_batch_size'],shuffle = False,num_workers=2)
         else:
             train_subset = self.training_data
@@ -50,12 +50,12 @@ class DataGenerator():
             g = torch.Generator()
             g.manual_seed(seed)
             self.train_dataloader = DataLoader(train_subset, batch_size=self.params['train_batch_size'],
-                                             shuffle = True,num_workers=2,worker_init_fn=seed_worker,generator=g)
+                                             shuffle = True,num_workers=2)
         
         
         else:
             self.train_dataloader = DataLoader(train_subset, batch_size=self.params['train_batch_size'],shuffle = True,num_workers=2)
-        self.test_dataloader = DataLoader(self.test_data, batch_size=self.params['test_batch_size'])
+        self.test_dataloader = DataLoader(self.test_data, batch_size=self.params['test_batch_size'],num_workers=2)
 
         self.train_len = len(train_subset)
         self.val_len = len(self.training_data)- self.train_len
@@ -126,9 +126,9 @@ class Cifar_10_data(DataGenerator):
     MEAN = (0.4914, 0.4822, 0.4465)
     STD = (0.2023, 0.1994, 0.2010)
     transforms_train = transforms.Compose([
-                    transforms.ToTensor(),
                     transforms.RandomCrop(32, padding=4),
                     transforms.RandomHorizontalFlip(),
+                    transforms.ToTensor(),
                     #transforms.RandomRotation(15),
                     transforms.Normalize(MEAN, STD)])
     transforms_test = transforms.Compose([
