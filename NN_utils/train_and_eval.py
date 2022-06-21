@@ -198,8 +198,11 @@ class Trainer():
         self.optimizer = optimizer
         self.loss_fn = loss_criterion
         self.epoch = 0
-        self.update_lr_epochs = update_lr[0]
-        self.update_lr_rate = update_lr[1]
+        if isinstance(update_lr,tuple):
+            self.update_lr_epochs = update_lr[0]
+            self.update_lr_rate = update_lr[1]
+        elif isinstance(update_lr,dict): #construir
+            self.update_lr = update_lr
 
         if training_data is not None:
             self.hist_train = hist_train(model,loss_criterion,training_data, risk_dict = risk_dict)
@@ -210,25 +213,29 @@ class Trainer():
     def fit(self,data = None,n_epochs = 1, live_plot = True,update_hist = True, save_checkpoint = False):
         if data is None:
             data = self.training_data
-        progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
-        progress = tqdm(data,position=1, leave=True, desc = 'Epoch progress:')
+        if not live_plot == 'print':
+            progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
+            progress = tqdm(data,position=1, leave=True, desc = 'Epoch progress:')
+        else: 
+            progress_epoch = range(n_epochs)
+            progress = data
         if save_checkpoint:
             acc = 0
         for e in progress_epoch:
-            desc = 'Progress:'
-            if hasattr(self,'hist_train'):
-                desc = f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} |' +desc
-            if hasattr(self,'hist_val'):
-                desc = f'Acc_val: {self.hist_val.acc_list[-1]:.2f} | ' + desc
+            if not live_plot == 'print':
+                desc = 'Progress:'
+                if hasattr(self,'hist_train'):
+                    desc = f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} |' +desc
+                if hasattr(self,'hist_val'):
+                    desc = f'Acc_val: {self.hist_val.acc_list[-1]:.2f} | ' + desc
 
-            progress_epoch.set_description(desc)
-            self.epoch += 1
-            progress.disable = False
-            progress.reset()
+                progress_epoch.set_description(desc)
+                progress.disable = False
+                progress.reset()
+
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
             self.update_hist(dataset = update_hist)
-            
-
+            self.epoch += 1
             if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
                 update_optim_lr(self.optimizer,self.update_lr_rate)
             if live_plot is True:
@@ -244,7 +251,7 @@ class Trainer():
             if save_checkpoint:
                 if self.hist_val.acc_list[-1] >= acc:
                     acc = self.hist_val.acc_list[-1]
-                    self.model.save_state_dict('.',self.name+'checkpoint')
+                    self.model.save_state_dict('.',self.model.name+'checkpoint')
 
     def update_hist(self, dataset = 'all'):
         '''Updates hist classes.
