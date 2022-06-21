@@ -207,11 +207,13 @@ class Trainer():
             self.hist_val = hist_train(model,loss_criterion,validation_data, risk_dict = risk_dict)
         self.update_hist()
             
-    def fit(self,data = None,n_epochs = 1, live_plot = True,update_hist = True):
+    def fit(self,data = None,n_epochs = 1, live_plot = True,update_hist = True, save_checkpoint = False):
         if data is None:
             data = self.training_data
         progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
         progress = tqdm(data,position=1, leave=True, desc = 'Epoch progress:')
+        if save_checkpoint:
+            acc = 0
         for e in progress_epoch:
             desc = 'Progress:'
             if hasattr(self,'hist_train'):
@@ -239,6 +241,10 @@ class Trainer():
                 display(progress_epoch.container)
             elif live_plot == 'print':
                 print('Epoch ', self.epoch, ', loss = ', loss)
+            if save_checkpoint:
+                if self.hist_val.acc_list[-1] >= acc:
+                    acc = self.hist_val.acc_list[-1]
+                    self.model.save_state_dict('.',self.name+'checkpoint')
 
     def update_hist(self, dataset = 'all'):
         '''Updates hist classes.
