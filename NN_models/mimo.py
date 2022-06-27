@@ -64,6 +64,7 @@ class Trainer_MIMO(TE.Trainer):
             if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
                 TE.update_optim_lr(self.optimizer,self.update_lr_rate)
             self.validate(plot = False)
+            self.model.train()
 
     def validate(self,plot = True):
         self.model.eval()
