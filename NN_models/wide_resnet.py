@@ -232,6 +232,10 @@ class Wide_ResNet(nn.Module):
         
         return out
 
+    def save_state_dict(self,path, name = None):
+        if name is None: name = self.name
+        torch.save(self.state_dict(), path + r'/' + name + '.pt')
+
 if __name__ == '__main__':
     net=Wide_ResNet(10,28, 10, 0.3)
 
