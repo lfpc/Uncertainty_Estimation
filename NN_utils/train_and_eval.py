@@ -210,7 +210,8 @@ class Trainer():
             self.hist_val = hist_train(model,loss_criterion,validation_data, risk_dict = risk_dict)
         self.update_hist()
             
-    def fit(self,data = None,n_epochs = 1, live_plot = True,update_hist = True, save_checkpoint = False):
+    def fit(self,data = None,n_epochs = 1, live_plot = True,update_hist = True, 
+            save_checkpoint = False, PATH = '.'):
         if data is None:
             data = self.training_data
         if not live_plot == 'print':
@@ -251,7 +252,7 @@ class Trainer():
             if save_checkpoint:
                 if self.hist_val.acc_list[-1] >= acc:
                     acc = self.hist_val.acc_list[-1]
-                    self.model.save_state_dict('.',self.model.name+'checkpoint')
+                    self.model.save_state_dict(PATH,self.model.name+'_checkpoint')
 
     def update_hist(self, dataset = 'all'):
         '''Updates hist classes.
