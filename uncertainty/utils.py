@@ -60,25 +60,7 @@ def dontknow_mask(uncertainty, coverage = None, threshold = None):
 
     return dontknow
 
-def acc_coverage_list(y_pred,y_true,uncertainty, c_list = np.arange(0,1,0.05)):
-    ''' Returns an array with the accuracy of the model in the data dataset
-     excluding the most uncertain (total number set by the coverage) samples.
-     Each item in the output array is the accuracy when the coverage is given by same item in c_list'''
 
-    acc_list = np.array([])
-    for c in c_list:
-        acc = acc_coverage(y_pred,y_true, uncertainty, c)
-        acc_list = np.append(acc_list,acc)
-
-    return acc_list
-
-
-def acc_coverage(y_pred,y_true, uncertainty, coverage):
-    '''Returns the total accuracy of model in some dataset excluding the c most uncertain samples'''
-    dk_mask = dontknow_mask(uncertainty, coverage)
-    y_pred, y_true = apply_mask(y_pred,y_true,1-dk_mask)
-    acc = correct_total(y_pred,y_true)/y_true.size(0)
-    return acc
 
     
 def acc_coverage_per_batch(model,data,unc_fn,c):

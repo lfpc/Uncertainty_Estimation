@@ -20,7 +20,7 @@ def seed_worker(worker_id):
 
 class DataGenerator():
 
-    params = {'train_batch_size':128,'validation_size':0.05,'test_batch_size': 100}
+    params = {'train_batch_size':128,'validation_size':0.0,'test_batch_size': 100}
     pre_seed = 42
 
     def __init__(self,
@@ -151,7 +151,7 @@ class Cifar_10_data(DataGenerator):
                                                 train=True,
                                                 download=download,
                                                 transform=self.transforms_train)
-        self.test_data = self.test_data(root="data",
+        self.test_data = self.test_data(root=data_dir,
                                         train=False,
                                         download=download,
                                         transform=self.transforms_test)
