@@ -49,10 +49,3 @@ def TCP_unc(y,label):
      as an uncertainty estimation, since TCP is a certainty quantification.
     '''
     return (1-get_TCP(y,label))
-
-
-def mutual_info(pred_array):
-    '''Returns de Mutual Information (Gal, 2016) of a probability tensor'''
-    ent = entropy(torch.mean(pred_array, axis=0))
-    MI = ent - torch.mean(entropy(pred_array), axis=0) 
-    return MI

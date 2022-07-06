@@ -12,19 +12,6 @@ def enable_dropout(model):
         if m.__class__.__name__.startswith('Dropout'):
             m.train()
 
-def MonteCarlo_meanvar(MC_array):
-    '''Returns the average variance of a tensor'''
-    var = torch.var(MC_array, axis=0) 
-    var = torch.mean(var,axis= -1)
-    return var
-
-def MonteCarlo_maxvar(MC_array, y = None):
-    '''Returns the average variance of a tensor'''
-    if y is None:
-        y = torch.argmax(torch.mean(MC_array,dim=0),dim = -1)
-    var = torch.var(indexing_3D(MC_array,y), axis=0)
-    return var
-
 def get_most_uncertain(data,uncertainty_method, n = 1):
     if not isinstance(uncertainty_method,(torch.Tensor,list,np.ndarray)):
         uncertainty_method = uncertainty_method(data)

@@ -1,7 +1,7 @@
-from turtle import forward
 import uncertainty as unc
 import uncertainty.utils as unc_utils
 import torch
+import ensemble
 
 
 def dropout_pred(model,X,enable = True):
@@ -41,36 +41,23 @@ def get_MCD(model,X,n=10):
 
     return mean, var, MI
 
-class MonteCarloDropout(torch.nn.Module):
-    unc_dict = {
-        'MI':unc.mutual_info,
-        'mean_var':unc_utils.MonteCarlo_meanvar,
-        'max_var':unc_utils.MonteCarlo_maxvar}
+class MonteCarloDropout(ensemble.Ensemble):
 
-    def __init__(self,model, n_samples, return_unc = False):
-        super().__init__()
+    def __init__(self,model, n_samples, return_uncs = False):
+
         self.model = model
         self.n_samples = n_samples
-        self.return_unc = return_unc
+        super().__init__(models_dict = {'model':self.model}, return_uncs= return_uncs)
+        self.set_dropout()
+
+    def set_dropout(self):
         self.model.eval()
-        unc_utils.enable_dropout(model)
+        unc_utils.enable_dropout(self.model)
 
+    def get_samples(self,x):
+        self.ensemble = mcd_pred(self.model,x,self.n_samples, enable=False)
+        return self.ensemble
 
-    def forward(self,x,return_unc = None):
-
-        if return_unc is None:
-            return_unc = self.return_unc
-
-        MC_array = mcd_pred(x,self.n_samples)
-        mean = torch.mean(MC_array, axis=0)
-
-        if return_unc:
-            var_mean = unc_utils.MonteCarlo_meanvar(MC_array)
-            var_max = unc_utils.MonteCarlo_maxvar(MC_array)
-            MI = unc.mutual_info(MC_array)
-            return mean,var_mean,var_max,MI
-        else:
-            return mean
 
 def accumulate_results_ensemble(model,data):
     '''Accumulate output (of model) and label of a entire dataset.'''
@@ -91,4 +78,15 @@ def accumulate_results_ensemble(model,data):
             MI_list = torch.cat((MI_list,MI))
             output_list = torch.cat((output_list,output))
     return output_list,label_list.long(),var_list,MI_list
+
+if __name__ == "__main__":
+    import NN_models
+    import cifar_data
+    model = NN_models.Model_CNN()
+    mcd = MonteCarloDropout(model,10)
+    data = cifar_data.Cifar_10_data()
+    x = data.get_sample()
+    output = mcd(x)
+    print(output.shape)
+
 

@@ -62,7 +62,7 @@ class DataGenerator():
         self.test_len = len(self.test_data)
 
 
-    def get_sample(self,data = 'train',dev = torch.device('cpu'),size = None):
+    def get_sample(self,data = 'test',dev = None,size = None):
         if data == 'train':
             dataloader = iter(self.train_dataloader)
         elif data == 'test':
@@ -70,7 +70,8 @@ class DataGenerator():
         elif data == 'val':
             dataloader = iter(self.validation_dataloader)
         image,label = next(dataloader)
-        image,label = image.to(dev),label.to(dev)
+        if dev is not None:
+            image,label = image.to(dev),label.to(dev)
         if size is not None:
             image,label = image[0:size],label[0:size]
         return image,label
