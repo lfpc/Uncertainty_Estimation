@@ -17,13 +17,6 @@ class MIMOModel(nn.Module):
     def to(self,device):
         super().to(device)
         self.model.to(device)
-        
-    def eval(self):
-        super().eval()
-        self.model.eval()
-    def train(self):
-        super().train()
-        self.model.train()
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         input_shape_list = list(input_tensor.size())  # (ensemble_num,batch_size,C,H,W)
