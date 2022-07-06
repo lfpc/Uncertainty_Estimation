@@ -49,6 +49,7 @@ class Trainer_MIMO(TE.Trainer):
         train_dataloader for _ in range(self.model.ensemble_num)]
 
         self.model.train()
+        dev = next(self.model.parameters()).device
         progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
         for epoch in progress_epoch:
             desc = 'Progress:'
@@ -58,10 +59,10 @@ class Trainer_MIMO(TE.Trainer):
 
             progress_epoch.set_description(desc)
             self.epoch += 1
-
+            
             for datum in zip(*train_dataloaders):
-                model_inputs = torch.stack([data[0] for data in datum]).cuda()
-                targets = torch.stack([data[1] for data in datum]).cuda()
+                model_inputs = torch.stack([data[0] for data in datum]).to(dev)
+                targets = torch.stack([data[1] for data in datum]).to(dev)
 
                 self.optimizer.zero_grad()
                 outputs = self.model(model_inputs)
