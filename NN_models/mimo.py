@@ -14,10 +14,6 @@ class MIMOModel(nn.Module):
         self.classifier_layer = self.model.classifier_layer
         self.model.classifier_layer = nn.Identity()
 
-    def to(self,device):
-        super().to(device)
-        self.model.to(device)
-
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         input_shape_list = list(input_tensor.size())  # (ensemble_num,batch_size,C,H,W)
         ensemble_num, batch_size = input_shape_list[0], input_shape_list[1]
