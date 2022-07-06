@@ -1,9 +1,8 @@
 import torch
 from math import log
 import NN_utils as utils
-from uncertainty.quantifications import entropy,get_TCP
+from uncertainty import entropy,get_TCP
 from NN_utils.train_and_eval import correct_class
-import uncertainty.comparison as unc_comp
 from scipy.optimize import root_scalar
 
 class aux_loss_fs(torch.nn.Module):

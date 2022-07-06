@@ -51,8 +51,10 @@ def correct_total(y_pred,y_true):
     correct_total = torch.sum(correct).item()
     return correct_total
 
-def calc_loss_batch(model,loss_criterion,data):
+def calc_loss_batch(model,loss_criterion,data,set_eval = True):
     '''Calculate the average loss over a dataset.'''
+    if set_eval:
+        model.eval()
     dev = next(model.parameters()).device
     running_loss = 0
     for image,label in data:
@@ -62,8 +64,10 @@ def calc_loss_batch(model,loss_criterion,data):
         running_loss += loss            
     return running_loss/len(data)
 
-def model_acc(model,data):
+def model_acc(model,data,set_eval = True):
     '''Returns the total accuracy of model in some dataset'''
+    if set_eval:
+        model.eval()
     with torch.no_grad():
         dev = next(model.parameters()).device
         total = 0
@@ -75,8 +79,10 @@ def model_acc(model,data):
             correct += correct_total(output,label)
     return (correct*100/total)
 
-def model_acc_and_loss(model,loss_criterion,data):
+def model_acc_and_loss(model,loss_criterion,data, set_eval = True):
     '''Calculate the average loss and the accuracy over a dataset.'''
+    if set_eval:
+        model.eval()
     dev = next(model.parameters()).device
     running_loss = 0
     total = 0
@@ -93,10 +99,12 @@ def model_acc_and_loss(model,loss_criterion,data):
     return acc,loss
 
 
-def accumulate_results(model,data):
+def accumulate_results(model,data, set_eval = True):
     '''Accumulate output (of model) and label of a entire dataset.'''
 
     dev = next(model.parameters()).device
+    if set_eval:
+        model.eval()
 
     output_list = torch.Tensor([]).to(dev)
     label_list = torch.Tensor([]).to(dev)

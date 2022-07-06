@@ -6,15 +6,16 @@ import NN_utils.train_and_eval as TE
 from tqdm.notebook import tqdm,trange
 
 class MIMOModel(nn.Module):
-    def __init__(self,model,num_classes, ensemble_num: int = 3, name = 'MIMO', *args):
+    def __init__(self,model,num_classes, ensemble_num: int = 3, name = 'MIMO',softmax = 'log', *args):
         super(MIMOModel, self).__init__()
         self.model = model(num_classes = num_classes * ensemble_num, name = name, *args).cuda()
+        self.softmax = softmax
         self.ensemble_num = ensemble_num
-        self.classifier_layer = self.model.classifier_layer[0]
+        self.classifier_layer = self.model.classifier_layer
         self.model.classifier_layer = nn.Identity()
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
-        input_shape_list = list(input_tensor.size())  # (ensemble_num,batch_size,1,28,28)
+        input_shape_list = list(input_tensor.size())  # (ensemble_num,batch_size,C,H,W)
         ensemble_num, batch_size = input_shape_list[0], input_shape_list[1]
         assert ensemble_num == self.ensemble_num
 
@@ -24,7 +25,10 @@ class MIMOModel(nn.Module):
         output = self.classifier_layer(output)
         output = output.view(ensemble_num, batch_size, ensemble_num, -1)
         output = torch.diagonal(output, offset=0, dim1=0, dim2=2).permute(2, 0, 1)
-        output = F.log_softmax(output, dim=-1)
+        if self.softmax == 'log':
+            output = F.log_softmax(output,dim=-1)
+        elif self.softmax:
+            output = F.softmax(output,dim = -1)
         return output
 
 class Trainer_MIMO(TE.Trainer):
@@ -36,7 +40,7 @@ class Trainer_MIMO(TE.Trainer):
         self.loss = []
         self.validate(plot = False)
 
-    def fit(self,train_dataloader,n_epochs = 1):
+    def fit(self,train_dataloader,n_epochs = 1, checkpoint = True, PATH = '.'):
         train_dataloaders = [
         train_dataloader for _ in range(self.model.ensemble_num)]
 
@@ -63,10 +67,10 @@ class Trainer_MIMO(TE.Trainer):
 
             if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
                 TE.update_optim_lr(self.optimizer,self.update_lr_rate)
-            self.validate(plot = False)
+            self.validate(False,checkpoint, PATH)
             self.model.train()
 
-    def validate(self,plot = True):
+    def validate(self,plot = True, checkpoint = False, PATH = '.'):
         self.model.eval()
         test_loss = 0
         correct = 0
@@ -87,4 +91,9 @@ class Trainer_MIMO(TE.Trainer):
         self.val_acc.append(acc)
         if plot:
             print(f"[Valid] Average loss: {test_loss:.4f} \t Accuracy:{acc:2.2f}%")
+        #save mimo model is possible? or save base model?
+        '''if checkpoint:
+            if self.val_acc[-1] >= maxacc:
+                maxacc = self.val_acc[-1]
+                self.model.model.save_state_dict(PATH,self.model.name+'_checkpoint')'''
 

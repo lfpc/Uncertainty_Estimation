@@ -2,6 +2,7 @@
 import torch
 from torch import nn
 import torchvision
+import torch.nn.functional as F
 
 def construct_conv_layer(blocks):
     #to elaborate
@@ -29,11 +30,11 @@ def construct_conv_layer(blocks):
 class Model_CNN(nn.Module):
     """CNN."""
 
-    def __init__(self,num_classes=10,input = (32,32),blocks = None, name = 'Model_CNN'):
+    def __init__(self,num_classes=10,input = (32,32),blocks = None, name = 'Model_CNN', softmax = 'log'):
         """CNN Builder."""
         super().__init__()
         self.name = name
-        
+        self.softmax = softmax
         if blocks is None:
             conv_layer = [
                 nn.Conv2d(in_channels=3, out_channels=int(16), kernel_size=3, padding='same'),
@@ -61,12 +62,9 @@ class Model_CNN(nn.Module):
             self.main_layer = nn.Sequential(*blocks)
         else:
             self.main_layer = blocks
-
         
-        self.classifier_layer = nn.Sequential(
-            nn.Linear(int(512), num_classes),
-            nn.LogSoftmax(dim=1)
-        )
+        self.classifier_layer = nn.Linear(int(512), num_classes)
+
 
 
     def forward(self, x):
@@ -74,6 +72,10 @@ class Model_CNN(nn.Module):
         x = self.main_layer(x)
         y = self.classifier_layer(x).float()
 
+        if self.softmax == 'log':
+            y = F.log_softmax(y,dim=-1)
+        elif self.softmax:
+            y = F.softmax(y,dim = -1)
         return y
 
     def save_state_dict(self,path, name = None):

@@ -1,3 +1,6 @@
+from turtle import forward
+
+from sympy import Determinant
 import uncertainty as unc
 import uncertainty.utils as unc_utils
 import torch
@@ -42,42 +45,40 @@ def get_MCD(model,X,n=10):
     return mean, var, MI
 
 class MonteCarloDropout(ensemble.Ensemble):
-
-    def __init__(self,model, n_samples, return_uncs = False):
+    def __init__(self,model, n_samples, as_ensemble = True,return_uncs = False):
         super().__init__(models_dict = {'model':model}, return_uncs= return_uncs)
         self.model = model
         self.n_samples = n_samples
-        
+        self.as_ensemble = as_ensemble
+        if self.as_ensemble:
+            self.uncs['MCP (MCD)'] = lambda x: unc.MCP_unc(torch.mean(x,axis = 0))
+            self.uncs['Entropy (MCD)'] = lambda x: unc.entropy(torch.mean(x,axis = 0))
+            
         self.set_dropout()
 
     def set_dropout(self):
         self.model.eval()
         unc_utils.enable_dropout(self.model)
 
-    def get_samples(self,x):
-        self.ensemble = mcd_pred(self.model,x,self.n_samples, enable=False)
+    def get_samples(self,x, enable = False):
+        self.ensemble = mcd_pred(self.model,x,self.n_samples, enable=enable)
         return self.ensemble
 
+    def deterministic(self,x):
+        self.eval()
+        y = self.model(x)
+        if self.return_uncs:
+            self.set_dropout()
+            d_uncs = self.get_unc()
+            return y,d_uncs
+        return y
 
-def accumulate_results_ensemble(model,data):
-    '''Accumulate output (of model) and label of a entire dataset.'''
-    dev = next(model.parameters()).device
-    output_list = torch.Tensor([]).to(dev)
-    var_list = torch.Tensor([]).to(dev)
-    MI_list = torch.Tensor([]).to(dev)
-    label_list = torch.Tensor([]).to(dev)
-    for image,label in data:
-        with torch.no_grad():
-            image,label = image.to(dev), label.to(dev)
-            output = torch.exp(model(image)[0])
-            var = model(image)[1]
-            MI = model(image)[2]
-
-            label_list = torch.cat((label_list,label))
-            var_list = torch.cat((var_list,var))
-            MI_list = torch.cat((MI_list,MI))
-            output_list = torch.cat((output_list,output))
-    return output_list,label_list.long(),var_list,MI_list
+    def forward(self,x):
+        if self.as_ensemble:
+            y = super().forward(x)
+        else:
+            y = self.deterministic(x)
+        return y
 
 if __name__ == "__main__":
     import NN_models

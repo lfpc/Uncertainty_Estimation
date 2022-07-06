@@ -1,15 +1,13 @@
 import numpy as np
 import torch
-from NN_utils import indexing_2D, is_probabilities,round_decimal
-import utils
 from NN_utils import train_and_eval as TE
 from sklearn.metrics import roc_curve as ROC
 from NN_utils import apply_mask
-from NN_utils.train_and_eval import correct_total
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 from itertools import cycle
 import uncertainty as unc
+from uncertainty import utils as unc_utils
 from sklearn.metrics import auc,brier_score_loss
 from sklearn.calibration import sk_calibration_curve
 
@@ -17,9 +15,9 @@ from sklearn.calibration import sk_calibration_curve
 
 def acc_coverage(y_pred,y_true, uncertainty, coverage):
     '''Returns the total accuracy of model in some dataset excluding the 1-c most uncertain samples'''
-    dk_mask = utils.dontknow_mask(uncertainty, coverage)
+    dk_mask = unc_utils.dontknow_mask(uncertainty, coverage)
     y_pred, y_true = apply_mask(y_pred,y_true,1-dk_mask)
-    acc = correct_total(y_pred,y_true)/y_true.size(0)
+    acc = TE.correct_total(y_pred,y_true)/y_true.size(0)
     return acc
 
 def error_coverage(y_pred,y_true, uncertainty, coverage):
@@ -32,10 +30,10 @@ def RC_curve(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arang
      Each item in the output array is the accuracy when the coverage is given by same item in c_list'''
 
     risk_list = np.array([])
-    for c in c_list:
-        risk = risk(y_pred,y_true, uncertainty, c)
-        rick_list = np.append(risk_list,risk)
-
+    with torch.no_grad():
+        for c in c_list:
+            risk = risk(y_pred,y_true, uncertainty, c)
+            risk_list = np.append(risk_list,risk)
     return risk_list
 
 def ROC_curve(output,y_true, uncertainty, return_threholds = False):
@@ -150,27 +148,42 @@ class selective_metrics():
     LABEL_FONTSIZE = 18
     TICKS_FONTSIZE = 12
     LINE_WIDTH = 3
-    def __init__(self,model,dataset, uncertainties = None) -> None:
-
-        self.output,self.label = TE.accumulate_results(model,dataset)
-        if isinstance(self.output,tuple):
-            self.output,self.g = self.output
-
-    def RC_curves(self,uncs: dict,risk = error_coverage, c_list = np.arange(0,1,0.05)):
-        self.risk = {}
-        for name,un in uncs.items():
-            self.risk[name] = RC_curve(self.output,self.label,un,risk, c_list)
+    def __init__(self,model,dataset, c_list = np.arange(0,1,0.05)) -> None:
         self.c_list = c_list
+
+        if callable(getattr(model, "get_unc", None)):
+            self.output,self.label,self.d_uncs = unc_utils.accumulate_results(model,dataset)
+            self.d_uncs['MCP'] = unc.MCP_unc(self.output)
+            self.d_uncs['Entropy'] = unc.entropy(self.output)
+        else:
+            self.output,self.label = TE.accumulate_results(model,dataset)
+
+        #if isinstance(self.output,tuple):
+        #    self.output,self.g = self.output
+    def add_uncs(self,unc_fn:dict):
+        for name,un in unc_fn.items():
+            if callable(un):
+                self.d_uncs[name] = un(self.output)
+            else:
+                self.d_uncs[name] = un
+        
+    def RC_curves(self,uncs: dict = None,risk = error_coverage):
+        self.risk = {}
+        for name,un in self.d_uncs.items():
+            self.risk[name] = RC_curve(self.output,self.label,un,risk, self.c_list)
+        for name,un in uncs.items():
+            self.risk[name] = RC_curve(self.output,self.label,un,risk, self.c_list)
+        
         return self.risk
 
     def plot_RC(self,AURC = False,*args):
         figure(figsize=self.FIGSIZE, dpi=80)
-        if args != ():
-            self.RC_curves(*args)
+        self.RC_curves(*args)
+
         linecycler = cycle(self.LINES)
         for name,risk in self.risk.items():
-            label = name if AURC else name+f' AURC = {auc(risk,self.c_list)}'
-            plt.plot(self.c_list,risk, label = name, linewidth = self.LINEWIDTH,linestyle = next(linecycler))
+            label = name+f' AURC = {auc(risk,self.c_list)}' if AURC else name
+            plt.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(linecycler))
         
         plt.legend()
         plt.xlabel("Coverage", fontsize=self.LABEL_FONTSIZE)
@@ -180,6 +193,45 @@ class selective_metrics():
         plt.grid()
         plt.show()
 
-
-
         #plt.plot(fpr, tpr, label = f'MCP - AUC = {auc(fpr, tpr)}')
+    def ROC_curves(self,uncs: dict = None):
+
+        self.ROC = {}
+        y_true = TE.correct_class(self.output,self.label).cpu().numpy()
+        for name,un in self.d_uncs.items():
+            fpr, tpr, _ = ROC(y_true,un.cpu().numpy())
+            self.ROC[name] = (fpr,tpr)
+        for name,un in uncs.items():
+            fpr, tpr, _ = ROC(y_true,un.cpu().numpy())
+            self.ROC[name] = (fpr,tpr)
+        return self.ROC
+    def plot_RC(self,AUROC = True,*args):
+        figure(figsize=self.FIGSIZE, dpi=80)
+        self.ROC_curves(*args)
+
+        linecycler = cycle(self.LINES)
+        for name,risk in self.ROC.items():
+            (fpr,tpr) = self.ROC[name]
+            label = name+f' AUROC = {auc(fpr,tpr)}' if AUROC else name
+            plt.plot(fpr,tpr, label = label, linewidth = self.LINEWIDTH,linestyle = next(linecycler))
+        
+        plt.legend()
+        plt.xlabel("False Positive Rate", fontsize=self.LABEL_FONTSIZE)
+        plt.ylabel("True Positive Rate", fontsize=self.LABEL_FONTSIZE)
+        plt.xticks(fontsize=self.TICKS_FONTSIZE)
+        plt.yticks(fontsize=self.TICKS_FONTSIZE)
+        plt.grid()
+        plt.show()
+
+    def E_AURC(self):
+        d = {}
+        for name,risk in self.risk.items():
+            AURC = {auc(risk,self.c_list)}
+            opt_aurc = auc(optimum_RC(self.output,self.label,risk, self.c_list))
+            EAURC = AURC-opt_aurc
+            d[name] = EAURC
+        return d
+    def AURC(self):
+        pass
+
+

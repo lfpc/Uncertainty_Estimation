@@ -4,6 +4,7 @@ from torch import nn
 import uncertainty as unc
 from NN_utils import indexing_3D
 
+
 def MonteCarlo_meanvar(MC_array):
     '''Returns the average variance of a tensor'''
     var = torch.var(MC_array, axis=0) 
@@ -25,8 +26,8 @@ def mutual_info(pred_array):
 
 
 class Ensemble(nn.Module):
-    uncs = {'var_mean': MonteCarlo_meanvar,
-            'var_max': MonteCarlo_maxvar,
+    uncs = {'Var(Mean)': MonteCarlo_meanvar,
+            'Var(Max)': MonteCarlo_maxvar,
             'MI': mutual_info}
 
 
@@ -50,6 +51,7 @@ class Ensemble(nn.Module):
     def apply_softmax(self):
         for _,model in self.models_dict.items():
             model.softmax = True
+
     def get_samples(self,x):
         ensemble = []
         for _,model in self.models_dict.items():
@@ -61,6 +63,7 @@ class Ensemble(nn.Module):
 
     def forward(self,x):
         self.get_samples(x)
+
         mean = torch.mean(self.ensemble,axis = 0)
         if self.return_uncs:
             d_uncs = self.get_unc()
@@ -74,4 +77,5 @@ class Ensemble(nn.Module):
         for name,fn in self.uncs.items():
             d_uncs[name] = fn(self.ensemble)
         return d_uncs
+
     

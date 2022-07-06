@@ -3,6 +3,7 @@ from NN_utils import apply_mask,get_n_biggest,indexing_3D
 import numpy as np
 from operator import xor
 from NN_utils.train_and_eval import correct_total
+from collections import defaultdict
 
 
 
@@ -47,8 +48,6 @@ def dontknow_mask(uncertainty, coverage = None, threshold = None):
 
     return dontknow
 
-
-
     
 def acc_coverage_per_batch(model,data,unc_fn,c):
     '''Returns the total accuracy of model in some dataset
@@ -88,23 +87,25 @@ def selective_risk(y_pred,label,c,loss_fn = torch.nn.NLLLoss(),unc_type = None):
     risk = loss_fn(y_pred,label)
     return risk
 
-def accumulate_results_mcd(model,data):
-    '''Accumulate output (of model) and label of a entire dataset.'''
+def accumulate_results(model,data):
+    '''Accumulate output (of model), label and the uncertainties dict of a entire dataset.'''
     dev = next(model.parameters()).device
-
-    output_list = torch.Tensor([]).to(dev)
-    var_list = torch.Tensor([]).to(dev)
-    MI_list = torch.Tensor([]).to(dev)
-    label_list = torch.Tensor([]).to(dev)
-    for image,label in data:
-        with torch.no_grad():
+    uncs = defaultdict(torch.Tensor)
+    with torch.no_grad():
+        output_list = torch.Tensor([]).to(dev)
+        label_list = torch.Tensor([]).to(dev)
+        for image,label in data:
             image,label = image.to(dev), label.to(dev)
-            output = torch.exp(model(image)[0])
-            var = model(image)[1]
-            MI = model(image)[2]
-
             label_list = torch.cat((label_list,label))
-            var_list = torch.cat((var_list,var))
-            MI_list = torch.cat((MI_list,MI))
+
+            output = model(image)
+            if model.return_uncs:
+                output,d_uncs = output
+            else:
+                d_uncs = model.get_unc()
+
             output_list = torch.cat((output_list,output))
-    return output_list,label_list.long(),var_list,MI_list
+            for name,unc in d_uncs.items():
+                uncs[name] = torch.cat((uncs[name].to(dev),unc))
+
+    return output_list,label_list.long(),uncs
