@@ -44,10 +44,10 @@ def get_MCD(model,X,n=10):
 class MonteCarloDropout(ensemble.Ensemble):
 
     def __init__(self,model, n_samples, return_uncs = False):
-
+        super().__init__(models_dict = {'model':model}, return_uncs= return_uncs)
         self.model = model
         self.n_samples = n_samples
-        super().__init__(models_dict = {'model':self.model}, return_uncs= return_uncs)
+        
         self.set_dropout()
 
     def set_dropout(self):
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     model = NN_models.Model_CNN()
     mcd = MonteCarloDropout(model,10)
     data = cifar_data.Cifar_10_data()
-    x = data.get_sample()
+    x,_ = data.get_sample()
     output = mcd(x)
     print(output.shape)
 
