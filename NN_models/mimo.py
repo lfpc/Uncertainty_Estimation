@@ -8,11 +8,22 @@ from tqdm.notebook import tqdm,trange
 class MIMOModel(nn.Module):
     def __init__(self,model,num_classes, ensemble_num: int = 3, name = 'MIMO',softmax = 'log', *args):
         super(MIMOModel, self).__init__()
-        self.model = model(num_classes = num_classes * ensemble_num, name = name, *args).cuda()
+        self.model = model(num_classes = num_classes * ensemble_num, name = name,softmax = False, *args)
         self.softmax = softmax
         self.ensemble_num = ensemble_num
         self.classifier_layer = self.model.classifier_layer
         self.model.classifier_layer = nn.Identity()
+
+    def to(self,device):
+        super().to(device)
+        self.model.to(device)
+        
+    def eval(self):
+        super().eval()
+        self.model.eval()
+    def train(self):
+        super().train()
+        self.model.train()
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         input_shape_list = list(input_tensor.size())  # (ensemble_num,batch_size,C,H,W)
