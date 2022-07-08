@@ -61,6 +61,9 @@ class MonteCarloDropout(ensemble.Ensemble):
         return self.ensemble
 
     def deterministic(self,x):
+        self.set_dropout()
+        self.get_samples(x) #needed if get_unc get called, as usually does
+        
         self.eval()
         y = self.model(x)
         if self.return_uncs:

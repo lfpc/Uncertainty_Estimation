@@ -183,7 +183,7 @@ class selective_metrics():
 
         linecycler = cycle(self.LINES)
         for name,risk in self.risk.items():
-            label = name+f' AURC = {auc(self.c_list,risk)}' if aurc else name
+            label = name+f' | AURC = {auc(self.c_list,risk)}' if aurc else name
             plt.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(linecycler))
         
         plt.legend()
@@ -212,7 +212,7 @@ class selective_metrics():
         linecycler = cycle(self.LINES)
         for name,risk in self.ROC.items():
             (fpr,tpr) = self.ROC[name]
-            label = name+f' AUROC = {auc(fpr,tpr)}' if auroc else name
+            label = name+f' | AUROC = {auc(fpr,tpr)}' if auroc else name
             plt.plot(fpr,tpr, label = label, linewidth = self.LINEWIDTH,linestyle = next(linecycler))
         
         plt.legend()
