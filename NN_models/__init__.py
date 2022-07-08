@@ -3,6 +3,10 @@ import torch
 from torch import nn
 import torchvision
 import torch.nn.functional as F
+from .wide_resnet import Wide_ResNet
+from .vgg import VGG_16
+from .CNN8 import CNN8
+
 
 def construct_conv_layer(blocks):
     #to elaborate
@@ -35,36 +39,12 @@ class Model_CNN(nn.Module):
         super().__init__()
         self.name = name
         self.softmax = softmax
-        if blocks is None:
-            conv_layer = [
-                nn.Conv2d(in_channels=3, out_channels=int(16), kernel_size=3, padding='same'),
-                nn.BatchNorm2d(int(16)),
-                nn.ReLU(inplace=True),
-                nn.Conv2d(in_channels=int(16), out_channels=int(32), kernel_size=3, padding='same'),
-                nn.Dropout(p=0.2),
-                nn.ReLU(inplace=True),
-                nn.MaxPool2d(kernel_size=2, stride=2)]
-
-            k = int(32/4)
-            fc_layer = [
-                nn.Flatten(),
-                nn.Linear(int(input[0]*input[1]*k), int(1024)),
-                nn.Dropout(p=0.4),
-                nn.ReLU(inplace=True),
-                nn.Linear(int(1024), int(512)),
-                nn.ReLU(inplace=True),
-                nn.Dropout(p=0.4)]
-                
-            
-            main_layer = conv_layer+fc_layer
-            self.main_layer = nn.Sequential(*main_layer)
-        elif isinstance(blocks,list):
+        if isinstance(blocks,list):
             self.main_layer = nn.Sequential(*blocks)
         else:
             self.main_layer = blocks
         
         self.classifier_layer = nn.Linear(int(512), num_classes)
-
 
 
     def forward(self, x):

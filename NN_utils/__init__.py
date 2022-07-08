@@ -221,7 +221,8 @@ def get_defined_models(module = NN_models):
             except:
                 sys.path.insert(1, module.__path__[0])
                 mod = __import__(modname)
-            d.update(get_defined_models(mod))
+            if isinstance(mod,torch.nn.Module):
+                d.update(get_defined_models(mod))
     return d
 
 def identify_from_statedict(state_dict, models_dict = None, name = None):

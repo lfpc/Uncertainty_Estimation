@@ -17,7 +17,13 @@ class MIMOModel(nn.Module):
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         input_shape_list = list(input_tensor.size())  # (ensemble_num,batch_size,C,H,W)
         ensemble_num, batch_size = input_shape_list[0], input_shape_list[1]
+        if ensemble_num != self.ensemble_num:
+            input_tensor = torch.stack([input_tensor] * self.ensemble_num)
+            input_shape_list = list(input_tensor.size())  # (ensemble_num,batch_size,C,H,W)
+            ensemble_num, batch_size = input_shape_list[0], input_shape_list[1]
+        
         assert ensemble_num == self.ensemble_num
+    
 
         input_tensor = input_tensor.view([ensemble_num * batch_size] + input_shape_list[2:])
         output = self.model(input_tensor)
@@ -75,11 +81,11 @@ class Trainer_MIMO(TE.Trainer):
         self.model.eval()
         test_loss = 0
         correct = 0
+        dev = next(self.model.parameters()).device
         with torch.no_grad():
             for data in self.test_dataloader:
-                model_inputs = torch.stack([data[0]] * self.model.ensemble_num).cuda()
-                target = data[1].cuda()
-
+                model_inputs = torch.stack([data[0]] * self.model.ensemble_num).to(dev)
+                target = data[1].to(dev)
                 outputs = self.model(model_inputs)
                 output = torch.mean(outputs, axis=0)
                 test_loss += self.loss_fn(output, target).item()
@@ -97,4 +103,5 @@ class Trainer_MIMO(TE.Trainer):
             if self.val_acc[-1] >= maxacc:
                 maxacc = self.val_acc[-1]
                 self.model.model.save_state_dict(PATH,self.model.name+'_checkpoint')'''
+        return acc,test_loss
 
