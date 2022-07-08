@@ -27,11 +27,11 @@ def get_vgg_layers(pretrained = False):
     return main_layer
 
 
-
+#generalizar para qualquer input (???)
 class VGG_16(Model_CNN):
-    def __init__(self,num_classes=10,input = (32,32), pretrained = False, name = 'VGG16', softmax = 'log'):
+    def __init__(self,num_classes=10, pretrained = False, name = 'VGG16', softmax = 'log'):
         """CNN Builder."""
-        super().__init__(num_classes,input,get_vgg_layers(pretrained),name = name, softmax=softmax)
+        super().__init__(num_classes,get_vgg_layers(pretrained),name = name, softmax=softmax)
 
 '''class VGG_16_g(Model_CNN_with_g):
     def __init__(self,num_classes=10,input = (32,32), pretrained = False, name = 'VGG16_g'):

@@ -4,8 +4,9 @@ from NN_models import Model_CNN
 
 
 
-
+#generalizar para qualquer input
 class CNN8(Model_CNN):
+    input = (32,32)
     conv_layer = [
                 nn.Conv2d(in_channels=3, out_channels=int(16), kernel_size=3, padding='same'),
                 nn.BatchNorm2d(int(16)),
@@ -26,6 +27,6 @@ class CNN8(Model_CNN):
                 nn.Dropout(p=0.4)]
     main_layer = conv_layer+fc_layer
 
-    def __init__(self,num_classes=10,input = (32,32), pretrained = False, name = 'CNN8', softmax = 'log'):
+    def __init__(self,num_classes=10, name = 'CNN8', softmax = 'log'):
         """CNN Builder."""
-        super().__init__(num_classes,input,blocks = CNN8.main_layer,name = name, softmax=softmax)
+        super().__init__(num_classes,blocks = CNN8.main_layer,name = name, softmax=softmax)
