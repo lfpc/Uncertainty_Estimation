@@ -177,13 +177,13 @@ class selective_metrics():
         
         return self.risk
 
-    def plot_RC(self,AURC = False,*args):
+    def plot_RC(self,aurc = False,*args):
         figure(figsize=self.FIGSIZE, dpi=80)
         self.RC_curves(*args)
 
         linecycler = cycle(self.LINES)
         for name,risk in self.risk.items():
-            label = name+f' AURC = {auc(risk,self.c_list)}' if AURC else name
+            label = name+f' AURC = {auc(risk,self.c_list)}' if aurc else name
             plt.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(linecycler))
         
         plt.legend()
@@ -206,14 +206,14 @@ class selective_metrics():
             fpr, tpr, _ = ROC(y_true,un.cpu().numpy())
             self.ROC[name] = (fpr,tpr)
         return self.ROC
-    def plot_RC(self,AUROC = True,*args):
+    def plot_RC(self,auroc = True,*args):
         figure(figsize=self.FIGSIZE, dpi=80)
         self.ROC_curves(*args)
 
         linecycler = cycle(self.LINES)
         for name,risk in self.ROC.items():
             (fpr,tpr) = self.ROC[name]
-            label = name+f' AUROC = {auc(fpr,tpr)}' if AUROC else name
+            label = name+f' AUROC = {auc(fpr,tpr)}' if auroc else name
             plt.plot(fpr,tpr, label = label, linewidth = self.LINEWIDTH,linestyle = next(linecycler))
         
         plt.legend()
