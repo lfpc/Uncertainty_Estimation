@@ -147,7 +147,7 @@ class selective_metrics():
     FIGSIZE = (8,6)
     LABEL_FONTSIZE = 18
     TICKS_FONTSIZE = 12
-    LINE_WIDTH = 3
+    LINEWIDTH = 3
     SoftMax_uncs = {'MCP': unc.MCP_unc,
                     'Entropy': unc.entropy}  #finalizar isso
     def __init__(self,model,dataset, c_list = np.arange(0,1,0.05)) -> None:
