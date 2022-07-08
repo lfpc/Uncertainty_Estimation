@@ -43,6 +43,7 @@ class Ensemble(nn.Module):
         super().to(device)
         for _,model in self.models_dict.items():
             model.to(device)
+        return self
     def eval(self):
         super().eval()
         for _,model in self.models_dict.items():
@@ -55,7 +56,6 @@ class Ensemble(nn.Module):
     def get_samples(self,x):
         ensemble = []
         for _,model in self.models_dict.items():
-            model.eval()
             pred = model(x)
             ensemble.append(pred)
         self.ensemble = torch.stack(ensemble)
