@@ -1,11 +1,7 @@
-from turtle import forward
-
-from sympy import Determinant
 import uncertainty as unc
 import uncertainty.utils as unc_utils
 import torch
-import ensemble
-
+from . import ensemble
 
 def dropout_pred(model,X,enable = True):
     '''Enable Dropout in the model and evaluate one prediction'''
