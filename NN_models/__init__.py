@@ -1,11 +1,7 @@
 # Define model
 import torch
 from torch import nn
-import torchvision
 import torch.nn.functional as F
-from .wide_resnet import Wide_ResNet
-from .vgg import VGG_16
-from .CNN8 import CNN8
 
 
 def construct_conv_layer(blocks):
@@ -176,4 +172,6 @@ class Model_CNN_with_g_and_h(Model_CNN_with_g):
         return self.h
 
 
-
+from .wide_resnet import Wide_ResNet
+from .vgg import VGG_16
+from .CNN8 import CNN8

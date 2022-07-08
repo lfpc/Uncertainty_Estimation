@@ -1,12 +1,11 @@
-from numpy import block
-import torch
+
 from torch import nn
-import NN_models
+from NN_models import Model_CNN
 
 
 
 
-class CNN8(NN_models.Model_CNN):
+class CNN8(Model_CNN):
     conv_layer = [
                 nn.Conv2d(in_channels=3, out_channels=int(16), kernel_size=3, padding='same'),
                 nn.BatchNorm2d(int(16)),

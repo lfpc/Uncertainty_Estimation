@@ -1,7 +1,7 @@
-import torch
+
 from torch import nn
 import torchvision
-import NN_models
+from NN_models import Model_CNN
 
 def get_vgg_layers(pretrained = False):
     #returns 
@@ -28,12 +28,12 @@ def get_vgg_layers(pretrained = False):
 
 
 
-class VGG_16(NN_models.Model_CNN):
+class VGG_16(Model_CNN):
     def __init__(self,num_classes=10,input = (32,32), pretrained = False, name = 'VGG16', softmax = 'log'):
         """CNN Builder."""
         super().__init__(num_classes,input,get_vgg_layers(pretrained),name = name, softmax=softmax)
 
-class VGG_16_g(NN_models.Model_CNN_with_g):
+'''class VGG_16_g(Model_CNN_with_g):
     def __init__(self,num_classes=10,input = (32,32), pretrained = False, name = 'VGG16_g'):
         """CNN Builder."""
         super().__init__(num_classes,input,get_vgg_layers(pretrained),name = name)
@@ -43,17 +43,5 @@ class VGG_16_g(NN_models.Model_CNN_with_g):
                 nn.ReLU(inplace=True),
                 nn.BatchNorm1d(512),
                 nn.Linear(512, 1),
-                nn.Sigmoid())
-
-class VGG_16_g_and_h(NN_models.Model_CNN_with_g_and_h):
-    def __init__(self,num_classes=10,input = (32,32), pretrained = False, name = 'VGG16_g_and_h'):
-        """CNN Builder."""
-        super().__init__(num_classes,input,get_vgg_layers(pretrained),name = name)
-
-        self.g_layer = nn.Sequential(
-                nn.Linear(512, 512),
-                nn.ReLU(inplace=True),
-                nn.BatchNorm1d(512),
-                nn.Linear(512, 1),
-                nn.Sigmoid())
+                nn.Sigmoid())'''
 
