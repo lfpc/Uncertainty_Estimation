@@ -148,15 +148,16 @@ class selective_metrics():
     LABEL_FONTSIZE = 18
     TICKS_FONTSIZE = 12
     LINE_WIDTH = 3
+    SoftMax_uncs = {'MCP': unc.MCP_unc,
+                    'Entropy': unc.entropy}  #finalizar isso
     def __init__(self,model,dataset, c_list = np.arange(0,1,0.05)) -> None:
         self.c_list = c_list
-
+        self.d_uncs = {}
         if callable(getattr(model, "get_unc", None)):
             self.output,self.label,self.d_uncs = unc_utils.accumulate_results(model,dataset)
-            self.d_uncs['MCP'] = unc.MCP_unc(self.output)
-            self.d_uncs['Entropy'] = unc.entropy(self.output)
         else:
             self.output,self.label = TE.accumulate_results(model,dataset)
+        self.add_uncs(self.SoftMax_uncs)
 
         #if isinstance(self.output,tuple):
         #    self.output,self.g = self.output
