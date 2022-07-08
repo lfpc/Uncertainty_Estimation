@@ -160,6 +160,6 @@ class Model_CNN_with_g_and_h(Model_CNN_with_g):
         return self.h'''
 
 
-from .wide_resnet import Wide_ResNet
+from .wide_resnet import WideResNet
 from .vgg import VGG_16
 from .CNN8 import CNN8

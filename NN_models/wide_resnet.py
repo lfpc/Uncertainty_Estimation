@@ -172,7 +172,7 @@ class NetworkBlock(nn.Module):
         return self.layer(x)
 
 #@registry.Model
-class Wide_ResNet(nn.Module):
+class WideResNet(nn.Module):
     def __init__(self, num_classes, depth = 28, widen_factor=10, droprate=0.3, use_bn=True, use_fixup=True,
                     softmax = False, name = 'WideResnet'):
         super().__init__()
@@ -235,5 +235,5 @@ class Wide_ResNet(nn.Module):
         torch.save(self.state_dict(), path + r'/' + name + '.pt')
 
 if __name__ == '__main__':
-    net=Wide_ResNet(10,28, 10, 0.3)
+    net=WideResNet(10,28, 10, 0.3)
 
