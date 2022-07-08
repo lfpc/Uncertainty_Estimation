@@ -9,7 +9,7 @@ from itertools import cycle
 import uncertainty as unc
 from uncertainty import utils as unc_utils
 from sklearn.metrics import auc,brier_score_loss
-from sklearn.calibration import sk_calibration_curve
+#from sklearn.calibration import calibration_curve as sk_calibration_curve
 
 
 
