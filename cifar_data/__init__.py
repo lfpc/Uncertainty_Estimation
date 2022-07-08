@@ -122,7 +122,7 @@ class Noisy_DataGenerator(DataGenerator):
         infos += f"Validation data length = {self.val_len} \n Test data length = {self.test_len}"
         return infos    
 
-class Cifar_10(DataGenerator):
+class Cifar10(DataGenerator):
 
     MEAN = (0.4914, 0.4822, 0.4465)
     STD = (0.2023, 0.1994, 0.2010)
@@ -160,7 +160,7 @@ class Cifar_10(DataGenerator):
                     name)
         
 
-class Cifar_100(DataGenerator):
+class Cifar100(DataGenerator):
     MEAN = (0.5070751592371323, 0.48654887331495095, 0.4409178433670343)
     STD = (0.2673342858792401, 0.2564384629170883, 0.27615047132568404)
     transforms_train = transforms.Compose([
@@ -197,7 +197,7 @@ class Cifar_100(DataGenerator):
                     name)
         
 #ARRUMAR NOISY CLASSES. PRECISAM CHAMAR CIFAR 10 ANTES  PARA DEFINIR A DATA E TAL
-class Noisy_CIFAR_10(Noisy_DataGenerator,Cifar_10):
+class Noisy_Cifar10(Noisy_DataGenerator,Cifar10):
 
 
     def __init__(self,noise_size,noisy_val = False,params = DataGenerator.params,
@@ -206,7 +206,7 @@ class Noisy_CIFAR_10(Noisy_DataGenerator,Cifar_10):
         self.test_data.root = data_dir
         super().__init__(noise_size,noisy_val,params,download, name)
 
-class Noisy_CIFAR_100(Noisy_DataGenerator,Cifar_100):
+class Noisy_Cifar100(Noisy_DataGenerator,Cifar100):
 
 
     def __init__(self,noise_size,noisy_val = False,params = DataGenerator.params,
