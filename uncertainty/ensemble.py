@@ -31,10 +31,11 @@ class Ensemble(nn.Module):
             'MI': mutual_info}
 
 
-    def __init__(self,models_dict, return_uncs = False):
+    def __init__(self,models_dict, return_uncs = False, softmax = False):
         super().__init__()
         self.models_dict = models_dict
         self.return_uncs = return_uncs
+        self.softmax = softmax
 
         self.p = nn.Parameter(torch.tensor(0.5,requires_grad = True)) #dummy parameter
         self.eval()
@@ -49,10 +50,15 @@ class Ensemble(nn.Module):
         for _,model in self.models_dict.items():
             model.eval()
 
-    def apply_softmax(self):
-        for _,model in self.models_dict.items():
-            model.softmax = True
-
+    def apply_softmax(self, method = 'all'):
+        if method == 'all':
+            for _,model in self.models_dict.items():
+                model.softmax = True
+        elif method == 'final':
+            for _,model in self.models_dict.items():
+                model.softmax = False
+            self.softmax = True
+        
     def get_samples(self,x):
         ensemble = []
         for _,model in self.models_dict.items():
@@ -68,6 +74,8 @@ class Ensemble(nn.Module):
         if self.return_uncs:
             d_uncs = self.get_unc()
             return mean,d_uncs
+        if self.softmax:
+            mean = nn.functional.softmax(mean,dim=-1)
         return mean
 
     def get_unc(self, x = None):
