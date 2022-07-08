@@ -29,4 +29,4 @@ class CNN8(Model_CNN):
 
     def __init__(self,num_classes=10, name = 'CNN8', softmax = 'log'):
         """CNN Builder."""
-        super().__init__(num_classes,blocks = CNN8.main_layer,name = name, softmax=softmax)
+        super().__init__(num_classes,blocks = self.main_layer,name = name, softmax=softmax)
