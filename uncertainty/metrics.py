@@ -168,7 +168,7 @@ class selective_metrics():
             else:
                 self.d_uncs[name] = un
         
-    def RC_curves(self,uncs: dict = None,risk = error_coverage):
+    def RC_curves(self,uncs: dict = {},risk = error_coverage):
         self.risk = {}
         for name,un in self.d_uncs.items():
             self.risk[name] = RC_curve(self.output,self.label,un,risk, self.c_list)
@@ -195,7 +195,7 @@ class selective_metrics():
         plt.show()
 
         #plt.plot(fpr, tpr, label = f'MCP - AUC = {auc(fpr, tpr)}')
-    def ROC_curves(self,uncs: dict = None):
+    def ROC_curves(self,uncs: dict = {}):
 
         self.ROC = {}
         y_true = TE.correct_class(self.output,self.label).cpu().numpy()
@@ -206,7 +206,7 @@ class selective_metrics():
             fpr, tpr, _ = ROC(y_true,un.cpu().numpy())
             self.ROC[name] = (fpr,tpr)
         return self.ROC
-    def plot_RC(self,auroc = True,*args):
+    def plot_ROC(self, auroc = True,*args):
         figure(figsize=self.FIGSIZE, dpi=80)
         self.ROC_curves(*args)
 
