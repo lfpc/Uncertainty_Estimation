@@ -25,8 +25,9 @@ class CNN8(Model_CNN):
                 nn.Linear(int(1024), int(512)),
                 nn.ReLU(inplace=True),
                 nn.Dropout(p=0.4)]
-    main_layer = conv_layer+fc_layer
+    
 
     def __init__(self,num_classes=10, name = 'CNN8', softmax = 'log'):
         """CNN Builder."""
-        super().__init__(num_classes,blocks = self.main_layer,name = name, softmax=softmax)
+        main_layer = self.conv_layer+self.fc_layer
+        super().__init__(num_classes,blocks = main_layer,name = name, softmax=softmax)

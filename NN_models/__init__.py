@@ -30,7 +30,7 @@ def construct_conv_layer(blocks):
 class Model_CNN(nn.Module):
     """CNN."""
 
-    def __init__(self,num_classes=10,blocks = None, name = 'Model_CNN', softmax = 'log'):
+    def __init__(self,num_classes,blocks, name = 'Model_CNN', softmax = 'log'):
         """CNN Builder."""
         super().__init__()
         self.name = name
