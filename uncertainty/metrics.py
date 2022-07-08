@@ -24,7 +24,7 @@ def error_coverage(y_pred,y_true, uncertainty, coverage):
     '''Returns the 0-1 loss of model in some dataset excluding the 1-c most uncertain samples'''
     return 1-acc_coverage(y_pred,y_true, uncertainty, coverage)
 
-def RC_curve(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1,0.05)):
+def RC_curve(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
     ''' Returns an array with the accuracy of the model in the data dataset
      excluding the most uncertain (total number set by the coverage) samples.
      Each item in the output array is the accuracy when the coverage is given by same item in c_list'''
@@ -46,7 +46,7 @@ def ROC_curve(output,y_true, uncertainty, return_threholds = False):
     else:
         return fpr,tpr
 
-def AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1,0.05)):
+def AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
     risk_list = RC_curve(y_pred,y_true,uncertainty, risk, c_list)
     return auc(c_list,risk_list)
 
@@ -61,11 +61,11 @@ def AUPR():
 
     
 
-def optimum_RC(y_pred,y_true,risk = error_coverage, c_list = np.arange(0.05,1,0.05)):
+def optimum_RC(y_pred,y_true,risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
     uncertainty = 1-TE.correct_class(y_pred,y_true)
     return RC_curve(y_pred,y_true,uncertainty, risk, c_list)
 
-def E_AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1,0.05)):
+def E_AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
     aurc = AURC(y_pred,y_true,uncertainty, risk, c_list)
     opt_aurc = auc(c_list,optimum_RC(y_pred,y_true,risk, c_list))
     return aurc - opt_aurc
@@ -150,7 +150,7 @@ class selective_metrics():
     LINEWIDTH = 3
     SoftMax_uncs = {'MCP': unc.MCP_unc,
                     'Entropy': unc.entropy} 
-    def __init__(self,model,dataset, c_list = np.arange(0.05,1,0.05)) -> None:
+    def __init__(self,model,dataset, c_list = np.arange(0.05,1.05,0.05)) -> None:
         self.c_list = c_list
         self.d_uncs = {}
         if callable(getattr(model, "get_unc", None)):
