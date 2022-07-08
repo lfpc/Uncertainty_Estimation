@@ -192,7 +192,7 @@ class selective_metrics():
         plt.xticks(fontsize=self.TICKS_FONTSIZE)
         plt.yticks(fontsize=self.TICKS_FONTSIZE)
         plt.grid()
-        plt.show()
+        #plt.show()
 
     def ROC_curves(self,uncs: dict = {}):
 
