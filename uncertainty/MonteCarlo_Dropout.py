@@ -41,12 +41,12 @@ def get_MCD(model,X,n=10):
     return mean, var, MI
 
 class MonteCarloDropout(ensemble.Ensemble):
-    def __init__(self,model, n_samples, as_ensemble = True,return_uncs = False):
-        super().__init__(models_dict = {'model':model}, return_uncs= return_uncs)
+    def __init__(self,model, n_samples, as_ensemble = True,return_uncs = False, softmax = False):
+        super().__init__(models_dict = {'model':model}, return_uncs= return_uncs, softmax = softmax)
         self.model = model
         self.n_samples = n_samples
         self.as_ensemble = as_ensemble
-        if self.as_ensemble:
+        if not self.as_ensemble:
             self.uncs['MCP (MCD)'] = lambda x: unc.MCP_unc(torch.mean(x,axis = 0))
             self.uncs['Entropy (MCD)'] = lambda x: unc.entropy(torch.mean(x,axis = 0))
             
@@ -63,7 +63,7 @@ class MonteCarloDropout(ensemble.Ensemble):
     def deterministic(self,x):
         self.set_dropout()
         self.get_samples(x) #needed if get_unc get called, as usually does
-        
+
         self.eval()
         y = self.model(x)
         if self.return_uncs:
