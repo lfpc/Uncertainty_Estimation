@@ -67,7 +67,7 @@ def optimum_RC(y_pred,y_true,risk = error_coverage, c_list = np.arange(0,1,0.05)
 
 def E_AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0,1,0.05)):
     aurc = AURC(y_pred,y_true,uncertainty, risk, c_list)
-    opt_aurc = auc(optimum_RC(y_pred,y_true,risk, c_list))
+    opt_aurc = auc(c_list,optimum_RC(y_pred,y_true,risk, c_list))
     return aurc - opt_aurc
 
 def Brier(y_pred,y_true,uncertainty):
@@ -183,7 +183,7 @@ class selective_metrics():
 
         linecycler = cycle(self.LINES)
         for name,risk in self.risk.items():
-            label = name+f' AURC = {auc(risk,self.c_list)}' if aurc else name
+            label = name+f' AURC = {auc(self.c_list,risk)}' if aurc else name
             plt.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(linecycler))
         
         plt.legend()
@@ -194,7 +194,6 @@ class selective_metrics():
         plt.grid()
         plt.show()
 
-        #plt.plot(fpr, tpr, label = f'MCP - AUC = {auc(fpr, tpr)}')
     def ROC_curves(self,uncs: dict = {}):
 
         self.ROC = {}
@@ -227,8 +226,8 @@ class selective_metrics():
     def E_AURC(self):
         d = {}
         for name,risk in self.risk.items():
-            AURC = {auc(risk,self.c_list)}
-            opt_aurc = auc(optimum_RC(self.output,self.label,risk, self.c_list))
+            AURC = {auc(self.c_list,risk)}
+            opt_aurc = auc(self.c_list,optimum_RC(self.output,self.label,risk, self.c_list))
             EAURC = AURC-opt_aurc
             d[name] = EAURC
         return d
