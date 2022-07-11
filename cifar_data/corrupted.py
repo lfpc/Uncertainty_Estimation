@@ -4,14 +4,14 @@ import os
 import numpy as np
 
 from PIL import Image
-from torch.utils.data import Subset, DataLoader
+from torch.utils.data import Subset,Dataset, DataLoader
 from torchvision import datasets
 import random
 
 
 
 
-class CIFAR10C(datasets.VisionDataset):
+class CIFAR10C(Dataset):
     corruptions = ['natural',
                     'gaussian_noise',
                     'shot_noise',
@@ -84,7 +84,7 @@ class CIFAR10C(datasets.VisionDataset):
     def __len__(self):
         return len(self.data)
 
-class CIFAR100C(datasets.Dataset):
+class CIFAR100C(Dataset):
     corruptions = ['natural',
                     'gaussian_noise',
                     'shot_noise',
