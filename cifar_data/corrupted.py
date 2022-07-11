@@ -36,10 +36,12 @@ class CIFAR10C(Dataset):
 
     def __init__(self, root :str = "data", names:list = corruptions,levels:tuple = (1,2,3,4,5),
                  transform=cifar_data.Cifar10.transforms_test, target_transform=None, natural_data = None):
-        super().__init__(
-                    root, transform=transform,
-                    target_transform=target_transform
-                )
+        #super().__init__(
+        #           root, transform=transform,
+        #           target_transform=target_transform
+        #        )
+        self.transform = transform
+        self.target_transform = target_transform
         self.data = np.empty((0,32, 32, 3))
         self.targets = np.array([])
         
@@ -109,10 +111,12 @@ class CIFAR100C(Dataset):
 
     def __init__(self, root :str = "data", names:list = corruptions,levels:tuple = (1,2,3,4,5),
                  transform=cifar_data.Cifar100.transforms_test, target_transform=None, natural_data = None):
-        super().__init__(
-                root, transform=transform,
-                target_transform=target_transform
-            )
+        #super().__init__(
+        #        root, transform=transform,
+        #        target_transform=target_transform
+        #    )
+        self.transform = transform
+        self.target_transform = target_transform
         self.data = np.empty((0,32, 32, 3),dtype=float)
         self.targets = np.array([],dtype=float)
         for name in names:
