@@ -84,7 +84,7 @@ class CIFAR10C(datasets.VisionDataset):
     def __len__(self):
         return len(self.data)
 
-class CIFAR100C(datasets.VisionDataset):
+class CIFAR100C(datasets.Dataset):
     corruptions = ['natural',
                     'gaussian_noise',
                     'shot_noise',
@@ -127,8 +127,8 @@ class CIFAR100C(datasets.VisionDataset):
                 else:
                     data = natural_data.data
                     targets = natural_data.targets
-                self.data = np.concatenate((self.data,data))
-                self.targets = np.concatenate((self.targets,targets))
+                self.data = np.concatenate((self.data,data),dtype = float)
+                self.targets = np.concatenate((self.targets,targets),dtype = float)
             else:
                 data_path = os.path.join(root,'CIFAR-100-C', name + '.npy')
                 target_path = os.path.join(root,'CIFAR-100-C', 'labels.npy')
