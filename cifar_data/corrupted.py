@@ -81,7 +81,7 @@ class CIFAR10C(Dataset):
         if self.target_transform is not None:
             targets = self.target_transform(targets)
             
-        return img, targets
+        return img.float(), targets.float()
     
     def __len__(self):
         return len(self.data)
@@ -155,7 +155,7 @@ class CIFAR100C(Dataset):
         if self.target_transform is not None:
             targets = self.target_transform(targets)
             
-        return img, targets
+        return img.float(), targets.float()
     
     def __len__(self):
         return len(self.data)
