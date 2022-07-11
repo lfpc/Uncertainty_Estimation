@@ -75,7 +75,7 @@ class CIFAR10C(Dataset):
         
     def __getitem__(self, index):
         img, targets = self.data[index], self.targets[index]
-        #img = Image.fromarray(img)
+        img = Image.fromarray(img)
         
         if self.transform is not None:
             img = self.transform(img)
