@@ -36,10 +36,15 @@ class CIFAR10C(datasets.VisionDataset):
 
     def __init__(self, root :str = "data", names:list = corruptions,levels:tuple = (1,2,3,4,5),
                  transform=cifar_data.Cifar10.transforms_test, target_transform=None, natural_data = None):
+        super().__init__(
+                    root, transform=transform,
+                    target_transform=target_transform
+                )
         self.data = np.empty((0,32, 32, 3))
         self.targets = np.array([])
         
         for name in names:
+            assert name in self.corruptions
             if name == 'natural':
                 if natural_data is None:
                     natural_data = root
@@ -52,22 +57,18 @@ class CIFAR10C(datasets.VisionDataset):
                     targets = natural_data.targets
                 self.data = np.concatenate((self.data,data))
                 self.targets = np.concatenate((self.targets,targets))
-            assert name in self.corruptions
-            super().__init__(
-                root, transform=transform,
-                target_transform=target_transform
-            )
-            data_path = os.path.join(root, name + '.npy')
-            target_path = os.path.join(root, 'labels.npy')
+            else: 
+                data_path = os.path.join(root,'CIFAR-10-C', name + '.npy')
+                target_path = os.path.join(root,'CIFAR-10-C', 'labels.npy')
+                
+                data = np.load(data_path)
+                targets = np.load(target_path)
+                for l in levels:
+                    l1 = (l-1)*10000
+                    l2 = l*10000
+                    self.data = np.concatenate((self.data,data[l1:l2]))
+                    self.targets = np.concatenate((self.targets,targets[l1:l2]))
             
-            data = np.load(data_path)
-            targets = np.load(target_path)
-            for l in levels:
-                l1 = (l-1)*10000
-                l2 = l*10000
-                self.data = np.concatenate((self.data,data[l1:l2]))
-                self.targets = np.concatenate((self.targets,targets[l1:l2]))
-        
         
     def __getitem__(self, index):
         img, targets = self.data[index], self.targets[index]
@@ -108,10 +109,14 @@ class CIFAR100C(datasets.VisionDataset):
 
     def __init__(self, root :str = "data", names:list = corruptions,levels:tuple = (1,2,3,4,5),
                  transform=cifar_data.Cifar100.transforms_test, target_transform=None, natural_data = None):
+        super().__init__(
+                root, transform=transform,
+                target_transform=target_transform
+            )
         self.data = np.empty((0,32, 32, 3))
         self.targets = np.array([])
-        
         for name in names:
+            assert name in self.corruptions
             if name == 'natural':
                 if natural_data is None:
                     natural_data = root
@@ -124,21 +129,17 @@ class CIFAR100C(datasets.VisionDataset):
                     targets = natural_data.targets
                 self.data = np.concatenate((self.data,data))
                 self.targets = np.concatenate((self.targets,targets))
-            assert name in self.corruptions
-            super().__init__(
-                root, transform=transform,
-                target_transform=target_transform
-            )
-            data_path = os.path.join(root, name + '.npy')
-            target_path = os.path.join(root, 'labels.npy')
-            
-            data = np.load(data_path)
-            targets = np.load(target_path)
-            for l in levels:
-                l1 = (l-1)*10000
-                l2 = l*10000
-                self.data = np.concatenate((self.data,data[l1:l2]))
-                self.targets = np.concatenate((self.targets,targets[l1:l2]))
+            else:
+                data_path = os.path.join(root,'CIFAR-100-C', name + '.npy')
+                target_path = os.path.join(root,'CIFAR-100-C', 'labels.npy')
+                
+                data = np.load(data_path)
+                targets = np.load(target_path)
+                for l in levels:
+                    l1 = (l-1)*10000
+                    l2 = l*10000
+                    self.data = np.concatenate((self.data,data[l1:l2]))
+                    self.targets = np.concatenate((self.targets,targets[l1:l2]))
         
         
     def __getitem__(self, index):
