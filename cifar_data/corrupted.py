@@ -7,6 +7,7 @@ from PIL import Image
 from torch.utils.data import Subset,Dataset, DataLoader
 from torchvision import datasets
 import random
+import torchvision.transforms as transforms
 
 
 
@@ -35,7 +36,7 @@ class CIFAR10C(Dataset):
     n_classes = 10  
 
     def __init__(self, root :str = "data", names:list = corruptions,levels:tuple = (1,2,3,4,5),
-                 transform=cifar_data.Cifar10.transforms_test, target_transform=None, natural_data = None):
+                 transform=cifar_data.Cifar10.transforms_test, target_transform=transforms.ToTensor(), natural_data = None):
         #super().__init__(
         #           root, transform=transform,
         #           target_transform=target_transform
@@ -110,7 +111,7 @@ class CIFAR100C(Dataset):
     n_classes = 100
 
     def __init__(self, root :str = "data", names:list = corruptions,levels:tuple = (1,2,3,4,5),
-                 transform=cifar_data.Cifar100.transforms_test, target_transform=None, natural_data = None):
+                 transform=cifar_data.Cifar100.transforms_test, target_transform=transforms.ToTensor(), natural_data = None):
         #super().__init__(
         #        root, transform=transform,
         #        target_transform=target_transform
