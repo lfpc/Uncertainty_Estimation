@@ -113,8 +113,8 @@ class CIFAR100C(datasets.VisionDataset):
                 root, transform=transform,
                 target_transform=target_transform
             )
-        self.data = np.empty((0,32, 32, 3))
-        self.targets = np.array([])
+        self.data = np.empty((0,32, 32, 3),dtype=float)
+        self.targets = np.array([],dtype=float)
         for name in names:
             assert name in self.corruptions
             if name == 'natural':
