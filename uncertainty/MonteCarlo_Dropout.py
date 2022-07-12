@@ -2,6 +2,7 @@ import uncertainty as unc
 import uncertainty.utils as unc_utils
 import torch
 from . import ensemble
+from copy import copy
 
 def dropout_pred(model,X,enable = True):
     '''Enable Dropout in the model and evaluate one prediction'''
@@ -47,6 +48,7 @@ class MonteCarloDropout(ensemble.Ensemble):
         self.n_samples = n_samples
         self.as_ensemble = as_ensemble
         if not self.as_ensemble:
+            self.uncs = copy(self.uncs)
             self.uncs['MCP (MCD)'] = lambda x: unc.MCP_unc(torch.mean(x,axis = 0))
             self.uncs['Entropy (MCD)'] = lambda x: unc.entropy(torch.mean(x,axis = 0))
             
