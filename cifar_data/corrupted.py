@@ -102,7 +102,7 @@ class Cifar100C(CorruptedDataset):
                 natural_data = cifar_data.Cifar100(data_dir = parent_root).test_data
             elif isinstance(natural_data,str):
                 natural_data = cifar_data.Cifar100(data_dir = natural_data).test_data
-        root = os.path.join(root,'CIFAR-10-C')
+        root = os.path.join(root,'CIFAR-100-C')
         super().__init__(
                    root,im_size = (32,32,3), names = names,levels = levels,
                  transform= transform, target_transform = target_transform, natural_data = natural_data)
