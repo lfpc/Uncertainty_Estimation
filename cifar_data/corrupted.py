@@ -67,7 +67,7 @@ class CorruptedDataset(datasets.VisionDataset):
         if self.target_transform is not None:
             targets = self.target_transform(targets)
             
-        return img.float(), targets.float()
+        return img, targets
     
     def __len__(self):
         return len(self.data)

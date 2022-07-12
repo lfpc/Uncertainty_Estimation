@@ -30,7 +30,6 @@ class Ensemble(nn.Module):
             'Var(Max)': MonteCarlo_maxvar,
             'MI': mutual_info}
 
-
     def __init__(self,models_dict, return_uncs = False, softmax = False):
         super().__init__()
         self.models_dict = models_dict
