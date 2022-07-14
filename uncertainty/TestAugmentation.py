@@ -1,7 +1,7 @@
 
 import torch
 #import albumentation
-from ensemble import Ensemble
+from uncertainty import ensemble
 from copy import copy
 import uncertainty as unc
 from torchvision.transforms import functional as F
@@ -57,7 +57,7 @@ class Add:
         return torch.clamp(x+self.a,min = 0.0,max = 1.0)
 
 
-class TTA(Ensemble):
+class TTA(ensemble.Ensemble):
     transforms = [F.hflip,
                   Scale(1.1),
                   Scale(1.2),
