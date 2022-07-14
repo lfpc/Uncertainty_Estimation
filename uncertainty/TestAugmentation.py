@@ -69,12 +69,11 @@ class TTA(ensemble.Ensemble):
                   Add(-0.1),
                   torchvision.transforms.FiveCrop(32)]
 
-    def __init__(self, model,n_samples,as_ensemble = True, transforms = transforms,
+    def __init__(self, model,as_ensemble = True, transforms = transforms,
                  return_uncs=False, softmax=False):
         models_dict = {'model':model}
         super().__init__(models_dict, return_uncs, softmax)
         self.model = model
-        self.n_samples = n_samples
         self.as_ensemble = as_ensemble
         self.transforms = transforms
         if not self.as_ensemble:
@@ -82,7 +81,7 @@ class TTA(ensemble.Ensemble):
             self.uncs['MCP (Ensemble)'] = lambda x: unc.MCP_unc(torch.mean(x,axis = 0))
             self.uncs['Entropy (Ensemble)'] = lambda x: unc.entropy(torch.mean(x,axis = 0))
     def get_samples(self,x):
-        self.ensemble = TestTimeAugmentation(self.model,x,self.n_samples, self.transforms)
+        self.ensemble = TestTimeAugmentation(self.model,x,self.transforms)
         return self.ensemble
 
     def deterministic(self,x):
