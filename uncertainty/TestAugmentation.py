@@ -11,7 +11,7 @@ import torchvision
 def TestTimeAugmentation(model,X, transforms):
     with torch.no_grad(): 
         samples = []
-        pred = model(x)
+        pred = model(X)
         samples.append(pred)
         for t in transforms:
             x = t(X)
