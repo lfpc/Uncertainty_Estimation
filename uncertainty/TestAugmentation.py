@@ -11,6 +11,8 @@ import torchvision
 def TestTimeAugmentation(model,X, transforms):
     with torch.no_grad(): 
         samples = []
+        pred = model(x)
+        samples.append(pred)
         for t in transforms:
             x = t(X)
             pred = model(x)
@@ -48,16 +50,18 @@ class Multiply:
         self.a = a
 
     def __call__(self, x):
-        return torch.clamp(x*self.a,min = 0.0,max = 1.0)
+        #torch.clamp(x*self.a,min = 0.0,max = 1.0)
+        return x*self.a
 class Add:       
     def __init__(self, a:float):
         self.a = a
 
     def __call__(self, x):
-        return torch.clamp(x+self.a,min = 0.0,max = 1.0)
-
+        #torch.clamp(x+self.a,min = 0.0,max = 1.0)
+        return x+self.a
 
 class TTA(ensemble.Ensemble):
+    # ver se essas coisas funcionam com batches
     transforms = [F.hflip,
                   Scale(1.1),
                   Scale(1.2),
