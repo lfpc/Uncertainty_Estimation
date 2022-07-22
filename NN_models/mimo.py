@@ -57,7 +57,7 @@ class Trainer_MIMO(TE.Trainer):
         self.model.train()
         dev = next(self.model.parameters()).device
         progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
-        maxacc
+        maxacc = 0 
         for epoch in progress_epoch:
             desc = 'Progress:'
             desc = f'Loss: {self.loss[-1]:.4f} |' +desc
