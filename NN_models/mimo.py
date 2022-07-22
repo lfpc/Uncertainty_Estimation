@@ -8,7 +8,8 @@ from tqdm.notebook import tqdm,trange
 class MIMOModel(nn.Module):
     def __init__(self,model,num_classes, ensemble_num: int = 3, name = 'MIMO',softmax = 'log', *args):
         super(MIMOModel, self).__init__()
-        self.model = model(num_classes = num_classes * ensemble_num, name = name,softmax = False, *args)
+        self.model = model(num_classes = num_classes * ensemble_num, softmax = False, *args)
+        self.name = name
         self.softmax = softmax
         self.ensemble_num = ensemble_num
         self.classifier_layer = self.model.classifier_layer
@@ -36,6 +37,9 @@ class MIMOModel(nn.Module):
         elif self.softmax:
             output = F.softmax(output,dim = -1)
         return output
+    def save_state_dict(self,path, name = None):
+        if name is None: name = self.name
+        torch.save(self.state_dict(), path + r'/' + name + '.pt')
 
 class Trainer_MIMO(TE.Trainer):
     def __init__(self, model, optimizer, loss_criterion, training_data=None, validation_data=None, update_lr=(0,1), risk_dict=None):
@@ -46,13 +50,14 @@ class Trainer_MIMO(TE.Trainer):
         self.loss = []
         self.validate(plot = False)
 
-    def fit(self,train_dataloader,n_epochs = 1, checkpoint = True, PATH = '.'):
+    def fit(self,train_dataloader,n_epochs:int = 1, checkpoint:bool = True, PATH:str = '.'):
         train_dataloaders = [
         train_dataloader for _ in range(self.model.ensemble_num)]
 
         self.model.train()
         dev = next(self.model.parameters()).device
         progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
+        maxacc
         for epoch in progress_epoch:
             desc = 'Progress:'
             desc = f'Loss: {self.loss[-1]:.4f} |' +desc
@@ -74,10 +79,15 @@ class Trainer_MIMO(TE.Trainer):
 
             if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
                 TE.update_optim_lr(self.optimizer,self.update_lr_rate)
-            self.validate(False,checkpoint, PATH)
+            self.validate(False)
+            #save mimo model is possible? or save base model?
+            if checkpoint:
+                if self.val_acc[-1] >= maxacc:
+                    maxacc = self.val_acc[-1]
+                    self.model.save_state_dict(PATH,self.model.name+'_checkpoint')
             self.model.train()
 
-    def validate(self,plot = True, checkpoint = False, PATH = '.'):
+    def validate(self,plot:bool = True):
         self.model.eval()
         test_loss = 0
         correct = 0
@@ -98,10 +108,5 @@ class Trainer_MIMO(TE.Trainer):
         self.val_acc.append(acc)
         if plot:
             print(f"[Valid] Average loss: {test_loss:.4f} \t Accuracy:{acc:2.2f}%")
-        #save mimo model is possible? or save base model?
-        '''if checkpoint:
-            if self.val_acc[-1] >= maxacc:
-                maxacc = self.val_acc[-1]
-                self.model.model.save_state_dict(PATH,self.model.name+'_checkpoint')'''
         return acc,test_loss
 
