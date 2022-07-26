@@ -24,7 +24,6 @@ class MIMOModel(nn.Module):
             ensemble_num, batch_size = input_shape_list[0], input_shape_list[1]
         
         assert ensemble_num == self.ensemble_num
-    
 
         input_tensor = input_tensor.view([ensemble_num * batch_size] + input_shape_list[2:])
         output = self.model(input_tensor)
