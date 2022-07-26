@@ -144,12 +144,14 @@ def ECE(y_true,
 
 class selective_metrics():
     LINES = ["-","--","-.",":"]
+    linecycler = cycle(LINES)
     FIGSIZE = (8,6)
     LABEL_FONTSIZE = 18
     TICKS_FONTSIZE = 12
     LINEWIDTH = 3
     SoftMax_uncs = {'MCP': unc.MCP_unc,
-                    'Entropy': unc.entropy} 
+                    'Entropy': unc.entropy}
+    
     def __init__(self,model,dataset, c_list = np.arange(0.05,1.05,0.05)) -> None:
         self.c_list = c_list
         self.d_uncs = {}
@@ -180,11 +182,9 @@ class selective_metrics():
     def plot_RC(self,aurc = False,*args):
         figure(figsize=self.FIGSIZE, dpi=80)
         self.RC_curves(*args)
-
-        linecycler = cycle(self.LINES)
         for name,risk in self.risk.items():
             label = name+f' | AURC = {auc(self.c_list,risk)}' if aurc else name
-            plt.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(linecycler))
+            plt.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
         
         plt.legend()
         plt.xlabel("Coverage", fontsize=self.LABEL_FONTSIZE)
@@ -209,11 +209,11 @@ class selective_metrics():
         figure(figsize=self.FIGSIZE, dpi=80)
         self.ROC_curves(*args)
 
-        linecycler = cycle(self.LINES)
+        
         for name,risk in self.ROC.items():
             (fpr,tpr) = self.ROC[name]
             label = name+f' | AUROC = {auc(fpr,tpr)}' if auroc else name
-            plt.plot(fpr,tpr, label = label, linewidth = self.LINEWIDTH,linestyle = next(linecycler))
+            plt.plot(fpr,tpr, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
         
         plt.legend()
         plt.xlabel("False Positive Rate", fontsize=self.LABEL_FONTSIZE)
@@ -232,5 +232,19 @@ class selective_metrics():
         return d
     def AURC(self):
         pass
+    def get_thresholds(self):
+        self.thresholds = {}
+        for name,un in self.d_uncs.items():
+            self.thresholds[name] = [np.percentile(un,100*c) for c in self.c_list]
+    def plot_thresholds(self):
+        for name,tau in self.thresholds[name].items():
+            plt.plot(self.c_list,tau, label = name, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
+        plt.legend()
+        plt.xlabel("Coverage", fontsize=self.LABEL_FONTSIZE)
+        plt.ylabel("Threshold", fontsize=self.LABEL_FONTSIZE)
+        plt.xticks(fontsize=self.TICKS_FONTSIZE)
+        plt.yticks(fontsize=self.TICKS_FONTSIZE)
+        plt.grid()
+        
 
 
