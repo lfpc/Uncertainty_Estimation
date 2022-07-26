@@ -238,7 +238,7 @@ class selective_metrics():
             self.thresholds[name] = [np.percentile(un.cpu(),100*c) for c in self.c_list]
     def plot_thresholds(self):
         self.get_thresholds()
-        for name,tau in self.thresholds[name].items():
+        for name,tau in self.thresholds.items():
             plt.plot(self.c_list,tau, label = name, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
         plt.legend()
         plt.xlabel("Coverage", fontsize=self.LABEL_FONTSIZE)
