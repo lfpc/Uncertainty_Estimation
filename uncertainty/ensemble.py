@@ -85,8 +85,5 @@ class Ensemble(nn.Module):
             d_uncs[name] = fn(self.ensemble)
         return d_uncs
 
-class MIMO():
-    
-    pass
 
     
