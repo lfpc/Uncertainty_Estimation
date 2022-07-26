@@ -9,5 +9,6 @@ class MIMO_ensemble(ensemble.Ensemble):
 
     def get_samples(self,x):
         x = [x for _ in range(self.n_ensembles)]
+        x = torch.stack(x)
         self.ensemble = self.model(x)
         return self.ensemble
