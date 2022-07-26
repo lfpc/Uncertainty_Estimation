@@ -235,8 +235,9 @@ class selective_metrics():
     def get_thresholds(self):
         self.thresholds = {}
         for name,un in self.d_uncs.items():
-            self.thresholds[name] = [np.percentile(un,100*c) for c in self.c_list]
+            self.thresholds[name] = [np.percentile(un.cpu(),100*c) for c in self.c_list]
     def plot_thresholds(self):
+        self.get_thresholds()
         for name,tau in self.thresholds[name].items():
             plt.plot(self.c_list,tau, label = name, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
         plt.legend()
