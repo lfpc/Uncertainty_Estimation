@@ -193,24 +193,25 @@ class hist_train():
     
                 
 
-def update_optim_lr(optimizer,rate):
-    optimizer.param_groups[0]['lr'] /= rate
+class update_optim_lr():
+    def __init__(self,optimizer,steps,factor) -> None:
+        self.optimizer = optimizer
+        self.steps = steps
+        self.factor = factor
+    def step(self):
+        self.optimizer.param_groups[0]['lr'] /= self.factor
 
 class Trainer():
     '''Class for easily training/fitting a Pytorch's NN model. Creates 2 'hist' classes,
     keeping usefull metrics and values.'''
     def __init__(self,model,optimizer,loss_criterion,training_data = None,validation_data = None,
-                    update_lr = (0,1),risk_dict = None):
+                    lr_scheduler = None,risk_dict = None):
 
         self.model = model
         self.optimizer = optimizer
         self.loss_fn = loss_criterion
         self.epoch = 0
-        if isinstance(update_lr,tuple):
-            self.update_lr_epochs = update_lr[0]
-            self.update_lr_rate = update_lr[1]
-        elif isinstance(update_lr,dict): #construir
-            self.update_lr = update_lr
+        self.lr_scheduler = lr_scheduler
 
         if training_data is not None:
             self.hist_train = hist_train(model,loss_criterion,training_data, risk_dict = risk_dict)
@@ -245,8 +246,7 @@ class Trainer():
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
             self.update_hist(dataset = update_hist)
             self.epoch += 1
-            if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
-                update_optim_lr(self.optimizer,self.update_lr_rate)
+            self.lr_scheduler.step(self.epoch)
             if live_plot is True:
                 desc_dict = {}
                 if hasattr(self,'hist_train'):
