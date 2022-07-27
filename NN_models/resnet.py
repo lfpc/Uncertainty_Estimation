@@ -296,7 +296,9 @@ def _resnet(block: Type[Union[BasicBlock, Bottleneck]], layers: List[int],
 
 def ResNet50(**kwargs: Any) -> ResNet:
   """ResNet-50 model from https://arxiv.org/pdf/1512.03385.pdf."""
-  return _resnet(Bottleneck, [3, 4, 6, 3], name = 'ResNet50',**kwargs)
+  if not 'name' in kwargs:
+      kwargs['name'] = 'ResNet50'
+  return _resnet(Bottleneck, [3, 4, 6, 3], **kwargs)
 
 def ResNet101(**kwargs: Any) -> ResNet:
     """ResNet-101 from `Deep Residual Learning for Image Recognition <https://arxiv.org/pdf/1512.03385.pdf>`__.
@@ -320,8 +322,9 @@ def ResNet101(**kwargs: Any) -> ResNet:
     .. autoclass:: torchvision.models.ResNet101_Weights
         :members:
     """
-
-    return _resnet(Bottleneck, [3, 4, 23, 3], name = 'ResNet101', **kwargs)
+    if not 'name' in kwargs:
+      kwargs['name'] = 'ResNet101'
+    return _resnet(Bottleneck, [3, 4, 23, 3], **kwargs)
 
 def ResNet34(**kwargs: Any) -> ResNet:
     """ResNet-34 from `Deep Residual Learning for Image Recognition <https://arxiv.org/pdf/1512.03385.pdf>`__.
@@ -340,8 +343,10 @@ def ResNet34(**kwargs: Any) -> ResNet:
     .. autoclass:: torchvision.models.ResNet34_Weights
         :members:
     """
+    if not 'name' in kwargs:
+      kwargs['name'] = 'ResNet34'
+    return _resnet(BasicBlock, [3, 4, 6, 3], **kwargs)
 
-    return _resnet(BasicBlock, [3, 4, 6, 3], name = 'ResNet34', **kwargs)
 def ResNet18(**kwargs: Any) -> ResNet:
     """ResNet-18 from `Deep Residual Learning for Image Recognition <https://arxiv.org/pdf/1512.03385.pdf>`__.
     Args:
@@ -359,5 +364,6 @@ def ResNet18(**kwargs: Any) -> ResNet:
     .. autoclass:: torchvision.models.ResNet18_Weights
         :members:
     """
-
-    return _resnet(BasicBlock, [2, 2, 2, 2], name = 'ResNet18', **kwargs)
+    if not 'name' in kwargs:
+      kwargs['name'] = 'ResNet18'
+    return _resnet(BasicBlock, [2, 2, 2, 2], **kwargs)
