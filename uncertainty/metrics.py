@@ -236,11 +236,11 @@ class selective_metrics():
         self.thresholds = {}
         for name,un in self.d_uncs.items():
             self.thresholds[name] = np.array([np.percentile(un.cpu(),100*c) for c in self.c_list])
-    def plot_thresholds(self,normalized = False):
+    def plot_thresholds(self,normalize = False):
         self.get_thresholds()
         figure(figsize=self.FIGSIZE, dpi=80)
         for name,tau in self.thresholds.items():
-            if normalized:
+            if normalize:
                 assert np.all(tau>0), "normalize non positive array"
                 tau /= tau.max()
             plt.plot(self.c_list,tau, label = name, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))

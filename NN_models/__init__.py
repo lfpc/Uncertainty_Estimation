@@ -163,3 +163,4 @@ class Model_CNN_with_g_and_h(Model_CNN_with_g):
 from .wide_resnet import WideResNet
 from .vgg import VGG_16
 from .CNN8 import CNN8
+from .resnet import ResNet101,ResNet18,ResNet34,ResNet50
