@@ -246,7 +246,8 @@ class Trainer():
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
             self.update_hist(dataset = update_hist)
             self.epoch += 1
-            self.lr_scheduler.step(self.epoch)
+            if self.lr_scheduler is not None:
+                self.lr_scheduler.step(self.epoch)
             if live_plot is True:
                 desc_dict = {}
                 if hasattr(self,'hist_train'):
