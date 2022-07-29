@@ -76,33 +76,11 @@ class TTA(ensemble.Ensemble):
     def __init__(self, model,as_ensemble = True, transforms = transforms,
                  return_uncs=False, softmax=False):
         models_dict = {'model':model}
-        super().__init__(models_dict, return_uncs, softmax)
-        self.model = model
-        self.as_ensemble = as_ensemble
+        super().__init__(models_dict, return_uncs,as_ensemble, softmax,model)
+
         self.transforms = transforms
-        if not self.as_ensemble:
-            self.uncs = copy(self.uncs)
-            self.uncs['MCP (Ensemble)'] = lambda x: unc.MCP_unc(torch.mean(x,axis = 0))
-            self.uncs['Entropy (Ensemble)'] = lambda x: unc.entropy(torch.mean(x,axis = 0))
+
     def get_samples(self,x):
         self.ensemble = TestTimeAugmentation(self.model,x,self.transforms)
         return self.ensemble
-
-    def deterministic(self,x):
-        y = self.model(x)
-        if self.softmax and not self.model.softmax:
-            y = torch.nn.functional.softmax(y,dim=-1)
-        if self.return_uncs:
-            d_uncs = self.get_unc(x)
-            return y,d_uncs
-        else:
-            self.get_samples(x) #needed if get_unc get called, as usually does
-            return y
-    
-    def forward(self,x):
-        if self.as_ensemble:
-            y = super().forward(x)
-        else:
-            y = self.deterministic(x)
-        return y
 

@@ -86,7 +86,11 @@ class DataGenerator():
             self.generate_dataloaders()
 
     def get_complete_training_dataloader(self):
-        return DataLoader(self.training_data, batch_size=self.params['train_batch_size'],shuffle = True)
+        if self.params['validation_size'] > 0:
+            return DataLoader(self.training_data, batch_size=self.params['train_batch_size'],shuffle = True)
+        else:
+            return self.train_dataloader
+            
     def __repr__(self):
         infos = f"{self.name} DATASET : \n Trainining data length = {self.train_len} \n"
         infos += f"Validation data length = {self.val_len} \n Test data length = {self.test_len}"

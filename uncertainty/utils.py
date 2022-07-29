@@ -12,6 +12,18 @@ def enable_dropout(model):
     for m in model.modules():
         if m.__class__.__name__.startswith('Dropout'):
             m.train()
+def enable_BatchNormalization(model):
+    """ Function to enable the dropout layers during test-time """
+    for m in model.modules():
+        if m.__class__.__name__.startswith('BatchNorm'):
+            m.train()
+            m.track_running_stats = True
+def disable_BatchNormalization(model):
+    """ Function to enable the dropout layers during test-time """
+    for m in model.modules():
+        if m.__class__.__name__.startswith('BatchNorm'):
+            m.training = model.training
+            m.track_running_stats = False
 
 def get_most_uncertain(data,uncertainty_method, n = 1):
     if not isinstance(uncertainty_method,(torch.Tensor,list,np.ndarray)):

@@ -43,42 +43,25 @@ def get_MCD(model,X,n=10):
 
 class MonteCarloDropout(ensemble.Ensemble):
     def __init__(self,model, n_samples, as_ensemble = True,return_uncs = False, softmax = False):
-        super().__init__(models_dict = {'model':model}, return_uncs= return_uncs, softmax = softmax)
-        self.model = model
+        models_dict = {'model':model}
+        super().__init__(models_dict, return_uncs, as_ensemble, softmax)
         self.n_samples = n_samples
-        self.as_ensemble = as_ensemble
-        if not self.as_ensemble:
-            self.uncs = copy(self.uncs)
-            self.uncs['MCP (MCD)'] = lambda x: unc.MCP_unc(torch.mean(x,axis = 0))
-            self.uncs['Entropy (MCD)'] = lambda x: unc.entropy(torch.mean(x,axis = 0))
-            
         self.set_dropout()
 
-    def set_dropout(self):
-        self.model.eval()
+    def set_dropout(self,eval = False):
+        if eval:
+            self.model.eval()
         unc_utils.enable_dropout(self.model)
 
     def get_samples(self,x, enable = False):
+        if not self.as_ensemble:
+            enable = True
         self.ensemble = mcd_pred(self.model,x,self.n_samples, enable=enable)
         return self.ensemble
 
     def deterministic(self,x):
         self.eval()
-        y = self.model(x)
-        self.set_dropout()
-        if self.return_uncs:
-            d_uncs = self.get_unc(x)
-            return y,d_uncs
-        else:
-            self.get_samples(x) #needed if get_unc get called, as usually does
-            return y
-
-    def forward(self,x):
-        if self.as_ensemble:
-            y = super().forward(x)
-        else:
-            y = self.deterministic(x)
-        return y
+        return super().deterministic(x)
 
 if __name__ == "__main__":
     import NN_models
