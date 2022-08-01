@@ -237,7 +237,7 @@ class Trainer():
                 if hasattr(self,'hist_train'):
                     desc = f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} |' +desc
                 if hasattr(self,'hist_val'):
-                    desc = f'Acc_val: {self.hist_val.acc_list[-1]:.2f} | ' + desc
+                    desc = f'Acc_val (max): {self.hist_val.acc_list[-1]:.2f} ({max(self.hist_val.acc_list):.2f}) | ' + desc
 
                 progress_epoch.set_description(desc)
                 progress.disable = False
@@ -254,7 +254,8 @@ class Trainer():
                     desc_dict['Train loss'] = self.hist_train.loss_list
                 if hasattr(self,'hist_val'):
                     desc_dict['Validation loss'] = self.hist_val.loss_list
-                utils.live_plot(desc_dict)
+                    desc_dict['MIN Val loss'] = np.argmin(self.hist_val.loss_list)
+                utils.live_plot(desc_dict,title = f'Loss {type(self.loss_fn).__name__}')
                 display(progress_epoch.container)
             elif live_plot == 'print':
                 print('Epoch ', self.epoch, ', loss = ', loss)

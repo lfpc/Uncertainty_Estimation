@@ -18,7 +18,10 @@ def live_plot(data_dict, figsize=(7,5), title=''):
     clear_output(wait=True)
     plt.figure(figsize=figsize)
     for label,data in data_dict.items():
-        plt.plot(data, label=label)
+        if isinstance(data,int):
+            plt.axvline(data,linestyle = '--', color = 'r', label = label)
+        else:
+            plt.plot(data, label=label)
     plt.title(title)
     plt.grid(True)
     plt.xlabel('epoch')
