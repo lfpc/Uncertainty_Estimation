@@ -13,6 +13,7 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
         self.model = model
         self.n_samples = n_samples
         self.as_ensemble = as_ensemble
+    
         if not self.as_ensemble:
             self.uncs = copy(self.uncs)
             self.uncs['MCP (MCD)'] = lambda x: unc.MCP_unc(torch.mean(x,axis = 0))
@@ -56,6 +57,7 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
         ensemble = []
         for s in range(self.n_samples):
             im_train,_ = next(self.batch_loader)
+            im_train = im_train.to(self.device)
             self.set_BN_mode()
             with torch.no_grad():
                 self.model(im_train)
