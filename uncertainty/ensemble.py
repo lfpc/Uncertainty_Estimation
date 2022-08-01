@@ -50,6 +50,7 @@ class Ensemble(nn.Module):
         super().to(device)
         for _,model in self.models_dict.items():
             model.to(device)
+        self.device = device
         return self
     def eval(self):
         super().eval()
