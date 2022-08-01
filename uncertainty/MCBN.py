@@ -9,7 +9,7 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
         super().__init__(models_dict = {'model':model}, return_uncs= return_uncs, softmax = softmax)
         
         assert isinstance(batch_loader.sampler,torch.utils.data.sampler.RandomSampler), "Batch Loader should have shuffle set to True to give randomness"
-        self.batch_loader = iter(batch_loader)
+        self.batch_loader = batch_loader
         self.model = model
         self.n_samples = n_samples
         self.as_ensemble = as_ensemble
@@ -55,8 +55,9 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
 
     def get_samples(self,x):
         ensemble = []
-        for s in range(self.n_samples):
-            im_train,_ = next(self.batch_loader)
+        batch_loader = iter(self.batch_loader)
+        for _ in range(self.n_samples):
+            im_train,_ = next(batch_loader)
             im_train = im_train.to(self.device)
             self.set_BN_mode()
             with torch.no_grad():
