@@ -254,7 +254,7 @@ class Trainer():
                     desc_dict['Train loss'] = self.hist_train.loss_list
                 if hasattr(self,'hist_val'):
                     desc_dict['Validation loss'] = self.hist_val.loss_list
-                    desc_dict['MIN Val loss'] = np.argmin(self.hist_val.loss_list)
+                    desc_dict['MIN Val loss'] = int(np.argmin(self.hist_val.loss_list))
                 utils.live_plot(desc_dict,title = f'Loss {type(self.loss_fn).__name__}')
                 display(progress_epoch.container)
             elif live_plot == 'print':

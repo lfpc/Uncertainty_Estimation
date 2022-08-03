@@ -48,6 +48,7 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
             m.train()
             m.track_running_stats = True
             m.momentum = 1
+            
     def reset_normal_mode(self):
         self.eval()
         self.__set_main_attributes()
