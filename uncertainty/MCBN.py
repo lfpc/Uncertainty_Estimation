@@ -13,11 +13,6 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
         self.model = model
         self.n_samples = n_samples
         self.as_ensemble = as_ensemble
-    
-        if not self.as_ensemble:
-            self.uncs = copy(self.uncs)
-            self.uncs['MCP (MCD)'] = lambda x: unc.MCP_unc(torch.mean(x,axis = 0))
-            self.uncs['Entropy (MCD)'] = lambda x: unc.entropy(torch.mean(x,axis = 0))
 
         self.__get_BN_modules()
         self.__save_main_attributes()
@@ -27,6 +22,7 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
         for m in self.model.modules():
             if m.__class__.__name__.startswith('BatchNorm'):
                 self.__modules.append(m)
+        assert len(self.__modules)>0, "No BatchNormalization modules found in model"
 
     def __save_main_attributes(self):
         self.__momentum = {}
@@ -72,9 +68,3 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
     def deterministic(self,x):
         self.reset_normal_mode()
         return super().deterministic(x)
-
-#testar se, depois de tudo, o modelo continua com previsões iguais (voltar ao fixed mu deu certo)
-#Analisar diferença se, em vez de mu, utilizar mu1 (apenas permitir a atualização com momentum)
-
-#na verdade é só setar o momentum em 1. Refazer
-#em pytorch é na verdade momentum x mu0 + 1-momentum  * mu1. Conferir.

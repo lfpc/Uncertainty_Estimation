@@ -14,14 +14,18 @@ from IPython.display import clear_output
 def save_state_dict(model,path, name):
     torch.save(model.state_dict(), path + r'/' + name + '.pt')
 
-def live_plot(data_dict, figsize=(7,5), title=''):
+def live_plot(data_dict, figsize=(7,5), title='', adjust = False):
     clear_output(wait=True)
     plt.figure(figsize=figsize)
+    lim = 0
     for label,data in data_dict.items():
         if isinstance(data,int):
             plt.axvline(data,linestyle = '--', color = 'r', label = label)
+            lim = max(np.percentile(data,97, method = 'lower'),lim)
         else:
             plt.plot(data, label=label)
+    if adjust:
+        plt.ylim(top=lim)
     plt.title(title)
     plt.grid(True)
     plt.xlabel('epoch')

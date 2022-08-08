@@ -6,6 +6,7 @@ import pickle
 import pandas as pd
 from tqdm.notebook import tqdm,trange
 from IPython.display import display
+from os.path import join
 
 def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,set_train_mode = True):
     '''Train a Neural Network'''
@@ -255,7 +256,7 @@ class Trainer():
                 if hasattr(self,'hist_val'):
                     desc_dict['Validation loss'] = self.hist_val.loss_list
                     desc_dict['MIN Val loss'] = int(np.argmin(self.hist_val.loss_list))
-                utils.live_plot(desc_dict,title = f'Loss {type(self.loss_fn).__name__}')
+                utils.live_plot(desc_dict,title = f'Loss {type(self.loss_fn).__name__}',adjust=True)
                 display(progress_epoch.container)
             elif live_plot == 'print':
                 print('Epoch ', self.epoch, ', loss = ', loss)
@@ -277,12 +278,14 @@ class Trainer():
     def save_hist(self,path, name = None, method = 'pickle-df'):
         assert method == 'pickle-class'  or method == 'pickle-df' or method == 'csv'
         if name is None: name = self.model.name
-        pass
+
         #salvar todas hist daqui
         if hasattr(self,'hist_train'):
-            self.hist_train.save_df(path+r'/'+name+'train_hist', method)
+            name_ = name+'train_hist'
+            self.hist_train.save_df(join(path,name_), method)
         if hasattr(self,'hist_val'):
-            self.hist_val.save_df(path+r'/'+name+'val_hist', method)
+            name_ = name+'val_hist'
+            self.hist_train.save_df(join(path,name_), method)
 
     def save_all(self, path_model, path_hist, name = None):
         self.save_hist(path_hist, name)

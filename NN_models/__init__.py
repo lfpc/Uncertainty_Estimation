@@ -2,6 +2,7 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
+from os.path import join
 
 
 def construct_conv_layer(blocks):
@@ -56,7 +57,8 @@ class Model_CNN(nn.Module):
 
     def save_state_dict(self,path, name = None):
         if name is None: name = self.name
-        torch.save(self.state_dict(), path + r'/' + name + '.pt')
+        name = name + '.pt'
+        torch.save(self.state_dict(), join(path,name))#path + r'/' + name + '.pt')
 
 '''# Define model
 class Model_CNN_with_g(Model_CNN):
