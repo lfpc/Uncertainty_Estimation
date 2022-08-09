@@ -260,8 +260,21 @@ def get_n_biggest(vec,n):
     unc = torch.argsort(vec, descending = True)
     return unc[0:n]
 
-        
-    
+def list_from_index(l,index):
+    return [l[i] for i in index]
+
+def slice_dict(d,keys):
+    if keys_in_dict(keys,d):
+        return {name:value for name,value in d.items() if name in keys}
+    elif all(isinstance(x,int) for x in keys):
+        l = list(d.items())
+        l = list_from_index(l,keys)
+        return dict(l)
+    else:
+        raise Exception("Keys is neither keys nor index")
+
+def keys_in_dict(keys,d):
+    return set(keys) <= set(d.keys())
 
 if __name__ == '__main__':
     pass
