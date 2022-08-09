@@ -10,6 +10,7 @@ import uncertainty as unc
 from uncertainty import utils as unc_utils
 from sklearn.metrics import auc,brier_score_loss
 from scipy.stats import spearmanr,pearsonr
+from pandas import DataFrame
 #from sklearn.calibration import calibration_curve as sk_calibration_curve
 
 
@@ -260,6 +261,10 @@ class selective_metrics():
     def correlation(self,metric = 'spearman'):
         if metric == 'spearman':
             fn = spearmanr
-        
+        df = DataFrame(index = self.d_uncs.keys(),columns=self.d_uncs.keys())
+        for name,un in self.d_uncs.items():
+            for name_2,un_2 in self.d_uncs.items():
+                df[name][name_2] = fn(un.cpu().numpy(),un_2.cpu().numpy()).correlation
+        return df
 
 
