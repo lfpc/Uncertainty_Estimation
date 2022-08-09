@@ -94,6 +94,6 @@ class TTA(ensemble.Ensemble):
         self.transforms = transforms
 
     def get_samples(self,x):
-        self.ensemble = TestTimeAugmentation(self.model,x,self.transform,use_main = self.use_main)
+        self.ensemble = TestTimeAugmentation(self.model,x,self.transforms,use_main = self.use_main)
         return self.ensemble
 
