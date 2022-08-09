@@ -86,14 +86,14 @@ class TTA(ensemble.Ensemble):
                   Add(-0.1),
                   FiveCrop(32,4)]
 
-    def __init__(self, model,as_ensemble = True, transforms = transforms,
-                 return_uncs=False, softmax=False):
+    def __init__(self, model,as_ensemble:bool = True, transforms = transforms,
+                 return_uncs:bool =False, softmax=False, use_main:bool = True):
         models_dict = {'model':model}
         super().__init__(models_dict, return_uncs,as_ensemble, softmax,model)
-
+        self.use_main = use_main
         self.transforms = transforms
 
     def get_samples(self,x):
-        self.ensemble = TestTimeAugmentation(self.model,x,self.transforms)
+        self.ensemble = TestTimeAugmentation(self.model,x,self.transform,use_main = self.use_main)
         return self.ensemble
 

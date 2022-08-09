@@ -9,6 +9,7 @@ from itertools import cycle
 import uncertainty as unc
 from uncertainty import utils as unc_utils
 from sklearn.metrics import auc,brier_score_loss
+from scipy.stats import spearmanr,pearsonr
 #from sklearn.calibration import calibration_curve as sk_calibration_curve
 
 
@@ -59,6 +60,11 @@ def Precision_Recall():
 def AUPR():
     pass
 
+def correlation(self,a,b,metric = 'spearman'):
+    if metric == 'spearman':
+        fn = spearmanr
+    rho = fn(a,b)    
+    return rho
     
 
 def optimum_RC(y_pred,y_true,risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
@@ -250,6 +256,10 @@ class selective_metrics():
         plt.xticks(fontsize=self.TICKS_FONTSIZE)
         plt.yticks(fontsize=self.TICKS_FONTSIZE)
         plt.grid()
+
+    def correlation(self,metric = 'spearman'):
+        if metric == 'spearman':
+            fn = spearmanr
         
 
 
