@@ -21,8 +21,8 @@ def live_plot(data_dict, figsize=(7,5), title='', adjust = False):
     for label,data in data_dict.items():
         if isinstance(data,int):
             plt.axvline(data,linestyle = '--', color = 'r', label = label)
-            lim = max(np.percentile(data,97, method = 'lower'),lim)
         else:
+            lim = max(np.percentile(data,97, method = 'lower'),lim)
             plt.plot(data, label=label)
     if adjust:
         plt.ylim(top=lim)
