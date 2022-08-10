@@ -170,6 +170,8 @@ class selective_metrics():
 
         #if isinstance(self.output,tuple):
         #    self.output,self.g = self.output
+    def fix_scale(self):
+        pass
     def add_uncs(self,unc_fn:dict):
         for name,un in unc_fn.items():
             if callable(un):
@@ -183,6 +185,7 @@ class selective_metrics():
             self.risk[name] = RC_curve(self.output,self.label,un,risk, self.c_list)
         for name,un in uncs.items():
             self.risk[name] = RC_curve(self.output,self.label,un,risk, self.c_list)
+        #plot optimal curve
         
         return self.risk
 
