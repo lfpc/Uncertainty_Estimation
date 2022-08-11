@@ -8,6 +8,7 @@ import torch
 from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
+from os.path import join
 
 
 def conv3x3(in_planes: int,
@@ -284,7 +285,8 @@ class ResNet(nn.Module):
     return self._forward_impl(x)
   def save_state_dict(self,path, name = None):
     if name is None: name = self.name
-    torch.save(self.state_dict(), path + r'/' + name + '.pt')
+    name = name + '.pt'
+    torch.save(self.state_dict(), join(path,name))#path + r'/' + name + '.pt')
   
 
 
