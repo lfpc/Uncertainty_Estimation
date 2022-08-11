@@ -194,17 +194,13 @@ class hist_train():
     
                 
 
-class Manual_Scheduler(torch.optim.lr_scheduler._LRScheduler):
-    #for constant decreasing see MultiStepLR
-    def __init__(self,optimizer,schedule:dict, last_epoch = -1,verbose = False):
-        self.schedule = schedule
-        super().__init__(optimizer, last_epoch, verbose)
-        
-    def get_lr(self):
-        if self.last_epoch in self.schedule.keys():
-            return [self.schedule[self.last_epoch]]
-        else:
-            return [group['lr'] for group in self.optimizer.param_groups]
+class update_optim_lr():
+    def __init__(self,optimizer,steps,factor) -> None:
+        self.optimizer = optimizer
+        self.steps = steps
+        self.factor = factor
+    def step(self):
+        self.optimizer.param_groups[0]['lr'] /= self.factor
 
 class Trainer():
     '''Class for easily training/fitting a Pytorch's NN model. Creates 2 'hist' classes,
@@ -295,11 +291,3 @@ class Trainer():
         self.save_hist(path_hist, name)
         self.model.save_state_dict(path_model, name)
         
-if __name__ == '__main__':
-    model =torch.nn.Sequential(torch.nn.Linear(10,10))
-    opt = torch.optim.SGD(model.parameters(), lr = 0.1)
-    schedule = {10:0.01,20:0.001,30:0.005}
-    scheduler = Manual_Scheduler(opt,schedule)
-    for e in range(35):
-        print(f"epoch = {e}, lr = {opt.param_groups[0]['lr']}")
-        scheduler.step(e)

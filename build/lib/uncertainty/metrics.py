@@ -159,11 +159,7 @@ class selective_metrics():
     SoftMax_uncs = {'MCP': unc.MCP_unc,
                     'Entropy': unc.entropy}
     
-    def __init__(self,model,dataset, c_list = np.arange(0.05,1.05,0.05),name = None) -> None:
-        if name is None:
-            self.name = model.name
-        else:
-            self.name = name
+    def __init__(self,model,dataset, c_list = np.arange(0.05,1.05,0.05)) -> None:
         self.c_list = c_list
         self.d_uncs = {}
         if callable(getattr(model, "get_unc", None)):
@@ -171,23 +167,11 @@ class selective_metrics():
         else:
             self.output,self.label = TE.accumulate_results(model,dataset)
         self.add_uncs(self.SoftMax_uncs)
-        self.fix_scale = False
 
-    def fix_plot_scale(self,x_range = None,y_range= None):
-        self.fix_scale = True
-        self.x_range = x_range
-        self.y_range = y_range
-
-    def config_plot(self):
-        plt.legend()
-        plt.xticks(fontsize=self.TICKS_FONTSIZE)
-        plt.yticks(fontsize=self.TICKS_FONTSIZE)
-        plt.grid()
-        plt.title(self.name)
-        if self.fix_scale:
-            plt.ylim(self.y_range)
-            plt.xlim(self.x_range)
-
+        #if isinstance(self.output,tuple):
+        #    self.output,self.g = self.output
+    def fix_scale(self):
+        pass
     def add_uncs(self,unc_fn:dict):
         for name,un in unc_fn.items():
             if callable(un):
@@ -212,10 +196,12 @@ class selective_metrics():
             label = name+f' | AURC = {auc(self.c_list,risk)}' if aurc else name
             plt.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
         
-        
+        plt.legend()
         plt.xlabel("Coverage", fontsize=self.LABEL_FONTSIZE)
         plt.ylabel("Risk", fontsize=self.LABEL_FONTSIZE)
-        self.config_plot()
+        plt.xticks(fontsize=self.TICKS_FONTSIZE)
+        plt.yticks(fontsize=self.TICKS_FONTSIZE)
+        plt.grid()
 
 
     def ROC_curves(self,uncs: dict = {}):
@@ -229,7 +215,6 @@ class selective_metrics():
             fpr, tpr, _ = ROC(y_true,un.cpu().numpy())
             self.ROC[name] = (fpr,tpr)
         return self.ROC
-
     def plot_ROC(self, auroc = True,*args):
         figure(figsize=self.FIGSIZE, dpi=80)
         self.ROC_curves(*args)
@@ -240,10 +225,12 @@ class selective_metrics():
             label = name+f' | AUROC = {auc(fpr,tpr)}' if auroc else name
             plt.plot(fpr,tpr, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
         
+        plt.legend()
         plt.xlabel("False Positive Rate", fontsize=self.LABEL_FONTSIZE)
         plt.ylabel("True Positive Rate", fontsize=self.LABEL_FONTSIZE)
-        self.config_plot()
-        
+        plt.xticks(fontsize=self.TICKS_FONTSIZE)
+        plt.yticks(fontsize=self.TICKS_FONTSIZE)
+        plt.grid()
 
     def E_AURC(self):
         d = {}
@@ -267,10 +254,12 @@ class selective_metrics():
                 assert np.all(tau>0), "normalize non positive array"
                 tau /= tau.max()
             plt.plot(self.c_list,tau, label = name, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
-
+        plt.legend()
         plt.xlabel("Coverage", fontsize=self.LABEL_FONTSIZE)
         plt.ylabel("Threshold", fontsize=self.LABEL_FONTSIZE)
-        self.config_plot()
+        plt.xticks(fontsize=self.TICKS_FONTSIZE)
+        plt.yticks(fontsize=self.TICKS_FONTSIZE)
+        plt.grid()
 
     def correlation(self,metric = 'spearman'):
         if metric == 'spearman':

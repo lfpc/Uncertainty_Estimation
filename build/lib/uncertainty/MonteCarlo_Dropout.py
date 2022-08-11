@@ -42,8 +42,9 @@ def get_MCD(model,X,n=10):
     return mean, var, MI
 
 class MonteCarloDropout(ensemble.Ensemble):
-    def __init__(self,model, n_samples, as_ensemble = True,return_uncs = False, softmax = False, name = 'MCDO'):
-        super().__init__(model, return_uncs, as_ensemble, softmax, name= name)
+    def __init__(self,model, n_samples, as_ensemble = True,return_uncs = False, softmax = False):
+        models_dict = {'model':model}
+        super().__init__(models_dict, return_uncs, as_ensemble, softmax, model)
         self.n_samples = n_samples
         self.set_dropout()
 

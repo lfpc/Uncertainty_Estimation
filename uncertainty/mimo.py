@@ -1,14 +1,5 @@
-from NN_models.mimo import *
+from NN_models.mimo import MIMO_Ensemble
 from uncertainty import ensemble
 
-class MIMO_ensemble(ensemble.Ensemble):
-    def __init__(self, model, return_uncs=False, softmax=False):
-        super().__init__(models_dict = {'model':model}, return_uncs= return_uncs, softmax = softmax)
-        self.model = model
-        self.n_ensembles = model.ensemble_num
-
-    def get_samples(self,x):
-        x = [x for _ in range(self.n_ensembles)]
-        x = torch.stack(x)
-        self.ensemble = self.model(x)
-        return self.ensemble
+def MIMO_ensemble(model_class, num_classes, n_ensembles: int = 3, name='MIMO', softmax='log',*args):
+    return ensemble.Ensemble(MIMO_Ensemble(model_class, num_classes, n_ensembles, name, softmax, *args))

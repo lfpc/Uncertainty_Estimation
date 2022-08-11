@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: uncertainty-estimation
+Version: 4.4.10
+Summary: Neural Networks in Pytorch - utils and losses, models e uncertainty quantifications definitions
+Home-page: https://github.com/lfpc/Uncertainty_Estimation
+Author: Luís FP Cattelan
+Author-email: luisfelipe1998@gmail.com
+License: MIT
+License-File: LICENSE

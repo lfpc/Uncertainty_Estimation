@@ -31,19 +31,15 @@ class Ensemble(nn.Module):
             'Var(Max)': MonteCarlo_maxvar,
             'MI': mutual_info}
 
-    def __init__(self,model:dict, #model
-                 return_uncs:bool = False, #return tuple (output,uncs_dict)
-                 as_ensemble:bool = True, #output as average of models
-                 softmax = False, #apply SM to ensemble output
-                 name = 'Ensemble'
-                 ):
+    def __init__(self,models_dict:dict, return_uncs:bool = False, as_ensemble:bool = True,softmax = False, model = None):
         super().__init__()
 
+        self.models_dict = models_dict
         self.return_uncs = return_uncs
         self.as_ensemble = as_ensemble
         self.softmax = softmax
         self.model = model
-        self.name = name
+        self.p = nn.Parameter(torch.tensor(0.5,requires_grad = True)) #dummy parameter
         self.eval()
         if not self.as_ensemble:
             self.uncs = copy(self.uncs)
@@ -52,26 +48,42 @@ class Ensemble(nn.Module):
     
     def to(self,device):
         super().to(device)
-        self.model.to(device)
+        for _,model in self.models_dict.items():
+            model.to(device)
+        self.device = device
         return self
-
     def eval(self):
         super().eval()
-        self.model.eval()
+        for _,model in self.models_dict.items():
+            model.eval()
+
+    def apply_softmax(self, method = 'all'):
+        if method == 'all':
+            for _,model in self.models_dict.items():
+                model.softmax = True
+        elif method == 'final':
+            for _,model in self.models_dict.items():
+                model.softmax = False
+            self.softmax = True
         
     def get_samples(self,x):
         ensemble = []
-        pred = self.model(x)
-        ensemble.append(pred)
+        for _,model in self.models_dict.items():
+            pred = model(x)
+            ensemble.append(pred)
         self.ensemble = torch.stack(ensemble)
         return self.ensemble
 
     def deterministic(self,x):
-        self.eval()
         y = self.model(x)
         if self.softmax and not self.model.softmax:
             y = torch.nn.functional.softmax(y,dim=-1)
-        return y
+        if self.return_uncs:
+            d_uncs = self.get_unc(x)
+            return y,d_uncs
+        else:
+            self.get_samples(x) #needed if get_unc get called, as usually does
+            return y
 
     def ensemble_forward(self,x):
 
@@ -89,10 +101,6 @@ class Ensemble(nn.Module):
             y = self.ensemble_forward(x)
         else:
             y = self.deterministic(x)
-            self.get_samples(x) #needed if get_unc get called, as usually does
-        if self.return_uncs:
-            d_uncs = self.get_unc()
-            return y,d_uncs
         return y
 
     def get_unc(self, x = None):
@@ -104,50 +112,4 @@ class Ensemble(nn.Module):
         return d_uncs
 
 
-class DeepEnsemble(Ensemble):
-
-    def __init__(self,models, #models for deep ensemble
-                 return_uncs:bool = False, #return tuple (output,uncs_dict)
-                 softmax = False, #apply SM to ensemble output
-                 name = 'DeepEnsemble'
-                 ):
-        if isinstance(models,dict):
-            self.models_dict = models
-            models = tuple(models.values())
-        self.p = nn.Parameter(torch.tensor(0.5,requires_grad = True)) #dummy parameter
-        super().__init__(models,return_uncs, softmax = softmax, name = name)
     
-    def to(self,device):
-        super(Ensemble,self).to(device)
-        for model in self.model:
-            model.to(device)
-        self.device = device
-        return self
-    def eval(self):
-        super(Ensemble,self).eval()
-        for model in self.model:
-            model.eval()
-
-    def apply_softmax(self, method = 'all'):
-        if method == 'all':
-            for model in self.model:
-                model.softmax = True
-        elif method == 'final':
-            for _,model in self.model:
-                model.softmax = False
-            self.softmax = True
-        
-    def get_samples(self,x):
-        ensemble = []
-        for model in self.model:
-            pred = model(x)
-            ensemble.append(pred)
-        self.ensemble = torch.stack(ensemble)
-        return self.ensemble
-
-    def deterministic(self,x):
-        model = self.model[0]
-        y = model(x)
-        if self.softmax and not model.softmax:
-            y = torch.nn.functional.softmax(y,dim=-1)
-        return y

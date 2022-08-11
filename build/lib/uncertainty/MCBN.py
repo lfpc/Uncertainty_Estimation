@@ -5,12 +5,12 @@ from copy import copy
 import uncertainty as unc
 
 class MonteCarloBatchNormalization(ensemble.Ensemble):
-    def __init__(self,model, n_samples, batch_loader,
-    as_ensemble = True,return_uncs = False, softmax = False, name = 'MCBN'):
-        super().__init__(model, return_uncs= return_uncs, softmax = softmax, name=name)
+    def __init__(self,model, n_samples, batch_loader,as_ensemble = True,return_uncs = False, softmax = False):
+        super().__init__(models_dict = {'model':model}, return_uncs= return_uncs, softmax = softmax)
         
         assert isinstance(batch_loader.sampler,torch.utils.data.sampler.RandomSampler), "Batch Loader should have shuffle set to True to give randomness"
         self.batch_loader = batch_loader
+        self.model = model
         self.n_samples = n_samples
         self.as_ensemble = as_ensemble
 
