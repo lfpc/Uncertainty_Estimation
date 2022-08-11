@@ -1,0 +1,3 @@
+[submodule "notebooks-scripts/ScriptsUncEst"]
+	path = notebooks-scripts/ScriptsUncEst
+	url = https://github.com/lfpc/ScriptsUncEst
