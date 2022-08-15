@@ -61,10 +61,8 @@ class Ensemble(nn.Module):
         return self
         
     def get_samples(self,x):
-        ensemble = []
-        pred = self.model(x)
-        ensemble.append(pred)
-        self.ensemble = torch.stack(ensemble)
+        '''Default ensemble model is to assume that self.model returns samples'''
+        self.ensemble = self.model(x)
         return self.ensemble
 
     def deterministic(self,x):
