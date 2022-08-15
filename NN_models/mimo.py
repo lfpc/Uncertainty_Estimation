@@ -107,8 +107,8 @@ class Trainer_MIMO(TE.Trainer):
             print(f"[Valid] Average loss: {test_loss:.4f} \t Accuracy:{acc:2.2f}%")
         return acc,test_loss
 
-class MIMO_Ensemble(MIMOModel):#
-    def __init__(self, model, num_classes, n_ensembles: int = 3, name='MIMO', softmax='log', *args):
+class MIMO_Ensemble(MIMOModel):
+    def __init__(self, model, num_classes, n_ensembles: int = 3, name='MIMO', softmax=True, *args):
         super().__init__(model, num_classes, n_ensembles, name, softmax, *args)
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = [x for _ in range(self.n_ensembles)]
