@@ -58,6 +58,7 @@ class Ensemble(nn.Module):
     def eval(self):
         super().eval()
         self.model.eval()
+        return self
         
     def get_samples(self,x):
         ensemble = []
@@ -102,6 +103,8 @@ class Ensemble(nn.Module):
         for name,fn in self.uncs.items():
             d_uncs[name] = fn(self.ensemble)
         return d_uncs
+    def load_state_dict(self, state_dict, strict: bool = True):
+        return self.model.load_state_dict(state_dict, strict)
 
 
 class DeepEnsemble(Ensemble):
