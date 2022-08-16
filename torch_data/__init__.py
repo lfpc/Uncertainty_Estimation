@@ -182,4 +182,4 @@ class Noisy_DataGenerator(DataGenerator):
         infos += f"Validation data length = {self.val_len} \n Test data length = {self.test_len}"
         return infos    
 
-from .cifar import Cifar10,Cifar100,Cifar100C,Cifar10C
+from .cifar import Cifar10,Cifar100,Cifar100C,Cifar10C,CIFAR_C_loader
