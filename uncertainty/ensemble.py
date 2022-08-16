@@ -31,7 +31,7 @@ class Ensemble(nn.Module):
             'Var(Max)': MonteCarlo_maxvar,
             'MI': mutual_info}
 
-    def __init__(self,model:dict, #model
+    def __init__(self,model, #model
                  return_uncs:bool = False, #return tuple (output,uncs_dict)
                  as_ensemble:bool = True, #output as average of models
                  softmax = False, #apply SM to ensemble output
@@ -44,7 +44,11 @@ class Ensemble(nn.Module):
         self.softmax = softmax
         self.model = model
         self.name = name
-        self.device = next(self.model.parameters()).device
+        try:
+            self.device = next(self.model.parameters()).device
+        except:
+            self.device = torch.device('cpu')
+            
         self.eval()
         if not self.as_ensemble:
             self.uncs = copy(self.uncs)
@@ -119,6 +123,7 @@ class DeepEnsemble(Ensemble):
             models = tuple(models.values())
         super().__init__(models,return_uncs, softmax = softmax, name = name)
         self.p = nn.Parameter(torch.tensor(0.5,requires_grad = True)) #dummy parameter
+        self.device = self.device = next(self.model[0].parameters()).device
     
     def to(self,device):
         super(Ensemble,self).to(device)
