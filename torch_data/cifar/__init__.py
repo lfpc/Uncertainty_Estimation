@@ -108,6 +108,7 @@ class Noisy_Cifar100(Noisy_DataGenerator,Cifar100):
         self.test_data.root = data_dir
         super().__init__(noise_size,noisy_val,params,
                 download, name)
+from corrupted import Cifar100C,Cifar10C
 
 
 
