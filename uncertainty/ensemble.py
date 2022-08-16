@@ -52,6 +52,7 @@ class Ensemble(nn.Module):
     
     def to(self,device):
         super().to(device)
+        self.device = device
         self.model.to(device)
         return self
 
