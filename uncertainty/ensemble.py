@@ -44,6 +44,7 @@ class Ensemble(nn.Module):
         self.softmax = softmax
         self.model = model
         self.name = name
+        self.device = next(self.model.parameters()).device
         self.eval()
         if not self.as_ensemble:
             self.uncs = copy(self.uncs)
