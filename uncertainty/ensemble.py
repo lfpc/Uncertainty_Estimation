@@ -115,8 +115,8 @@ class DeepEnsemble(Ensemble):
         if isinstance(models,dict):
             self.models_dict = models
             models = tuple(models.values())
-        self.p = nn.Parameter(torch.tensor(0.5,requires_grad = True)) #dummy parameter
         super().__init__(models,return_uncs, softmax = softmax, name = name)
+        self.p = nn.Parameter(torch.tensor(0.5,requires_grad = True)) #dummy parameter
     
     def to(self,device):
         super(Ensemble,self).to(device)
