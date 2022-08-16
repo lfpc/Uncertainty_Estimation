@@ -1,4 +1,4 @@
-import cifar
+from torch_data import cifar
 
 import os
 import numpy as np
