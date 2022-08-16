@@ -45,12 +45,22 @@ class MonteCarloDropout(ensemble.Ensemble):
     def __init__(self,model, n_samples, as_ensemble = True,return_uncs = False, softmax = False, name = 'MCDO'):
         super().__init__(model, return_uncs, as_ensemble, softmax, name= name)
         self.n_samples = n_samples
+        self.__get_Dropout_modules()
         self.set_dropout()
+
+    def __get_Dropout_modules(self):
+        self.__modules = []
+        for m in self.model.modules():
+            if m.__class__.__name__.startswith('Dropout'):
+                self.__modules.append(m)
+        assert len(self.__modules)>0, "No Dropout modules found in model"
 
     def set_dropout(self,eval = False):
         if eval:
             self.model.eval()
-        unc_utils.enable_dropout(self.model)
+        for m in self.__modules:
+            m.train()
+        #unc_utils.enable_dropout(self.model)
 
     def get_samples(self,x, enable = False):
         if not self.as_ensemble:
@@ -59,7 +69,6 @@ class MonteCarloDropout(ensemble.Ensemble):
         return self.ensemble
 
     def deterministic(self,x):
-        self.eval()
         return super().deterministic(x)
 
 if __name__ == "__main__":
