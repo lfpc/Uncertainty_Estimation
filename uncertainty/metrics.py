@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from NN_utils import train_and_eval as TE
 from sklearn.metrics import roc_curve as ROC
-from NN_utils import apply_mask
+from NN_utils import apply_mask, slice_dict
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 from itertools import cycle
@@ -173,6 +173,8 @@ class selective_metrics():
             self.output,self.label = TE.accumulate_results(model,dataset)
         self.add_uncs(self.SoftMax_uncs)
         self.fix_scale = False
+    def set_uncs(self,uncs):
+        self.d_uncs = slice_dict(self.d_uncs,uncs)
 
     def fix_plot_scale(self,x_range = None,y_range= None):
         self.fix_scale = True
@@ -197,17 +199,16 @@ class selective_metrics():
             else:
                 self.d_uncs[name] = un
         
-    def RC_curves(self,uncs: dict = {},risk = error_coverage):
+    def RC_curves(self,risk = error_coverage, optimum = False):
         self.risk = {}
         for name,un in self.d_uncs.items():
             self.risk[name] = RC_curve(self.output,self.label,un,risk, self.c_list)
-        for name,un in uncs.items():
-            self.risk[name] = RC_curve(self.output,self.label,un,risk, self.c_list)
-        #plot optimal curve
+        if optimum:
+            self.risk['Optimal'] = optimum_RC(self.output,self.label,risk, self.c_list)
         
         return self.risk
 
-    def plot_RC(self,aurc = False,*args):
+    def plot_RC(self,aurc = False,optimum = False,*args):
         #adicionar ideal
         figure(figsize=self.FIGSIZE, dpi=80)
         self.RC_curves(*args)
@@ -215,20 +216,16 @@ class selective_metrics():
             label = name+f' | AURC = {auc(self.c_list,risk)}' if aurc else name
             plt.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
         
-        
         plt.xlabel("Coverage", fontsize=self.LABEL_FONTSIZE)
         plt.ylabel("Risk", fontsize=self.LABEL_FONTSIZE)
         self.config_plot()
 
 
-    def ROC_curves(self,uncs: dict = {}):
+    def ROC_curves(self):
 
         self.ROC = {}
         y_true = np.logical_not(TE.correct_class(self.output,self.label).cpu().numpy())
         for name,un in self.d_uncs.items():
-            fpr, tpr, _ = ROC(y_true,un.cpu().numpy())
-            self.ROC[name] = (fpr,tpr)
-        for name,un in uncs.items():
             fpr, tpr, _ = ROC(y_true,un.cpu().numpy())
             self.ROC[name] = (fpr,tpr)
         return self.ROC
@@ -236,7 +233,6 @@ class selective_metrics():
     def plot_ROC(self, auroc = True,*args):
         figure(figsize=self.FIGSIZE, dpi=80)
         self.ROC_curves(*args)
-
         
         for name,(fpr,tpr) in self.ROC.items():
             label = name+f' | AUROC = {auc(fpr,tpr)}' if auroc else name
@@ -245,7 +241,17 @@ class selective_metrics():
         plt.xlabel("False Positive Rate", fontsize=self.LABEL_FONTSIZE)
         plt.ylabel("True Positive Rate", fontsize=self.LABEL_FONTSIZE)
         self.config_plot()
-        
+    def risk_diference(self,ref = 'MCP'):
+        risks_dif = {}
+        for name,risk in self.risk.items():
+            if ref in self.risk.keys():
+                risks_dif[name] = risk-self.risk[ref]
+            else:
+                risks_dif[name] = risk-ref
+        return risks_dif
+    def get_best(self):
+        best = np.array([r for r in self.risk.values()]).min(axis=0)
+        return best
 
     def E_AURC(self):
         d = {}
@@ -296,7 +302,7 @@ class selective_metrics():
         ax1.tick_params(axis="x",labelsize=self.TICKS_FONTSIZE)
         ax1.tick_params(axis="y",labelsize=self.TICKS_FONTSIZE)
         ax1.grid()
-        #self.fix_scale = False
+        self.fix_scale = False
         for name,(fpr,tpr) in self.ROC.items():
             label = name+f' | AUROC = {auc(fpr,tpr)}' if auroc else name
             ax2.plot(fpr,tpr, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
