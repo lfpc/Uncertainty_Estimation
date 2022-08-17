@@ -39,8 +39,8 @@ class MIMOModel(nn.Module):
 
 
 class Trainer_MIMO(TE.Trainer):
-    def __init__(self, model, optimizer, loss_criterion, training_data=None, validation_data=None, update_lr=(0,1), risk_dict=None):
-        super().__init__(model, optimizer, loss_criterion, None, None, update_lr, risk_dict)
+    def __init__(self, model, optimizer, loss_criterion, training_data=None, validation_data=None, lr_scheduler = None, risk_dict=None):
+        super().__init__(model, optimizer, loss_criterion, None, None, lr_scheduler=lr_scheduler, risk_dict = risk_dict)
         
         self.test_dataloader = validation_data 
         self.val_acc = []
@@ -74,8 +74,8 @@ class Trainer_MIMO(TE.Trainer):
                 loss.backward()
                 self.optimizer.step()
 
-            if (self.update_lr_epochs>0) and (self.epoch%self.update_lr_epochs == 0):
-                TE.update_optim_lr(self.optimizer,self.update_lr_rate)
+            if self.lr_scheduler is not None:
+                self.lr_scheduler.step(self.epoch)
             self.validate(False)
             #save mimo model is possible? or save base model?
             if checkpoint:
