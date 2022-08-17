@@ -224,7 +224,7 @@ class selective_metrics():
     def ROC_curves(self,uncs: dict = {}):
 
         self.ROC = {}
-        y_true = TE.correct_class(self.output,self.label).cpu().numpy()
+        y_true = np.logical_not(TE.correct_class(self.output,self.label).cpu().numpy())
         for name,un in self.d_uncs.items():
             fpr, tpr, _ = ROC(y_true,un.cpu().numpy())
             self.ROC[name] = (fpr,tpr)
@@ -238,8 +238,7 @@ class selective_metrics():
         self.ROC_curves(*args)
 
         
-        for name,risk in self.ROC.items():
-            (fpr,tpr) = self.ROC[name]
+        for name,(fpr,tpr) in self.ROC.items():
             label = name+f' | AUROC = {auc(fpr,tpr)}' if auroc else name
             plt.plot(fpr,tpr, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
         
@@ -295,8 +294,7 @@ class selective_metrics():
             ax1.set_ylabel("Risk", fontsize=self.LABEL_FONTSIZE)
     
         #self.fix_scale = False
-        for name,risk in self.ROC.items():
-            (fpr,tpr) = self.ROC[name]
+        for name,(fpr,tpr) in self.ROC.items():
             label = name+f' | AUROC = {auc(fpr,tpr)}' if auroc else name
             ax2.plot(fpr,tpr, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
             ax2.set_title('ROC curve')
