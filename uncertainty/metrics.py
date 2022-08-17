@@ -179,12 +179,13 @@ class selective_metrics():
         self.x_range = x_range
         self.y_range = y_range
 
-    def config_plot(self):
+    def config_plot(self, title = True):
         plt.legend()
         plt.xticks(fontsize=self.TICKS_FONTSIZE)
         plt.yticks(fontsize=self.TICKS_FONTSIZE)
         plt.grid()
-        plt.title(self.name)
+        if title:
+            plt.title(self.name)
         if self.fix_scale:
             plt.ylim(self.y_range)
             plt.xlim(self.x_range)
@@ -285,10 +286,8 @@ class selective_metrics():
     def plot_ROC_and_RC(self, aurc = False, auroc = True, *args):
         self.RC_curves(*args)
         self.ROC_curves(*args)
+        f, (ax1, ax2) = plt.subplots(1, 2,figsize=self.FIGSIZE,dpi=80)
         for name,risk in self.risk.items():
-            
-            figure(figsize=self.FIGSIZE, dpi=80)
-            f, (ax1, ax2) = plt.subplots(1, 2)
             label = name+f' | AURC = {auc(self.c_list,risk)}' if aurc else name
             ax1.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
             ax1.set_title('Risk Coverage')
@@ -303,4 +302,5 @@ class selective_metrics():
             ax2.set_title('ROC curve')
             ax2.set_xlabel("False Positive Rate", fontsize=self.LABEL_FONTSIZE)
             ax2.set_ylabel("True Positive Rate", fontsize=self.LABEL_FONTSIZE)
-        self.config_plot()
+        self.config_plot(title = False)
+        f.suptitle("Main Title", fontsize=15)
