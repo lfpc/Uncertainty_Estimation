@@ -290,15 +290,18 @@ class selective_metrics():
             label = name+f' | AURC = {auc(self.c_list,risk)}' if aurc else name
             ax1.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
             ax1.set_title('Risk Coverage')
-            ax1.set_xlabel("Coverage", fontsize=self.LABEL_FONTSIZE)
-            ax1.set_ylabel("Risk", fontsize=self.LABEL_FONTSIZE)
-    
+            ax1.set_xlabel("Coverage", fontsize=self.LABEL_FONTSIZE*0.5)
+            ax1.set_ylabel("Risk", fontsize=self.LABEL_FONTSIZE*0.5)
+        plt.legend()
+        plt.xticks(fontsize=self.TICKS_FONTSIZE)
+        plt.yticks(fontsize=self.TICKS_FONTSIZE)
+        plt.grid()
         #self.fix_scale = False
         for name,(fpr,tpr) in self.ROC.items():
             label = name+f' | AUROC = {auc(fpr,tpr)}' if auroc else name
             ax2.plot(fpr,tpr, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
             ax2.set_title('ROC curve')
-            ax2.set_xlabel("False Positive Rate", fontsize=self.LABEL_FONTSIZE)
-            ax2.set_ylabel("True Positive Rate", fontsize=self.LABEL_FONTSIZE)
+            ax2.set_xlabel("False Positive Rate", fontsize=self.LABEL_FONTSIZE*0.5)
+            ax2.set_ylabel("True Positive Rate", fontsize=self.LABEL_FONTSIZE*0.5)
         self.config_plot(title = False)
         f.suptitle("Main Title", fontsize=15)
