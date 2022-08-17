@@ -293,8 +293,8 @@ class selective_metrics():
         ax1.set_xlabel("Coverage", fontsize=self.LABEL_FONTSIZE*0.8)
         ax1.set_ylabel("Risk", fontsize=self.LABEL_FONTSIZE*0.8)
         ax1.legend()
-        ax1.tick_params(axis="x",fontsize=self.TICKS_FONTSIZE)
-        ax1.tick_params(axis="y",fontsize=self.TICKS_FONTSIZE)
+        ax1.tick_params(axis="x",labelsize=self.TICKS_FONTSIZE)
+        ax1.tick_params(axis="y",labelsize=self.TICKS_FONTSIZE)
         ax1.grid()
         #self.fix_scale = False
         for name,(fpr,tpr) in self.ROC.items():
@@ -304,7 +304,7 @@ class selective_metrics():
         ax2.set_xlabel("False Positive Rate", fontsize=self.LABEL_FONTSIZE*0.8)
         ax2.set_ylabel("True Positive Rate", fontsize=self.LABEL_FONTSIZE*0.8)
         ax2.legend()
-        ax2.tick_params(axis="x",fontsize=self.TICKS_FONTSIZE)
-        ax2.tick_params(axis="y",fontsize=self.TICKS_FONTSIZE)
+        ax2.tick_params(axis="x",labelsize=self.TICKS_FONTSIZE)
+        ax2.tick_params(axis="y",labelsize=self.TICKS_FONTSIZE)
         ax2.grid()
         f.suptitle("Main Title", fontsize=15)
