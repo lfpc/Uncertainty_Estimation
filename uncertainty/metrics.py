@@ -1,3 +1,4 @@
+from tkinter import FALSE
 import numpy as np
 import torch
 from NN_utils import train_and_eval as TE
@@ -206,6 +207,7 @@ class selective_metrics():
         return self.risk
 
     def plot_RC(self,aurc = False,*args):
+        #adicionar ideal
         figure(figsize=self.FIGSIZE, dpi=80)
         self.RC_curves(*args)
         for name,risk in self.risk.items():
@@ -280,5 +282,25 @@ class selective_metrics():
             for name_2,un_2 in self.d_uncs.items():
                 df[name][name_2] = fn(un.cpu().numpy(),un_2.cpu().numpy()).correlation
         return df
-
-
+    def plot_ROC_and_RC(self, aurc = False, auroc = True, *args):
+        self.RC_curves(*args)
+        self.ROC_curves(*args)
+        for name,risk in self.risk.items():
+            
+            figure(figsize=self.FIGSIZE, dpi=80)
+            f, (ax1, ax2) = plt.subplots(1, 2)
+            label = name+f' | AURC = {auc(self.c_list,risk)}' if aurc else name
+            ax1.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
+            ax1.set_title('Risk Coverage')
+            ax1.set_xlabel("Coverage", fontsize=self.LABEL_FONTSIZE)
+            ax1.set_ylabel("Risk", fontsize=self.LABEL_FONTSIZE)
+    
+        #self.fix_scale = False
+        for name,risk in self.ROC.items():
+            (fpr,tpr) = self.ROC[name]
+            label = name+f' | AUROC = {auc(fpr,tpr)}' if auroc else name
+            ax2.plot(fpr,tpr, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
+            ax2.set_title('ROC curve')
+            ax2.set_xlabel("False Positive Rate", fontsize=self.LABEL_FONTSIZE)
+            ax2.set_ylabel("True Positive Rate", fontsize=self.LABEL_FONTSIZE)
+        self.config_plot()
