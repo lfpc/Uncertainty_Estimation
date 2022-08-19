@@ -104,10 +104,8 @@ def accumulate_results(model,data, output_and_label = (True,True)):
     dev = next(model.parameters()).device
     uncs = defaultdict(torch.Tensor)
     with torch.no_grad():
-        if output_and_label[0]:
-            output_list = torch.Tensor([]).to(dev)
-        if output_and_label[1]:
-            label_list = torch.Tensor([])
+        output_list = torch.Tensor([]).to(dev)
+        label_list = torch.Tensor([])
         for image,label in data:
             image,label = image.to(dev), label
             if output_and_label[1]:
