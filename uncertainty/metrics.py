@@ -170,17 +170,20 @@ class selective_metrics():
         self.model = model
         if dataset is not None:
             self.get_uncs(dataset)
-        self.add_uncs(self.SoftMax_uncs)
         self.fix_scale = False
+
     def set_uncs(self,uncs):
         self.d_uncs = slice_dict(self.d_uncs,uncs)
-    def get_uncs(self,dataset=None):
+    def get_uncs(self,dataset=None,extra_uncs:dict = None):
         if dataset is None:
             dataset = self.dataset
         if callable(getattr(self.model, "get_unc", None)):
             self.output,self.label,self.d_uncs = unc_utils.accumulate_results(self.model,dataset)
+            #ajustar accumulate results
         else:
             self.output,self.label = TE.accumulate_results(self.model,dataset)
+        self.add_uncs(extra_uncs)
+        self.add_uncs(self.SoftMax_uncs)
 
 
     def fix_plot_scale(self,x_range = None,y_range= None):
