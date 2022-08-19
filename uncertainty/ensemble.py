@@ -8,7 +8,7 @@ from copy import copy
 
 def MonteCarlo_meanvar(MC_array):
     '''Returns the average variance of a tensor'''
-    var = torch.var(MC_array, axis=0) 
+    var = torch.var(MC_array, axis=0, unbiased=False) 
     var = torch.mean(var,axis= -1)
     return var
 
@@ -16,7 +16,7 @@ def MonteCarlo_maxvar(MC_array, y = None):
     '''Returns the average variance of a tensor'''
     if y is None:
         y = torch.argmax(torch.mean(MC_array,dim=0),dim = -1)
-    var = torch.var(indexing_3D(MC_array,y), axis=0)
+    var = torch.var(indexing_3D(MC_array,y), axis=0,unbiased=False)
     return var
 
 def mutual_info(pred_array):
@@ -105,8 +105,12 @@ class Ensemble(nn.Module):
             self.get_samples(x)
         d_uncs = {}
         for name,fn in self.uncs.items():
-            d_uncs[name] = fn(self.ensemble)
+            if name == 'Var(Max)' and self.as_ensemble is False:
+                d_uncs[name] = fn(self.ensemble,torch.argmax(self.model(x),dim = -1)) 
+            else:    
+                d_uncs[name] = fn(self.ensemble)
         return d_uncs
+
     def load_state_dict(self, state_dict, strict: bool = True):
         return self.model.load_state_dict(state_dict, strict)
 

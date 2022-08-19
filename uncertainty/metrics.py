@@ -174,6 +174,7 @@ class selective_metrics():
 
     def set_uncs(self,uncs):
         self.d_uncs = slice_dict(self.d_uncs,uncs)
+        
     def get_uncs(self,dataset=None,extra_uncs:dict = {}):
         if dataset is None:
             dataset = self.dataset
