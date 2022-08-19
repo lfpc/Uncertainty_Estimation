@@ -188,7 +188,7 @@ class selective_metrics():
         if dataset is None:
             dataset = self.dataset
         if callable(getattr(self.model, "get_unc", None)):
-            output,label,self.d_uncs = unc_utils.accumulate_results(self.model,dataset,(self.__share_output,self.__share_label))
+            output,label,self.d_uncs = unc_utils.accumulate_results(self.model,dataset,(not self.__share_output,not self.__share_label))
             if not self.__share_output:
                 self.output = output
         else:
