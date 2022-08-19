@@ -7,7 +7,6 @@ from PIL import Image
 from torch.utils.data import Subset,Dataset, DataLoader
 from torchvision import datasets
 import random
-import torchvision.transforms as transforms
 
 class CorruptedDataset(datasets.VisionDataset):
     corruptions = ['natural',
@@ -114,7 +113,7 @@ def CIFAR_C_loader(n,batch_size = 100,**kwargs):
     elif n == 100:
         dataset = Cifar100C(**kwargs)
     loader = DataLoader(dataset, batch_size=batch_size,
-                            shuffle=False, num_workers=2)
+                            shuffle=False, num_workers=2,pin_memory=True)
     return loader
 
 

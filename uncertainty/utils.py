@@ -99,25 +99,31 @@ def selective_risk(y_pred,label,c,loss_fn = torch.nn.NLLLoss(),unc_type = None):
     risk = loss_fn(y_pred,label)
     return risk
 
-def accumulate_results(model,data):
+def accumulate_results(model,data, output_and_label = (True,True)):
     '''Accumulate output (of model), label and the uncertainties dict of a entire dataset.'''
     dev = next(model.parameters()).device
     uncs = defaultdict(torch.Tensor)
     with torch.no_grad():
-        output_list = torch.Tensor([]).to(dev)
-        label_list = torch.Tensor([]).to(dev)
+        if output_and_label[0]:
+            output_list = torch.Tensor([]).to(dev)
+        if output_and_label[1]:
+            label_list = torch.Tensor([])
         for image,label in data:
-            image,label = image.to(dev), label.to(dev)
-            label_list = torch.cat((label_list,label))
+            image,label = image.to(dev), label
+            if output_and_label[1]:
+                label_list = torch.cat((label_list,label))
 
             output = model(image)
             if model.return_uncs:
                 output,d_uncs = output
             else:
                 d_uncs = model.get_unc()
-
-            output_list = torch.cat((output_list,output))
+            if output_and_label[0]:
+                output_list = torch.cat((output_list,output))
             for name,unc in d_uncs.items():
-                uncs[name] = torch.cat((uncs[name].to(dev),unc))
+                try:
+                    uncs[name] = torch.cat((uncs[name],unc))
+                except:
+                    uncs[name] = torch.cat((uncs[name].to(dev),unc))
 
     return output_list,label_list.long(),uncs

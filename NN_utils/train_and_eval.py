@@ -16,7 +16,7 @@ def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,s
     for epoch in range(n_epochs):
         running_loss = 0
         for image,label in data:
-            image,label = image.to(dev), label.to(dev)
+            image,label = image.to(dev, non_blocking=True), label.to(dev, non_blocking=True)
             optimizer.zero_grad()
             output = model(image)
             loss = loss_criterion(output,label)
@@ -59,7 +59,7 @@ def calc_loss_batch(model,loss_criterion,data,set_eval = True):
     dev = next(model.parameters()).device
     running_loss = 0
     for image,label in data:
-        image,label = image.to(dev), label.to(dev)
+        image,label = image.to(dev, non_blocking=True), label.to(dev, non_blocking=True)
         output = model(image)
         loss = loss_criterion(output,label)
         running_loss += loss            
@@ -74,7 +74,7 @@ def model_acc(model,data,set_eval = True):
         total = 0
         correct= 0
         for image,label in data:
-            image,label = image.to(dev), label.to(dev)
+            image,label = image.to(dev, non_blocking=True), label.to(dev, non_blocking=True)
             output = model(image)
             total += label.size(0)
             correct += correct_total(output,label)
@@ -89,7 +89,7 @@ def model_acc_and_loss(model,loss_criterion,data, set_eval = True):
     total = 0
     correct= 0
     for image,label in data:
-        image,label = image.to(dev), label.to(dev)
+        image,label = image.to(dev, non_blocking=True), label.to(dev, non_blocking=True)
         output = model(image)
         loss = loss_criterion(output,label)
         running_loss += loss.item()
@@ -100,7 +100,7 @@ def model_acc_and_loss(model,loss_criterion,data, set_eval = True):
     return acc,loss
 
 
-def accumulate_results(model,data, set_eval = True):
+def accumulate_results(model,data, set_eval = False):
     '''Accumulate output (of model) and label of a entire dataset.'''
 
     dev = next(model.parameters()).device
@@ -108,11 +108,10 @@ def accumulate_results(model,data, set_eval = True):
         model.eval()
 
     output_list = torch.Tensor([]).to(dev)
-    label_list = torch.Tensor([]).to(dev)
-
-    for image,label in data:
-        with torch.no_grad():
-            image,label = image.to(dev), label.to(dev)
+    label_list = torch.Tensor([])
+    with torch.no_grad():
+        for image,label in data:
+            image,label = image.to(dev), label
             output = model(image)
 
             label_list = torch.cat((label_list,label))

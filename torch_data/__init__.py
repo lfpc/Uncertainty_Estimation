@@ -32,9 +32,9 @@ def split_data(training_data,val_size,val_transforms, method = 'range', seed = N
 def get_dataloaders(training_data,test_data,params,validation_data = None):
     if validation_data is None:
         training_data,validation_data = split_data(training_data)
-    train_dataloader = DataLoader(training_data, batch_size=params['train_batch_size'],shuffle = True)
-    validation_dataloader = DataLoader(validation_data, batch_size=params['train_batch_size'],shuffle = False)
-    test_dataloader = DataLoader(test_data, batch_size=params['test_batch_size'])
+    train_dataloader = DataLoader(training_data, batch_size=params['train_batch_size'],shuffle = True,pin_memory=True)
+    validation_dataloader = DataLoader(validation_data, batch_size=params['train_batch_size'],shuffle = False,pin_memory=True)
+    test_dataloader = DataLoader(test_data, batch_size=params['test_batch_size'],pin_memory=True)
     return train_dataloader, validation_dataloader, test_dataloader
 
 def imshow(img):
@@ -105,12 +105,12 @@ class DataGenerator():
             g = torch.Generator()
             g.manual_seed(seed)
             self.train_dataloader = DataLoader(train_subset, batch_size=self.params['train_batch_size'],
-                                             shuffle = True,num_workers=2)
+                                             shuffle = True,num_workers=2,pin_memory=True)
         
         
         else:
-            self.train_dataloader = DataLoader(train_subset, batch_size=self.params['train_batch_size'],shuffle = True,num_workers=2)
-        self.test_dataloader = DataLoader(self.test_data, batch_size=self.params['test_batch_size'],num_workers=2)
+            self.train_dataloader = DataLoader(train_subset, batch_size=self.params['train_batch_size'],shuffle = True,num_workers=2,pin_memory=True)
+        self.test_dataloader = DataLoader(self.test_data, batch_size=self.params['test_batch_size'],num_workers=2,pin_memory=True)
 
         self.train_len = len(train_subset)
         self.val_len = len(self.training_data)- self.train_len
@@ -142,7 +142,7 @@ class DataGenerator():
 
     def get_complete_training_dataloader(self):
         if self.params['validation_size'] > 0:
-            return DataLoader(self.training_data, batch_size=self.params['train_batch_size'],shuffle = True)
+            return DataLoader(self.training_data, batch_size=self.params['train_batch_size'],shuffle = True,pin_memory=True)
         else:
             return self.train_dataloader
             
@@ -171,7 +171,7 @@ class Noisy_DataGenerator(DataGenerator):
             corrupt_label(self.validation_dataloader.dataset,noise_size,self.n_classes,copy_ = False)
     def get_clean_subset(self):
         clean_data = Subset(self.training_data, list(range(int((len(self.train_dataloader.dataset)*self.noise_size)),len(self.train_dataloader.dataset))))
-        self.clean_data = DataLoader(clean_data,batch_size=self.params['train_batch_size'],shuffle = True)
+        self.clean_data = DataLoader(clean_data,batch_size=self.params['train_batch_size'],shuffle = True,pin_memory=True)
         return self.clean_data
 
     def __repr__(self):
