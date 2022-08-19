@@ -172,14 +172,15 @@ class selective_metrics():
         self.c_list = c_list
         self.d_uncs = {}
         self.model = model
-        if dataset is not None:
-            self.get_uncs(dataset)
-        self.fix_scale = False
         if labels is not None:
             self.share_dataset(labels)
         else:
             self.__share_label = False
         self.__share_output = False
+        if dataset is not None:
+            self.get_uncs(dataset)
+        self.fix_scale = False
+        
 
     def set_uncs(self,uncs):
         self.d_uncs = slice_dict(self.d_uncs,uncs)

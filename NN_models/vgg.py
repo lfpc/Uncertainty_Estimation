@@ -4,10 +4,12 @@ import torchvision
 from NN_models import Model_CNN
 
 def get_vgg_layers(pretrained = False):
+    if not pretrained:
+        pretrained = None
     #returns 
     i=0
     conv_layer = []
-    for layer in torchvision.models.vgg16(pretrained=pretrained).features:
+    for layer in torchvision.models.vgg16(weights=pretrained).features:
         conv_layer.append(layer)
         if isinstance(layer,nn.Conv2d):
             layer.padding = 'same'
