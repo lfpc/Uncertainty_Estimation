@@ -82,7 +82,7 @@ class ImbalanceCifar10(Cifar10):
             cls_num_list.append(self.num_per_cls_dict[i])
         return cls_num_list
 
-class ImbalanceCifar10(Cifar100):
+class ImbalanceCifar100(Cifar100):
     def __init__(self, imbalance_ratio,imb_type = 'exp', train = True, test = True,
                         apply_test = False,
                         params = DataGenerator.params,
