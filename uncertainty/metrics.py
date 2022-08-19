@@ -160,21 +160,28 @@ class selective_metrics():
     SoftMax_uncs = {'MCP': unc.MCP_unc,
                     'Entropy': unc.entropy}
     
-    def __init__(self,model,dataset, c_list = np.arange(0.05,1.05,0.05),name = None) -> None:
+    def __init__(self,model,dataset = None, c_list = np.arange(0.05,1.05,0.05),name = None) -> None:
         if name is None:
             self.name = model.name
         else:
             self.name = name
         self.c_list = c_list
         self.d_uncs = {}
-        if callable(getattr(model, "get_unc", None)):
-            self.output,self.label,self.d_uncs = unc_utils.accumulate_results(model,dataset)
-        else:
-            self.output,self.label = TE.accumulate_results(model,dataset)
+        self.model = model
+        if dataset is not None:
+            self.get_uncs(dataset)
         self.add_uncs(self.SoftMax_uncs)
         self.fix_scale = False
     def set_uncs(self,uncs):
         self.d_uncs = slice_dict(self.d_uncs,uncs)
+    def get_uncs(self,dataset=None):
+        if dataset is None:
+            dataset = self.dataset
+        if callable(getattr(self.model, "get_unc", None)):
+            self.output,self.label,self.d_uncs = unc_utils.accumulate_results(self.model,dataset)
+        else:
+            self.output,self.label = TE.accumulate_results(self.model,dataset)
+
 
     def fix_plot_scale(self,x_range = None,y_range= None):
         self.fix_scale = True
