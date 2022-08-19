@@ -105,9 +105,9 @@ def accumulate_results(model,data, output_and_label = (True,True)):
     uncs = defaultdict(torch.Tensor)
     with torch.no_grad():
         output_list = torch.Tensor([]).to(dev)
-        label_list = torch.Tensor([])
+        label_list = torch.Tensor([]).to(dev)
         for image,label in data:
-            image,label = image.to(dev), label
+            image,label = image.to(dev,non_blocking=True), label.to(dev,non_blocking=True)
             if output_and_label[1]:
                 label_list = torch.cat((label_list,label))
 
