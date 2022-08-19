@@ -73,10 +73,10 @@ class Ensemble(nn.Module):
 
     def deterministic(self,x):
         self.eval()
-        y = self.model(x)
+        self.y = self.model(x)
         if self.softmax and not self.model.softmax:
-            y = torch.nn.functional.softmax(y,dim=-1)
-        return y
+            self.y = torch.nn.functional.softmax(self.y,dim=-1)
+        return self.y
 
     def ensemble_forward(self,x):
 
@@ -103,10 +103,11 @@ class Ensemble(nn.Module):
     def get_unc(self, x = None):
         if x is not None:
             self.get_samples(x)
+            self.deterministic(x)
         d_uncs = {}
         for name,fn in self.uncs.items():
             if name == 'Var(Max)' and self.as_ensemble is False:
-                d_uncs[name] = fn(self.ensemble,torch.argmax(self.model(x),dim = -1)) 
+                d_uncs[name] = fn(self.ensemble,torch.argmax(self.y,dim = -1)) 
             else:    
                 d_uncs[name] = fn(self.ensemble)
         return d_uncs
