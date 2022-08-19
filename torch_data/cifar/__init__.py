@@ -40,15 +40,17 @@ class Cifar10(DataGenerator):
     def __init__(self,params = DataGenerator.params, 
                 name = 'CIFAR 10',
                 download = True, 
-                data_dir = "data"):
+                data_dir = "data",
+                train = True,
+                test = True):
         self.training_data = self.training_data(root=data_dir,
                                                 train=True,
                                                 download=download,
-                                                transform=self.transforms_train)
+                                                transform=self.transforms_train) if train else None
         self.test_data = self.test_data(root=data_dir,
                                         train=False,
                                         download=download,
-                                        transform=self.transforms_test)
+                                        transform=self.transforms_test) if test else None
         super().__init__(params,
                     name)
         
@@ -77,15 +79,18 @@ class Cifar100(DataGenerator):
     def __init__(self,params = DataGenerator.params, 
                 name = 'CIFAR 100',
                 download = True, 
-                data_dir = "data"):
+                data_dir = "data",
+                train = True,
+                test = True):
         self.training_data = self.training_data(root=data_dir,
                                                 train=True,
                                                 download=download,
-                                                transform=self.transforms_train)
-        self.test_data = self.test_data(root=data_dir,
+                                                transform=self.transforms_train) if train else None
+        if test:    
+            self.test_data = self.test_data(root=data_dir,
                                         train=False,
                                         download=download,
-                                        transform=self.transforms_test)
+                                        transform=self.transforms_test) if test else None
         super().__init__(params,
                     name)
         
