@@ -114,7 +114,6 @@ class Noisy_Cifar100(Noisy_DataGenerator,Cifar100):
         super().__init__(noise_size,noisy_val,params,
                 download, name)
 from .corrupted import Cifar100C,Cifar10C,CIFAR_C_loader
-from .imbalance import ImbalanceCifar10, ImbalanceCifar100
 
 
 
