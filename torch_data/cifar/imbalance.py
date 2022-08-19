@@ -92,15 +92,17 @@ class ImbalanceCifar100(Cifar100):
                         download=True, 
                         data_dir="data"):
         super().__init__(params, name, download, data_dir, train = train, test = test)
-        img_num_list = self.get_img_num_per_cls(self.n_classes, imb_type, imbalance_ratio)
         if self.training_data is not None:
+            img_num_list = self.get_img_num_per_cls(self.training_data,self.n_classes, imb_type, imbalance_ratio)
             self.gen_imbalanced_data(self.training_data,img_num_list)
         if self.training_data is not None and apply_test:
+            img_num_list = self.get_img_num_per_cls(self.test_data,self.n_classes, imb_type, imbalance_ratio)
             self.gen_imbalanced_data(self.test_data,img_num_list)
+        #self.generate_dataloaders()
 
 
-    def get_img_num_per_cls(self, cls_num, imb_type, imb_factor):
-        img_max = len(self.data) / cls_num
+    def get_img_num_per_cls(self,data, cls_num, imb_type, imb_factor):
+        img_max = len(data) / cls_num
         img_num_per_cls = []
         if imb_type == 'exp':
             for cls_idx in range(cls_num):
