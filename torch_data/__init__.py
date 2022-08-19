@@ -96,25 +96,18 @@ class DataGenerator():
 
     def generate_dataloaders(self,seed = None):
 
-        if self.params['validation_size'] > 0:
+        if self.params['validation_size'] > 0 and self.training_data is not None:
             train_subset, val_subset = split_data(self.training_data,self.params['validation_size'],self.transforms_test)
-            self.validation_dataloader = DataLoader(val_subset, batch_size=self.params['train_batch_size'],shuffle = False,num_workers=2)
-        else:
-            train_subset = self.training_data
-        if seed is not None:
-            g = torch.Generator()
-            g.manual_seed(seed)
-            self.train_dataloader = DataLoader(train_subset, batch_size=self.params['train_batch_size'],
-                                             shuffle = True,num_workers=2,pin_memory=True)
-        
-        
-        else:
             self.train_dataloader = DataLoader(train_subset, batch_size=self.params['train_batch_size'],shuffle = True,num_workers=2,pin_memory=True)
-        self.test_dataloader = DataLoader(self.test_data, batch_size=self.params['test_batch_size'],num_workers=2,pin_memory=True)
-
-        self.train_len = len(train_subset)
-        self.val_len = len(self.training_data)- self.train_len
-        self.test_len = len(self.test_data)
+            self.validation_dataloader = DataLoader(val_subset, batch_size=self.params['train_batch_size'],shuffle = False,num_workers=2)
+            self.train_len = len(train_subset)
+            self.val_len = len(self.training_data)- self.train_len
+        elif self.training_data is not None:
+            self.train_dataloader = DataLoader(self.training_data, batch_size=self.params['train_batch_size'],shuffle = True,num_workers=2,pin_memory=True)
+            self.train_len = len(self.training_data)
+        if self.test_data is not None:
+            self.test_dataloader = DataLoader(self.test_data, batch_size=self.params['test_batch_size'],num_workers=2,pin_memory=True)
+            self.test_len = len(self.test_data)
 
 
     def get_sample(self,data = 'test',dev = None,size = None):
