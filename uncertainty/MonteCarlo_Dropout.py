@@ -73,10 +73,10 @@ class MonteCarloDropout(ensemble.Ensemble):
 
 if __name__ == "__main__":
     import NN_models
-    import cifar_data
+    import torch_data
     model = NN_models.Model_CNN()
     mcd = MonteCarloDropout(model,10)
-    data = cifar_data.Cifar_10_data()
+    data = torch_data.Cifar_10_data()
     x,_ = data.get_sample()
     output = mcd(x)
     print(output.shape)
