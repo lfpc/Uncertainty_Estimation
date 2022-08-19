@@ -85,7 +85,7 @@ class ImbalanceCifar10(Cifar10):
         return cls_num_list
 
 class ImbalanceCifar100(Cifar100):
-    def __init__(self, imbalance_ratio,imb_type = 'exp', train = True, test = True,
+    def __init__(self, imbalance_ratio = 0.01,imb_type = 'exp', train = True, test = True,
                         apply_test = False,
                         params = Cifar100.params,
                         name='CIFAR 100 - LT',
