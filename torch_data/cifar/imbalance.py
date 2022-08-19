@@ -3,12 +3,12 @@ Basen on https://github.com/KaihuaTang/Long-Tailed-Recognition.pytorch
 """
 
 import numpy as np
-from torch_data import Cifar10,Cifar100,DataGenerator
+from .__init__ import Cifar10,Cifar100
 
 class ImbalanceCifar10(Cifar10):
     def __init__(self, imbalance_ratio = 0.01,imb_type = 'exp', train = True, test = True,
                         apply_test = False,
-                        params = DataGenerator.params,
+                        params = Cifar10.params,
                         name='CIFAR 10 - LT',
                         download=True, 
                         data_dir="data"):
@@ -85,7 +85,7 @@ class ImbalanceCifar10(Cifar10):
 class ImbalanceCifar100(Cifar100):
     def __init__(self, imbalance_ratio,imb_type = 'exp', train = True, test = True,
                         apply_test = False,
-                        params = DataGenerator.params,
+                        params = Cifar100.params,
                         name='CIFAR 100 - LT',
                         download=True, 
                         data_dir="data"):
