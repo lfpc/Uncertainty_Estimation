@@ -160,7 +160,11 @@ class selective_metrics():
     SoftMax_uncs = {'MCP': unc.MCP_unc,
                     'Entropy': unc.entropy}
     
-    def __init__(self,model,dataset = None, c_list = np.arange(0.05,1.05,0.05),name = None) -> None:
+    def __init__(self,model,
+                dataset = None, 
+                c_list = np.arange(0.05,1.05,0.05),
+                name = None,
+                labels = None) -> None:
         if name is None:
             self.name = model.name
         else:
@@ -171,21 +175,36 @@ class selective_metrics():
         if dataset is not None:
             self.get_uncs(dataset)
         self.fix_scale = False
+        if labels is not None:
+            self.share_dataset(labels)
+        else:
+            self.__share_label = False
+        self.__share_output = False
 
     def set_uncs(self,uncs):
         self.d_uncs = slice_dict(self.d_uncs,uncs)
-        
+
     def get_uncs(self,dataset=None,extra_uncs:dict = {}):
         if dataset is None:
             dataset = self.dataset
         if callable(getattr(self.model, "get_unc", None)):
-            self.output,self.label,self.d_uncs = unc_utils.accumulate_results(self.model,dataset)
-            #ajustar accumulate results
+            output,label,self.d_uncs = unc_utils.accumulate_results(self.model,dataset,(self.__share_output,self.__share_label))
+            if not self.__share_output:
+                self.output = output
         else:
-            self.output,self.label = TE.accumulate_results(self.model,dataset)
+            self.output,label = TE.accumulate_results(self.model,dataset)
+        if not self.__share_label:
+            self.label = label
         self.add_uncs(extra_uncs)
         self.add_uncs(self.SoftMax_uncs)
+        return self.d_uncs
 
+    def share_dataset(self,label,output = None):
+        self.__share_label = True
+        self.label = label
+        if output is not None:
+            self.__share_output = True
+            self.output = output
 
     def fix_plot_scale(self,x_range = None,y_range= None):
         self.fix_scale = True
