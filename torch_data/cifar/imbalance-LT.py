@@ -6,7 +6,7 @@ import numpy as np
 from torch_data import Cifar10,Cifar100,DataGenerator
 
 class ImbalanceCifar10(Cifar10):
-    def __init__(self, imbalance_ratio,imb_type = 'exp', train = True, test = True,
+    def __init__(self, imbalance_ratio = 0.01,imb_type = 'exp', train = True, test = True,
                         apply_test = False,
                         params = DataGenerator.params,
                         name='CIFAR 10 - LT',
@@ -18,6 +18,7 @@ class ImbalanceCifar10(Cifar10):
             self.gen_imbalanced_data(self.training_data,img_num_list)
         if self.training_data is not None and apply_test:
             self.gen_imbalanced_data(self.test_data,img_num_list)
+        #self.generate_dataloaders()
 
 
     def get_img_num_per_cls(self, cls_num, imb_type, imb_factor):
