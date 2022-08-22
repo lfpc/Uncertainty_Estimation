@@ -108,10 +108,10 @@ def accumulate_results(model,data, set_eval = False):
         model.eval()
 
     output_list = torch.Tensor([]).to(dev)
-    label_list = torch.Tensor([])
+    label_list = torch.Tensor([]).to(dev)
     with torch.no_grad():
         for image,label in data:
-            image,label = image.to(dev), label
+            image,label = image.to(dev), label.to(dev)
             output = model(image)
 
             label_list = torch.cat((label_list,label))
