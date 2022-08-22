@@ -50,6 +50,9 @@ def dataset_cut_classes(data,indices = (0,1)):
     data.data = data.data[idx]
     return data
 
+def is_number(x):
+    return isinstance(x,float) or isinstance(x,int)
+
 def indexing_2D(ar,idx):
     ''' Index a 2D tensor by a 1D tensor along dimension 1.'''
     #generalizar para dimensão qualquer.

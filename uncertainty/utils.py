@@ -1,5 +1,5 @@
 import torch
-from NN_utils import apply_mask,get_n_biggest,indexing_3D
+from NN_utils import apply_mask,get_n_biggest,indexing_3D, is_number
 import numpy as np
 from operator import xor
 from NN_utils.train_and_eval import correct_total
@@ -42,7 +42,7 @@ def get_most_certain(data,uncertainty_method, n = 1):
 def dontknow_mask(uncertainty, coverage = None, threshold = None):
     '''Returns a DontKnow Tensor: 1 for the most (coverage most) uncertain samples
     and 0 for the rest'''
-    assert xor(isinstance(coverage,float) or isinstance(coverage,int), isinstance(threshold,float) or isinstance(threshold,int))
+    assert xor(is_number(coverage),is_number(threshold))
     if threshold is None and coverage is not None:
         with torch.no_grad():
             n_pred = uncertainty.shape[0]

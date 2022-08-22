@@ -29,10 +29,10 @@ class CorruptedDataset(datasets.VisionDataset):
                     'saturate',
                     'frost']
 
-    def __init__(self, root :str,im_size: tuple, names:list = corruptions,levels:tuple = (1,2,3,4,5),
+    def __init__(self, data_dir :str,im_size: tuple, names:list = corruptions,levels:tuple = (1,2,3,4,5),
                  transform= None, target_transform = None, natural_data = None):
         super().__init__(
-                   root, transform=transform,
+                   data_dir, transform=transform,
                    target_transform=target_transform)
         im_size = (0,) + im_size
         self.data = np.empty(im_size).astype(np.uint8)
@@ -46,8 +46,8 @@ class CorruptedDataset(datasets.VisionDataset):
                 self.data = np.concatenate((self.data,data))
                 self.targets = np.concatenate((self.targets,targets))
             else: 
-                data_path = os.path.join(root, name + '.npy')
-                target_path = os.path.join(root, 'labels.npy')
+                data_path = os.path.join(data_dir, name + '.npy')
+                target_path = os.path.join(data_dir, 'labels.npy')
                 data = np.load(data_path)
                 targets = np.load(target_path)
                 for l in levels:
@@ -76,34 +76,34 @@ class Cifar10C(CorruptedDataset):
     classes = cifar.Cifar10.classes
     n_classes = 10
 
-    def __init__(self, root :str, names:list = CorruptedDataset.corruptions,levels:tuple = (1,2,3,4,5),
+    def __init__(self, data_dir :str, names:list = CorruptedDataset.corruptions,levels:tuple = (1,2,3,4,5),
                  transform=cifar.Cifar10.transforms_test, target_transform=None, natural_data = None):
         if 'natural' in names:
             if natural_data is None:
-                parent_root = os.path.abspath(os.path.join(root,os.pardir))
-                natural_data = cifar.Cifar10(data_dir = parent_root).test_data
+                parent_data_dir = os.path.abspath(os.path.join(data_dir,os.pardir))
+                natural_data = cifar.Cifar10(data_dir = parent_data_dir).test_data
             elif isinstance(natural_data,str):
                 natural_data = cifar.Cifar10(data_dir = natural_data).test_data
-        root = os.path.join(root,'CIFAR-10-C')
+        data_dir = os.path.join(data_dir,'CIFAR-10-C')
         super().__init__(
-                   root,im_size = (32,32,3), names = names,levels = levels,
+                   data_dir,im_size = (32,32,3), names = names,levels = levels,
                  transform= transform, target_transform = target_transform, natural_data = natural_data)
 
 class Cifar100C(CorruptedDataset):
     classes = cifar.Cifar100.classes
     n_classes = 100
 
-    def __init__(self, root :str, names:list = CorruptedDataset.corruptions,levels:tuple = (1,2,3,4,5),
+    def __init__(self, data_dir :str, names:list = CorruptedDataset.corruptions,levels:tuple = (1,2,3,4,5),
                  transform=cifar.Cifar100.transforms_test, target_transform=None, natural_data = None):
         if 'natural' in names:
             if natural_data is None:
-                parent_root = os.path.abspath(os.path.join(root,os.pardir))
-                natural_data = cifar.Cifar100(data_dir = parent_root).test_data
+                parent_data_dir = os.path.abspath(os.path.join(data_dir,os.pardir))
+                natural_data = cifar.Cifar100(data_dir = parent_data_dir).test_data
             elif isinstance(natural_data,str):
                 natural_data = cifar.Cifar100(data_dir = natural_data).test_data
-        root = os.path.join(root,'CIFAR-100-C')
+        data_dir = os.path.join(data_dir,'CIFAR-100-C')
         super().__init__(
-                   root,im_size = (32,32,3), names = names,levels = levels,
+                   data_dir,im_size = (32,32,3), names = names,levels = levels,
                  transform= transform, target_transform = target_transform, natural_data = natural_data)
 
 
