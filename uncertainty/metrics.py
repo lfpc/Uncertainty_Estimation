@@ -42,7 +42,7 @@ def RC_curve(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arang
 def ROC_curve(output,y_true, uncertainty, return_threholds = False):
     if callable(uncertainty):
         uncertainty = uncertainty(output)
-    y_true = 1-TE.correct_class(output,y_true).cpu().numpy()
+    y_true = np.logical_not(TE.correct_class(output,y_true).cpu().numpy())
     fpr, tpr, thresholds = ROC(y_true,uncertainty.cpu().numpy())
     if return_threholds:
         return fpr,tpr,thresholds
