@@ -239,10 +239,10 @@ class selective_metrics():
         
         return self.risk
 
-    def plot_RC(self,aurc = False,optimum = False,*args):
+    def plot_RC(self,aurc = False,**kwargs):
         #adicionar ideal
         figure(figsize=self.FIGSIZE, dpi=80)
-        self.RC_curves(*args)
+        self.RC_curves(**kwargs)
         for name,risk in self.risk.items():
             label = name+f' | AURC = {auc(self.c_list,risk)}' if aurc else name
             plt.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
