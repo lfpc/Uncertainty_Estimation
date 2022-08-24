@@ -166,14 +166,4 @@ class Model_CNN_with_g_and_h(Model_CNN_with_g):
 from wide_resnet import WideResNet
 from vgg import VGG_16
 from CNN8 import CNN8
-import importlib
-
-
-mdl = importlib.import_module("pytorch-cifar")
-# is there an __all__?  if so respect it
-if "__all__" in mdl.__dict__:
-    names = mdl.__dict__["__all__"]
-else:
-    # otherwise we import all names that don't begin with _
-    names = [x for x in mdl.__dict__ if not x.startswith("_")]
-globals().update({k: getattr(mdl, k) for k in names})
+from .pytorch_cifar import *
