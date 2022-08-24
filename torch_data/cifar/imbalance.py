@@ -13,7 +13,6 @@ class ImbalanceCifar10(Cifar10):
                         download=True, 
                         data_dir="data"):
         super().__init__(params, name, download, data_dir, train = train, test = test)
-
         if self.training_data is not None:
             img_num_list = self.get_img_num_per_cls(self.training_data,self.n_classes, imb_type, imbalance_ratio)
             self.gen_imbalanced_data(self.training_data,img_num_list)

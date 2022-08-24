@@ -251,7 +251,7 @@ class Trainer():
             self.update_hist(dataset = update_hist)
             self.epoch += 1
             if self.lr_scheduler is not None:
-                self.lr_scheduler.step(self.epoch)
+                self.lr_scheduler.step()
             if live_plot is True:
                 desc_dict = {}
                 if hasattr(self,'hist_train'):

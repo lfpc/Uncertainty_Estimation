@@ -1,10 +1,5 @@
-
-from torch.utils.data import DataLoader
 from torchvision import datasets
 import torchvision.transforms as transforms
-from torch.utils.data import random_split
-from torch.utils.data import Subset
-from sklearn.model_selection import train_test_split
 import torch
 import random
 import numpy as np
@@ -43,16 +38,16 @@ class Cifar10(DataGenerator):
                 data_dir = "data",
                 train = True,
                 test = True):
-        self.training_data = self.training_data(root=data_dir,
+        training_data = self.training_data(root=data_dir,
                                                 train=True,
                                                 download=download,
                                                 transform=self.transforms_train) if train else None
-        self.test_data = self.test_data(root=data_dir,
+        test_data = self.test_data(root=data_dir,
                                         train=False,
                                         download=download,
                                         transform=self.transforms_test) if test else None
         super().__init__(params,
-                    name)
+                    name,training_data,None,test_data)
         
 
 class Cifar100(DataGenerator):
@@ -82,17 +77,17 @@ class Cifar100(DataGenerator):
                 data_dir = "data",
                 train = True,
                 test = True):
-        self.training_data = self.training_data(root=data_dir,
+        training_data = self.training_data(root=data_dir,
                                                 train=True,
                                                 download=download,
                                                 transform=self.transforms_train) if train else None
-        if test:    
-            self.test_data = self.test_data(root=data_dir,
-                                        train=False,
-                                        download=download,
-                                        transform=self.transforms_test) if test else None
+
+        test_data = self.test_data(root=data_dir,
+                                    train=False,
+                                    download=download,
+                                    transform=self.transforms_test) if test else None
         super().__init__(params,
-                    name)
+                    name,training_data,None,test_data)
         
 #ARRUMAR NOISY CLASSES. PRECISAM CHAMAR CIFAR 10 ANTES  PARA DEFINIR A DATA E TAL
 class Noisy_Cifar10(Noisy_DataGenerator,Cifar10):

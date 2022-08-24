@@ -82,32 +82,41 @@ class DataGenerator():
                     params = params,
                     name = 'DataGenerator',
                     training_data = None,
+                    validation_data = None,
                     test_data = None,
                     seed = None):
 
         self.name = name
-        if training_data is not None:
-            self.training_data = training_data
-        if test_data is not None:
-            self.test_data = test_data
-
         self.params = params
+
+        self.training_data = training_data
+        self.train_len = len(self.training_data) if training_data is not None else 0
+        self.validation_data = validation_data
+        if validation_data is not None:
+            self.params['validation_size'] = len(validation_data)/(self.train_len+len(validation_data))
+        elif self.params['validation_size'] > 0 and self.training_data is not None:
+            self.__split_validation()
+        
+        self.test_data = test_data
+        
+        self.val_len = len(self.validation_data) if self.validation_data is not None else 0
+        self.test_len = len(self.test_data) if test_data is not None else 0
+
         self.generate_dataloaders(seed)
 
-    def generate_dataloaders(self,seed = None):
+    def __split_validation(self):
+        self.complete_train_data = copy.copy(self.training_data)
+        self.training_data, self.validation_data = split_data(self.training_data,self.params['validation_size'],self.transforms_test)
+        self.val_len = len(self.training_data)- self.train_len
 
-        if self.params['validation_size'] > 0 and self.training_data is not None:
-            train_subset, val_subset = split_data(self.training_data,self.params['validation_size'],self.transforms_test)
-            self.train_dataloader = DataLoader(train_subset, batch_size=self.params['train_batch_size'],shuffle = True,num_workers=2,pin_memory=True)
-            self.validation_dataloader = DataLoader(val_subset, batch_size=self.params['train_batch_size'],shuffle = False,num_workers=2)
-            self.train_len = len(train_subset)
-            self.val_len = len(self.training_data)- self.train_len
-        elif self.training_data is not None:
+    def generate_dataloaders(self,seed = None):
+        if self.validation_data is not None:
+            self.validation_dataloader = DataLoader(self.validation_data, batch_size=self.params['test_batch_size'],shuffle = False,num_workers=2,pin_memory=True)
+        if self.training_data is not None:
             self.train_dataloader = DataLoader(self.training_data, batch_size=self.params['train_batch_size'],shuffle = True,num_workers=2,pin_memory=True)
-            self.train_len = len(self.training_data)
         if self.test_data is not None:
-            self.test_dataloader = DataLoader(self.test_data, batch_size=self.params['test_batch_size'],num_workers=2,pin_memory=True)
-            self.test_len = len(self.test_data)
+            self.test_dataloader = DataLoader(self.test_data, batch_size=self.params['test_batch_size'],shuffle=False,num_workers=2,pin_memory=True)
+            
 
 
     def get_sample(self,data = 'test',dev = None,size = None):
@@ -123,6 +132,10 @@ class DataGenerator():
         if size is not None:
             image,label = image[0:size],label[0:size]
         return image,label
+
+    def __iter__(self):
+        return iter(self.test_dataloader)
+
 
     def change_transforms(self,transforms_train,transforms_test):
             self.transforms_train = transforms_train
@@ -177,3 +190,4 @@ class Noisy_DataGenerator(DataGenerator):
 
 from .cifar import Cifar10,Cifar100,Cifar100C,Cifar10C,CIFAR_C_loader
 from .cifar.imbalance import ImbalanceCifar10,ImbalanceCifar100
+from .Tiny_Image_Net import TinyImageNet
