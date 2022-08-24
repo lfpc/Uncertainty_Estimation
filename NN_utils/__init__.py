@@ -10,6 +10,7 @@ import NN_models
 import pkgutil
 import warnings
 from IPython.display import clear_output
+from os.path import join
 
 def save_state_dict(model,path, name):
     torch.save(model.state_dict(), path + r'/' + name + '.pt')
@@ -38,6 +39,10 @@ def weight_reset(m):
     if callable(reset_parameters):
         m.reset_parameters()
 
+def save_state_dict(model,path, name = None):
+    if name is None: name = model.name
+    name = name + '.pt'
+    torch.save(model.state_dict(), join(path,name))
 
 def dataset_cut_classes(data,indices = (0,1)):
 

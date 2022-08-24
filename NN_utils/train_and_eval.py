@@ -266,7 +266,7 @@ class Trainer():
             if save_checkpoint:
                 if self.hist_val.acc_list[-1] >= acc:
                     acc = self.hist_val.acc_list[-1]
-                    self.model.save_state_dict(PATH,self.model.name+'_checkpoint')
+                    self.save_state_dict(PATH,self.model.name+'_checkpoint')
 
     def update_hist(self, dataset = 'all'):
         '''Updates hist classes.
@@ -290,9 +290,14 @@ class Trainer():
             name_ = name+'val_hist'
             self.hist_train.save_df(join(path,name_), method)
 
+    def save_state_dict(self,path, name = None):
+        if name is None: name = self.model.name
+        name = name + '.pt'
+        torch.save(self.model.state_dict(), join(path,name))
+
     def save_all(self, path_model, path_hist, name = None):
         self.save_hist(path_hist, name)
-        self.model.save_state_dict(path_model, name)
+        self.save_state_dict(path_model, name)
         
 if __name__ == '__main__':
     model =torch.nn.Sequential(torch.nn.Linear(10,10))

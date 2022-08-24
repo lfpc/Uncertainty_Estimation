@@ -4,7 +4,6 @@ from torch import nn
 import torch.nn.functional as F
 from os.path import join
 
-
 def construct_conv_layer(blocks):
     #to elaborate
     #iterate over blocks and append to conv_layer conv2d with blocks_i size
@@ -165,4 +164,4 @@ class Model_CNN_with_g_and_h(Model_CNN_with_g):
 from .wide_resnet import WideResNet
 from .vgg import VGG_16
 from .CNN8 import CNN8
-from .resnet import ResNet101,ResNet18,ResNet34,ResNet50
+from .pytorch_cifar import *
