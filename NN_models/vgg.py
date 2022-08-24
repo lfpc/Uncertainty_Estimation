@@ -31,10 +31,10 @@ class VGG_16(Model_CNN):
         cifar_input = (32,32,3) #CHANGE THIS EVENTUALLY
         k = 1
         for i,c in enumerate(cifar_input):
-            k *= int(input_size[i]/c)
+            k *= input_size[i]/c
         conv_layer = get_vgg_layers(pretrained)
         fc_layer = [nn.Flatten(),
-        nn.Linear(k*512, 512),
+        nn.Linear(int(k)*512, 512),
         nn.ReLU(inplace = True),
         nn.BatchNorm1d(512),
         nn.Dropout(0.3)]
