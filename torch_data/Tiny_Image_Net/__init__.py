@@ -4,6 +4,7 @@ from torchvision import datasets
 import torchvision.transforms as transforms
 #from .tin import TinyImageNetDataset
 from os.path import join,exists
+from operator import xor
 
 class TinyImageNet(DataGenerator):
 
@@ -27,15 +28,18 @@ class TinyImageNet(DataGenerator):
                 name = 'CIFAR 10',
                 data_dir = "data",
                 train = True,
-                val = True,
+                val = False,
                 test = True):
         if join(data_dir,'tiny-imagenet-200'):
             data_dir = join(data_dir,'tiny-imagenet-200')
         elif not (exists(join(data_dir,'train')) and exists(join(data_dir,'val')) and exists(join(data_dir,'test'))):
             raise Exception("Wrong Data Directory")
         training_data = datasets.ImageFolder(join(data_dir,'train'),self.transforms_train) if train else None
-        validation_data = datasets.ImageFolder(join(data_dir,'val'),self.transforms_test) if val else None
-        test_data = datasets.ImageFolder(join(data_dir,'test'),self.transforms_test) if test else None
+        validation_data = datasets.ImageFolder(join(data_dir,'val','images'),self.transforms_test) if val else None
+        test_data = datasets.ImageFolder(join(data_dir,'val','images'),self.transforms_test) if test else None
+        #### TEST_DATA is actually VAL_DATA
+        ####ORIGINAL TEST DATA HAVE NO LABELS
+
 
         super().__init__(params,
                     name, training_data, validation_data, test_data)
