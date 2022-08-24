@@ -3,6 +3,8 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 from os.path import join
+from os import getcwd
+import sys
 
 def construct_conv_layer(blocks):
     #to elaborate
@@ -161,7 +163,17 @@ class Model_CNN_with_g_and_h(Model_CNN_with_g):
         return self.h'''
 
 
-from .wide_resnet import WideResNet
-from .vgg import VGG_16
-from .CNN8 import CNN8
-from .pytorch_cifar import *
+from wide_resnet import WideResNet
+from vgg import VGG_16
+from CNN8 import CNN8
+import importlib
+
+
+mdl = importlib.import_module("pytorch-cifar")
+# is there an __all__?  if so respect it
+if "__all__" in mdl.__dict__:
+    names = mdl.__dict__["__all__"]
+else:
+    # otherwise we import all names that don't begin with _
+    names = [x for x in mdl.__dict__ if not x.startswith("_")]
+globals().update({k: getattr(mdl, k) for k in names})

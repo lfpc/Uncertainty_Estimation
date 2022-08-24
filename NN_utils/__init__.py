@@ -287,5 +287,3 @@ def keys_in_dict(keys,d):
 if __name__ == '__main__':
     print('oioioioioioioo')
     print(list_from_index([1,2,3,4],[0,1,2,3]))
-
-
