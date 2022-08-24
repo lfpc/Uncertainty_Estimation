@@ -2,9 +2,6 @@
 	path = notebooks-scripts/ScriptsUncEst
 	url = https://github.com/lfpc/ScriptsUncEst
 
-[submodule "NN_models/pytorch_cifar"]
-	path = NN_models/pytorch_cifar
-	url = https://github.com/kuangliu/pytorch-cifar
 [submodule "NN_models/pytorch-cifar"]
 	path = NN_models/pytorch-cifar
 	url = https://github.com/kuangliu/pytorch-cifar
