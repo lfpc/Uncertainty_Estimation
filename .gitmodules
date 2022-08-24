@@ -4,4 +4,4 @@
 
 [submodule "NN_models/pytorch-cifar"]
 	path = NN_models/pytorch-cifar
-	url = https://github.com/kuangliu/pytorch-cifar
+	url = https://github.com/kuangliu/pytorch-cifar.git
