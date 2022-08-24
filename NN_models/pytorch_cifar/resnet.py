@@ -71,9 +71,11 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, num_blocks, num_classes=10):
+    def __init__(self, block, num_blocks, num_classes=10,name = 'ResNet', softmax = False):
         super(ResNet, self).__init__()
         self.in_planes = 64
+        self.name = name
+        self.softmax = softmax
 
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
                                stride=1, padding=1, bias=False)
@@ -101,27 +103,31 @@ class ResNet(nn.Module):
         out = F.avg_pool2d(out, 4)
         out = out.view(out.size(0), -1)
         out = self.linear(out)
+        if self.softmax == 'log':
+            out = F.log_softmax(out,dim=-1)
+        elif self.softmax:
+            out = F.softmax(out,dim=-1)
         return out
 
 
-def ResNet18():
-    return ResNet(BasicBlock, [2, 2, 2, 2])
+def ResNet18(**kwargs):
+    return ResNet(BasicBlock, [2, 2, 2, 2],**kwargs)
 
 
-def ResNet34():
-    return ResNet(BasicBlock, [3, 4, 6, 3])
+def ResNet34(**kwargs):
+    return ResNet(BasicBlock, [3, 4, 6, 3],**kwargs)
 
 
-def ResNet50():
-    return ResNet(Bottleneck, [3, 4, 6, 3])
+def ResNet50(**kwargs):
+    return ResNet(Bottleneck, [3, 4, 6, 3],**kwargs)
 
 
-def ResNet101():
-    return ResNet(Bottleneck, [3, 4, 23, 3])
+def ResNet101(**kwargs):
+    return ResNet(Bottleneck, [3, 4, 23, 3],**kwargs)
 
 
-def ResNet152():
-    return ResNet(Bottleneck, [3, 8, 36, 3])
+def ResNet152(**kwargs):
+    return ResNet(Bottleneck, [3, 8, 36, 3],**kwargs)
 
 
 def test():
