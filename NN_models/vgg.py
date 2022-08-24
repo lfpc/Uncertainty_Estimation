@@ -20,20 +20,27 @@ def get_vgg_layers(pretrained = False):
             if i%2==1:
                 conv_layer.append(nn.Dropout(0.3))
         
-    fc_layer = [nn.Flatten(),
-        nn.Linear(512, 512),
-        nn.ReLU(inplace = True),
-        nn.BatchNorm1d(512),
-        nn.Dropout(0.3)]
-    main_layer = conv_layer + fc_layer
-    return main_layer
+    
+    return conv_layer
 
 
 #generalizar para qualquer input (???)
 class VGG_16(Model_CNN):
-    def __init__(self,num_classes=10, pretrained = False, name = 'VGG16', softmax = 'log'):
+    def __init__(self,num_classes=10,input = (32,32,3), pretrained = False, name = 'VGG16', softmax = 'log'):
         """CNN Builder."""
-        super().__init__(num_classes,get_vgg_layers(pretrained),name = name, softmax=softmax)
+        cifar_input = (32,32,3)
+        k = 0
+        for i,c in enumerate(cifar_input):
+            k *= input[i]/c
+        conv_layer = get_vgg_layers(pretrained)
+        fc_layer = [nn.Flatten(),
+        nn.Linear(k*512, 512),
+        nn.ReLU(inplace = True),
+        nn.BatchNorm1d(512),
+        nn.Dropout(0.3)]
+        main_layer = conv_layer + fc_layer
+
+        super().__init__(num_classes,main_layer,name = name, softmax=softmax)
 
 '''class VGG_16_g(Model_CNN_with_g):
     def __init__(self,num_classes=10,input = (32,32), pretrained = False, name = 'VGG16_g'):
