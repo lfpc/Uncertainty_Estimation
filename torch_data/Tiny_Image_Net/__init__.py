@@ -1,8 +1,9 @@
+from logging import raiseExceptions
 from torch_data import DataGenerator
 from torchvision import datasets
 import torchvision.transforms as transforms
 #from .tin import TinyImageNetDataset
-from os.path import join
+from os.path import join,exists
 
 class TinyImageNet(DataGenerator):
 
@@ -24,12 +25,14 @@ class TinyImageNet(DataGenerator):
 
     def __init__(self,params = DataGenerator.params, 
                 name = 'CIFAR 10',
-                download = True,
                 data_dir = "data",
                 train = True,
                 val = True,
                 test = True):
-
+        if join(data_dir,'tiny-imagenet-200'):
+            data_dir = join(data_dir,'tiny-imagenet-200')
+        elif not (exists(join(data_dir,'train')) and exists(join(data_dir,'val')) and exists(join(data_dir,'test'))):
+            raise Exception("Wrong Data Directory")
         training_data = datasets.ImageFolder(join(data_dir,'train'),self.transforms_train) if train else None
         validation_data = datasets.ImageFolder(join(data_dir,'val'),self.transforms_test) if val else None
         test_data = datasets.ImageFolder(join(data_dir,'test'),self.transforms_test) if test else None
