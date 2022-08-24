@@ -26,12 +26,12 @@ def get_vgg_layers(pretrained = False):
 
 #generalizar para qualquer input (???)
 class VGG_16(Model_CNN):
-    def __init__(self,num_classes=10,input = (32,32,3), pretrained = False, name = 'VGG16', softmax = 'log'):
+    def __init__(self,num_classes=10,input_size = (32,32,3), pretrained = False, name = 'VGG16', softmax = 'log'):
         """CNN Builder."""
-        cifar_input = (32,32,3)
+        cifar_input = (32,32,3) #CHANGE THIS EVENTUALLY
         k = 0
         for i,c in enumerate(cifar_input):
-            k *= input[i]/c
+            k *= input_size[i]/c
         conv_layer = get_vgg_layers(pretrained)
         fc_layer = [nn.Flatten(),
         nn.Linear(k*512, 512),
