@@ -29,7 +29,7 @@ class VGG_16(Model_CNN):
     def __init__(self,num_classes=10,input_size = (32,32,3), pretrained = False, name = 'VGG16', softmax = 'log'):
         """CNN Builder."""
         cifar_input = (32,32,3) #CHANGE THIS EVENTUALLY
-        k = 0
+        k = 1
         for i,c in enumerate(cifar_input):
             k *= input_size[i]/c
         conv_layer = get_vgg_layers(pretrained)
