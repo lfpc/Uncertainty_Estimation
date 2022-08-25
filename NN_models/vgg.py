@@ -3,7 +3,7 @@ from torch import nn
 import torchvision
 from NN_models import Model_CNN
 
-def get_vgg_layers(pretrained = False):
+def get_vgg_layers(pretrained = False, conv_drop = True):
     if not pretrained:
         pretrained = None
     #returns 
@@ -17,7 +17,7 @@ def get_vgg_layers(pretrained = False):
             i+=1
         if isinstance(layer,nn.ReLU):
             conv_layer.extend([nn.BatchNorm2d(out_channels)])
-            if i%2==1:
+            if i%2==1 and conv_drop:
                 conv_layer.append(nn.Dropout(0.3))
         
     
@@ -26,18 +26,18 @@ def get_vgg_layers(pretrained = False):
 
 #generalizar para qualquer input (???)
 class VGG_16(Model_CNN):
-    def __init__(self,num_classes=10,input_size = (32,32,3), pretrained = False, name = 'VGG16', softmax = 'log'):
+    def __init__(self,num_classes=10,conv_drop = True,input_size = (32,32,3), pretrained = False, name = 'VGG16', softmax = 'log'):
         """CNN Builder."""
         cifar_input = (32,32,3) #CHANGE THIS EVENTUALLY
         k = 1
         for i,c in enumerate(cifar_input):
             k *= input_size[i]/c
-        conv_layer = get_vgg_layers(pretrained)
+        conv_layer = get_vgg_layers(pretrained,conv_drop)
         fc_layer = [nn.Flatten(),
+        nn.Dropout(0.3),
         nn.Linear(int(k)*512, 512),
         nn.ReLU(inplace = True),
-        nn.BatchNorm1d(512),
-        nn.Dropout(0.3)]
+        nn.BatchNorm1d(512)]
         main_layer = conv_layer + fc_layer
 
         super().__init__(num_classes,main_layer,name = name, softmax=softmax)

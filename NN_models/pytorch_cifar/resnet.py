@@ -71,12 +71,12 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, num_blocks, num_classes=10,name = 'ResNet', softmax = False):
+    def __init__(self, block, num_blocks, num_classes=10,conv_drop = False,drop_rate = 0,name = 'ResNet', softmax = False):
         super(ResNet, self).__init__()
         self.in_planes = 64
         self.name = name
         self.softmax = softmax
-
+        self.conv_drop = conv_drop
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
                                stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
@@ -85,6 +85,7 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
         self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
         self.linear = nn.Linear(512*block.expansion, num_classes)
+        self.dropout = nn.Dropout(drop_rate)
 
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1]*(num_blocks-1)
@@ -97,11 +98,18 @@ class ResNet(nn.Module):
     def forward(self, x):
         out = F.relu(self.bn1(self.conv1(x)))
         out = self.layer1(out)
+        if self.conv_drop:
+            out = self.dropout(out)
         out = self.layer2(out)
+        if self.conv_drop:
+            out = self.dropout(out)
         out = self.layer3(out)
+        if self.conv_drop:
+            out = self.dropout(out)
         out = self.layer4(out)
         out = F.avg_pool2d(out, 4)
         out = out.view(out.size(0), -1)
+        out = self.dropout(out)
         out = self.linear(out)
         if self.softmax == 'log':
             out = F.log_softmax(out,dim=-1)
