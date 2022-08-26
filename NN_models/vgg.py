@@ -35,9 +35,9 @@ class VGG_16(Model_CNN):
         conv_layer = get_vgg_layers(pretrained,conv_drop,drop_rate)
         fc_layer = [nn.Flatten(),
         nn.Linear(int(k)*512, 512),
-        nn.Dropout(drop_rate),
         nn.ReLU(inplace = True),
-        nn.BatchNorm1d(512)]
+        nn.BatchNorm1d(512),
+        nn.Dropout(drop_rate)]
         main_layer = conv_layer + fc_layer
 
         super().__init__(num_classes,main_layer,name = name, softmax=softmax)
