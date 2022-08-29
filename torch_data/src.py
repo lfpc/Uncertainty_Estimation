@@ -170,7 +170,7 @@ def Binary_DataGenerators(data,type = 'parity'):
     return data
 
 def Binary_Dataset(data,type = 'parity'):
-    data.targets = list((data.targets%2).astype(int))
+    data.targets = list(np.asarray(data.targets%2).astype(int))
     return data
 
 
