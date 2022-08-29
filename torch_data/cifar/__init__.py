@@ -3,7 +3,8 @@ import torchvision.transforms as transforms
 import torch
 import random
 import numpy as np
-from torch_data import DataGenerator,Noisy_DataGenerator
+from torch_data.src import DataGenerator,Noisy_DataGenerator
+
 
 def seed_worker(worker_id):
     worker_seed = torch.initial_seed() % 2**32
@@ -32,12 +33,12 @@ class Cifar10(DataGenerator):
     n_classes = 10   
 
 
-    def __init__(self,params = DataGenerator.params, 
-                name = 'CIFAR 10',
+    def __init__(self,params = DataGenerator.params,
                 download = True, 
                 data_dir = "data",
                 train = True,
-                test = True):
+                test = True,
+                dataloader = True):
         training_data = self.training_data(root=data_dir,
                                                 train=True,
                                                 download=download,
@@ -46,8 +47,7 @@ class Cifar10(DataGenerator):
                                         train=False,
                                         download=download,
                                         transform=self.transforms_test) if test else None
-        super().__init__(params,
-                    name,training_data,None,test_data)
+        super().__init__(params,training_data,None,test_data,dataloader)
         
 
 class Cifar100(DataGenerator):
@@ -71,12 +71,12 @@ class Cifar100(DataGenerator):
     n_classes = 100
 
 
-    def __init__(self,params = DataGenerator.params, 
-                name = 'CIFAR 100',
+    def __init__(self,params = DataGenerator.params,
                 download = True, 
                 data_dir = "data",
                 train = True,
-                test = True):
+                test = True,
+                dataloader = True):
         training_data = self.training_data(root=data_dir,
                                                 train=True,
                                                 download=download,
@@ -86,8 +86,7 @@ class Cifar100(DataGenerator):
                                     train=False,
                                     download=download,
                                     transform=self.transforms_test) if test else None
-        super().__init__(params,
-                    name,training_data,None,test_data)
+        super().__init__(params,training_data,None,test_data,dataloader)
         
 #ARRUMAR NOISY CLASSES. PRECISAM CHAMAR CIFAR 10 ANTES  PARA DEFINIR A DATA E TAL
 class Noisy_Cifar10(Noisy_DataGenerator,Cifar10):
@@ -108,8 +107,10 @@ class Noisy_Cifar100(Noisy_DataGenerator,Cifar100):
         self.test_data.root = data_dir
         super().__init__(noise_size,noisy_val,params,
                 download, name)
-from .corrupted import Cifar100C,Cifar10C,CIFAR_C_loader
+#from .corrupted import Cifar100C,Cifar10C,CIFAR_C_loader
 
-
-
+if __name__ == '__main__':
+    data = Cifar10()
+    print(list((np.asarray(data.training_data.targets)%2).astype(int)))
+    
        

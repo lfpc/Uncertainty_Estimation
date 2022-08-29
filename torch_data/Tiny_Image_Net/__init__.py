@@ -1,5 +1,5 @@
 from logging import raiseExceptions
-from torch_data import DataGenerator
+from torch_data.src import DataGenerator
 from torchvision import datasets
 import torchvision.transforms as transforms
 #from .tin import TinyImageNetDataset
