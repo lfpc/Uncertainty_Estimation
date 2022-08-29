@@ -26,8 +26,8 @@ class ImbalanceCifar100(Cifar100,ImbalanceDataSet):
                         params = Cifar10.params,
                         download=True, 
                         data_dir="data"):
-        Cifar100.__init__(params, download, data_dir, train = train, test = test, dataloader = False)
-        ImbalanceDataSet.__init__(imbalance_ratio,
+        Cifar100.__init__(self,params, download, data_dir, train = train, test = test, dataloader = False)
+        ImbalanceDataSet.__init__(self,imbalance_ratio,
                     self.training_data,
                     self.validation_data,
                     self.test_data,
