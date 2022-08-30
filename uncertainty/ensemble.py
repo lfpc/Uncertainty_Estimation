@@ -52,7 +52,7 @@ class Ensemble(nn.Module):
         self.eval()
         if not self.as_ensemble:
             self.uncs = copy(self.uncs)
-            self.uncs['MCP (Ensemble)'] = lambda x: unc.MCP_unc(torch.mean(x,axis = 0))
+            self.uncs['SR (Ensemble)'] = lambda x: unc.MCP_unc(torch.mean(x,axis = 0))
             self.uncs['Entropy (Ensemble)'] = lambda x: unc.entropy(torch.mean(x,axis = 0))
     
     def to(self,device):

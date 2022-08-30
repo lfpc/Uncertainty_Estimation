@@ -157,7 +157,7 @@ class selective_metrics():
     LABEL_FONTSIZE = 18
     TICKS_FONTSIZE = 12
     LINEWIDTH = 3
-    SoftMax_uncs = {'MCP': unc.MCP_unc,
+    SoftMax_uncs = {'SR': unc.MCP_unc,
                     'Entropy': unc.entropy}
     
     def __init__(self,model,
