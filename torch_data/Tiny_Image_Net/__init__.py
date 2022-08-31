@@ -25,11 +25,12 @@ class TinyImageNet(DataGenerator):
 
 
     def __init__(self,params = DataGenerator.params, 
-                name = 'CIFAR 10',
+                name = 'TinyImageNet',
                 data_dir = "data",
                 train = True,
                 val = False,
-                test = True):
+                test = True,
+                dataloader = True):
         if exists(join(data_dir,'tiny-imagenet-200')):
             data_dir = join(data_dir,'tiny-imagenet-200')
         elif not (exists(join(data_dir,'train')) and exists(join(data_dir,'val')) and exists(join(data_dir,'test'))):
@@ -41,8 +42,7 @@ class TinyImageNet(DataGenerator):
         ####ORIGINAL TEST DATA HAVE NO LABELS
 
 
-        super().__init__(params,
-                    name, training_data, validation_data, test_data)
+        super().__init__(params, training_data, validation_data, test_data, dataloader)
     def get_classes(self,data_dir):
         with open(join(data_dir,'words.txt')) as f:
             lines = f.readlines()
