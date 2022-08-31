@@ -70,7 +70,7 @@ def correlation(self,a,b,metric = 'spearman'):
     
 
 def optimum_RC(y_pred,y_true,risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
-    uncertainty = torch.logical_not(TE.correct_class(y_pred,y_true))
+    uncertainty = torch.logical_not(TE.correct_class(y_pred,y_true)).float()
     return RC_curve(y_pred,y_true,uncertainty, risk, c_list)
 
 def E_AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):

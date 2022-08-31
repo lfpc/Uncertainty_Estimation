@@ -30,7 +30,7 @@ class TinyImageNet(DataGenerator):
                 train = True,
                 val = False,
                 test = True):
-        if join(data_dir,'tiny-imagenet-200'):
+        if exists(join(data_dir,'tiny-imagenet-200')):
             data_dir = join(data_dir,'tiny-imagenet-200')
         elif not (exists(join(data_dir,'train')) and exists(join(data_dir,'val')) and exists(join(data_dir,'test'))):
             raise Exception("Wrong Data Directory")
