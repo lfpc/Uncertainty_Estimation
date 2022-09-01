@@ -12,6 +12,18 @@ import warnings
 from IPython.display import clear_output
 from os.path import join
 
+def apply_softmax(model,softmax = True):
+    is_activation = isinstance(model.classifier[-1],torch.nn.Softmax) or isinstance(model.classifier[-1],torch.nn.LogSoftmax)
+    if is_activation and softmax:
+        raise Exception("Classifier already has an activation function")
+    if softmax == 'log':
+        model.classifier.append(torch.nn.LogSoftmax(dim=-1))
+    elif softmax:
+        model.classifier.append(torch.nn.Softmax(dim=-1))
+    elif is_activation:
+        model.classifier[-1] = torch.nn.Identity()
+    return model
+
 def save_state_dict(model,path, name):
     torch.save(model.state_dict(), path + r'/' + name + '.pt')
 
