@@ -4,13 +4,6 @@ import numpy as np
 from os.path import exists, join
 from torchvision import datasets
 
-
-def get_classes(file = 'imagenet1k_classes.txt'):
-    import json
-    with open(file) as f:
-        data = f.read()
-    js = json.loads(data)
-    return js
 def get_transforms(model = 'resnet50'):
     from NN_models import pytorch,pretrained_models
     return pretrained_models[pytorch.__dict__[model]].transforms()
@@ -21,7 +14,7 @@ class ImageNet(DataGenerator):
     transforms_test = get_transforms()
     transforms_train = transforms_test
     n_classes = 1000
-    classes = get_classes()
+    classes = 'Apply get_classes()'#get_classes()
     def __init__(self,params=DataGenerator.params, 
                       data_dir = "data",
                       train = False,
@@ -43,5 +36,12 @@ class ImageNet(DataGenerator):
         if val and test:
             raise Warning("val and test are the same since original test has no labels")
         super().__init__(params, training_data, validation_data, test_data, dataloader)
+        self.classes = self.get_classes(join(data_dir,'imagenet1k_classes.txt'))
+    def get_classes(file = 'imagenet1k_classes.txt'):
+        import json
+        with open(file) as f:
+            data = f.read()
+        js = json.loads(data)
+        return js
 
 
