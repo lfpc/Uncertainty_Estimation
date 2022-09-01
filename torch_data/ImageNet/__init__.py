@@ -37,9 +37,9 @@ class ImageNet(DataGenerator):
         if transforms is not None:
             self.change_transforms(transforms)
 
-        training_data = datasets.imagenet.ImageNet(join(data_dir,'train'),split = 'train', transform = self.transforms_train) if train else None
-        validation_data = datasets.imagenet.ImageNet(join(data_dir,'val'),split = 'val',transform = self.transforms_test) if val else None
-        test_data = datasets.imagenet.ImageNet(join(data_dir,'val'),split = 'val',transform = self.transforms_test) if test else None
+        training_data = datasets.imagenet.ImageNet(join(data_dir),split = 'train', transform = self.transforms_train) if train else None
+        validation_data = datasets.imagenet.ImageNet(join(data_dir),split = 'val',transform = self.transforms_test) if val else None
+        test_data = datasets.imagenet.ImageNet(join(data_dir),split = 'val',transform = self.transforms_test) if test else None
         if val and test:
             raise Warning("val and test are the same since original test has no labels")
         super().__init__(params, training_data, validation_data, test_data, dataloader)
