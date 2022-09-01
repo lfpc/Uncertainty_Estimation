@@ -167,3 +167,10 @@ from .wide_resnet import WideResNet
 from .vgg import VGG_16
 from .CNN8 import CNN8
 from .pytorch_cifar import *
+import torchvision.models as pytorch
+
+pretrained_models = {
+pytorch.resnet50: pytorch.ResNet50_Weights.DEFAULT,
+pytorch.efficientnet_b0:pytorch.EfficientNet_B0_Weights.DEFAULT,
+pytorch.vgg16_bn:pytorch.VGG16_BN_Weights.DEFAULT,
+pytorch.convnext_small:pytorch.ConvNeXt_Small_Weights.DEFAULT}

@@ -25,7 +25,6 @@ class TinyImageNet(DataGenerator):
 
 
     def __init__(self,params = DataGenerator.params, 
-                name = 'TinyImageNet',
                 data_dir = "data",
                 train = True,
                 val = False,
@@ -38,6 +37,8 @@ class TinyImageNet(DataGenerator):
         training_data = datasets.ImageFolder(join(data_dir,'train'),self.transforms_train) if train else None
         validation_data = datasets.ImageFolder(join(data_dir,'val','images'),self.transforms_test) if val else None
         test_data = datasets.ImageFolder(join(data_dir,'val','images'),self.transforms_test) if test else None
+        if val and test:
+            raise Warning("val and test are the same since original test has no labels")
         #### TEST_DATA is actually VAL_DATA
         ####ORIGINAL TEST DATA HAVE NO LABELS
 
