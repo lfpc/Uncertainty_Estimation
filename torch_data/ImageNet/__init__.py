@@ -11,9 +11,9 @@ def get_classes(file = 'imagenet1k_classes.txt'):
         data = f.read()
     js = json.loads(data)
     return js
-def get_transforms():
-    from torchvision.models import ResNet50_Weights
-    return ResNet50_Weights.DEFAULT.transforms()
+def get_transforms(model = 'resnet50'):
+    from NN_models import pytorch,pretrained_models
+    return pretrained_models[pytorch.__dict__[model]].transforms()
 
 
 class ImageNet(DataGenerator):
@@ -35,7 +35,7 @@ class ImageNet(DataGenerator):
         else: raise Exception("Can't find ImageNet folder in data_dir")
         
         if transforms is not None:
-            self.change_transforms(transforms)
+            self.transforms_test = transforms
 
         training_data = datasets.imagenet.ImageNet(join(data_dir),split = 'train', transform = self.transforms_train) if train else None
         validation_data = datasets.imagenet.ImageNet(join(data_dir),split = 'val',transform = self.transforms_test) if val else None
