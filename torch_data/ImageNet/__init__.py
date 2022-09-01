@@ -37,7 +37,7 @@ class ImageNet(DataGenerator):
             raise Warning("val and test are the same since original test has no labels")
         super().__init__(params, training_data, validation_data, test_data, dataloader)
         self.classes = self.get_classes(join(data_dir,'imagenet1k_classes.txt'))
-    def get_classes(file = 'imagenet1k_classes.txt'):
+    def get_classes(self,file = 'imagenet1k_classes.txt'):
         import json
         with open(file) as f:
             data = f.read()
