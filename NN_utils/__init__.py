@@ -13,15 +13,33 @@ from IPython.display import clear_output
 from os.path import join
 
 def apply_softmax(model,softmax = True):
-    is_activation = isinstance(model.classifier[-1],torch.nn.Softmax) or isinstance(model.classifier[-1],torch.nn.LogSoftmax)
-    if is_activation and softmax:
-        raise Exception("Classifier already has an activation function")
     if softmax == 'log':
-        model.classifier.append(torch.nn.LogSoftmax(dim=-1))
+        activation = torch.nn.LogSoftmax
     elif softmax:
-        model.classifier.append(torch.nn.Softmax(dim=-1))
-    elif is_activation:
-        model.classifier[-1] = torch.nn.Identity()
+        activation = torch.nn.Softmax
+
+    module = list(model._modules.keys())[-1]
+
+    if isinstance(module,torch.nn.Sequential):
+        is_activation = isinstance(model._modules[module][-1],torch.nn.Softmax) or isinstance(model._modules[module][-1],torch.nn.LogSoftmax)
+        if isinstance(model._modules[module][-1],torch.nn.Identity):
+            raise Warning("Last layer is identity, check if no activation was applied before it")
+        if is_activation and softmax:
+            model._modules[module][-1] = activation(dim=-1)
+            raise Warning("Classifier already has an activation function")
+        elif softmax:
+            model._modules[module].append(activation(dim=-1))
+        elif is_activation:
+            model._modules[module][-1] = torch.nn.Identity()
+    else:
+        is_activation = isinstance(model._modules[module],torch.nn.Softmax) or isinstance(model._modules[module],torch.nn.LogSoftmax)
+        if is_activation and softmax:
+            model._modules[module] = activation(dim=-1)
+            raise Warning("Classifier already has an activation function")
+        elif softmax:
+            model._modules[module] = torch.nn.Sequential(model._modules[module],activation(dim=-1))
+        elif is_activation:
+            model._modules[module] = torch.nn.Identity()
     return model
 
 def save_state_dict(model,path, name):
