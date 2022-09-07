@@ -3,6 +3,7 @@ from uncertainty import ensemble
 import torch
 from copy import copy
 import uncertainty as unc
+from collections import defaultdict
 
 class MonteCarloBatchNormalization(ensemble.Ensemble):
     def __init__(self,model, n_samples, batch_loader,
@@ -69,3 +70,36 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
     def deterministic(self,x):
         self.reset_normal_mode()
         return super().deterministic(x)
+
+class Fast_MCBN(MonteCarloBatchNormalization):
+    def __init__(self, model, n_samples, batch_loader, as_ensemble=True, return_uncs=False, softmax=False, name='MCBN'):
+        super().__init__(model, n_samples, None, as_ensemble, return_uncs, softmax, name)
+        self.__get_BN_parameters(batch_loader)
+        self.reset_normal_mode()
+
+    def __get_BN_parameters(self,batch_loader):
+        self.set_BN_mode()
+        self.params = defaultdict(list)
+        batch_loader = iter(self.batch_loader)
+        for _ in range(self.n_samples):
+            im,_ = next(batch_loader)
+            im = im.to(self.device)
+            with torch.no_grad():
+                self.model(im)
+                for m in self.__modules:
+                    self.params[m].append((m.running_mean,m.running_var))
+    def __set_BN_parameters(self,i):
+        for m in self.__modules:
+            mean,var = self.params[m][i]
+            m.running_mean = mean
+            m.running_var = var
+
+    def get_samples(self,x):
+        ensemble = []
+        for i in range(self.n_samples):
+            with torch.no_grad():
+                self.__set_BN_parameters(i)
+                y = self.model(x)
+                ensemble.append(y)
+                self.ensemble = torch.stack(ensemble)
+        return self.ensemble
