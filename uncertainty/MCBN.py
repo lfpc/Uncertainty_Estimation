@@ -18,29 +18,29 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
         self.__save_main_attributes()
 
     def __get_BN_modules(self):
-        self._modules = []
+        self._BN_modules = []
         for m in self.model.modules():
             if m.__class__.__name__.startswith('BatchNorm'):
-                self._modules.append(m)
-        assert len(self._modules)>0, "No BatchNormalization modules found in model"
+                self._BN_modules.append(m)
+        assert len(self._BN_modules)>0, "No BatchNormalization modules found in model"
 
     def __save_main_attributes(self):
         self.__momentum = {}
         self.__running_mean= {}
         self.__running_var= {}
 
-        for m in self._modules:
+        for m in self._BN_modules:
             self.__momentum[m] = copy(m.momentum)
             self.__running_mean[m] = copy(m.running_mean)
             self.__running_var[m] = copy(m.running_var)
     def __set_main_attributes(self):
-        for m in self._modules:
+        for m in self._BN_modules:
             m.momentum = copy(self.__momentum[m])
             m.running_mean = copy(self.__running_mean[m])
             m.running_var = copy(self.__running_var[m])
 
     def set_BN_mode(self):
-        for m in self._modules:
+        for m in self._BN_modules:
             m.train()
             m.track_running_stats = True
             m.momentum = 1
@@ -84,11 +84,11 @@ class Fast_MCBN(MonteCarloBatchNormalization):
             im = im.to(self.device)
             with torch.no_grad():
                 self.model(im)
-                for m in self._modules:
+                for m in self._BN_modules:
                     self.params[m].append((m.running_mean,m.running_var))
 
     def __set_BN_parameters(self,i):
-        for m in self._modules:
+        for m in self._BN_modules:
             mean,var = self.params[m][i]
             m.running_mean = mean
             m.running_var = var
@@ -102,3 +102,13 @@ class Fast_MCBN(MonteCarloBatchNormalization):
                 ensemble.append(y)
                 self.ensemble = torch.stack(ensemble)
         return self.ensemble
+
+if __name__ == '__main__':
+    from NN_models import VGG_16
+    from torch_data import Cifar10
+    DATA_PATH = r'C:\Users\luisf\Documents\GitHub\Uncertainty_Estimation\notebooks-scripts\ScriptsUncEst\data'
+    model = VGG_16(num_classes=10)
+    loader = Cifar10(data_dir=DATA_PATH).test_dataloader
+    model_mcbn = Fast_MCBN(model,n_samples = 5, as_ensemble = True,batch_loader = loader)
+    #print(model_mcbn.params.keys())
+    
