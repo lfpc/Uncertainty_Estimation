@@ -19,29 +19,29 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
         self.__save_main_attributes()
 
     def __get_BN_modules(self):
-        self.__modules = []
+        self._modules = []
         for m in self.model.modules():
             if m.__class__.__name__.startswith('BatchNorm'):
-                self.__modules.append(m)
-        assert len(self.__modules)>0, "No BatchNormalization modules found in model"
+                self._modules.append(m)
+        assert len(self._modules)>0, "No BatchNormalization modules found in model"
 
     def __save_main_attributes(self):
         self.__momentum = {}
         self.__running_mean= {}
         self.__running_var= {}
 
-        for m in self.__modules:
+        for m in self._modules:
             self.__momentum[m] = copy(m.momentum)
             self.__running_mean[m] = copy(m.running_mean)
             self.__running_var[m] = copy(m.running_var)
     def __set_main_attributes(self):
-        for m in self.__modules:
+        for m in self._modules:
             m.momentum = copy(self.__momentum[m])
             m.running_mean = copy(self.__running_mean[m])
             m.running_var = copy(self.__running_var[m])
 
     def set_BN_mode(self):
-        for m in self.__modules:
+        for m in self._modules:
             m.train()
             m.track_running_stats = True
             m.momentum = 1
@@ -85,10 +85,11 @@ class Fast_MCBN(MonteCarloBatchNormalization):
             im = im.to(self.device)
             with torch.no_grad():
                 self.model(im)
-                for m in self.__modules:
+                for m in self._modules:
                     self.params[m].append((m.running_mean,m.running_var))
+
     def __set_BN_parameters(self,i):
-        for m in self.__modules:
+        for m in self._modules:
             mean,var = self.params[m][i]
             m.running_mean = mean
             m.running_var = var
