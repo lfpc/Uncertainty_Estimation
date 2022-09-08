@@ -79,7 +79,7 @@ class Fast_MCBN(MonteCarloBatchNormalization):
     def __get_BN_parameters(self,batch_loader):
         self.set_BN_mode()
         self.params = defaultdict(list)
-        batch_loader = iter(self.batch_loader)
+        batch_loader = iter(batch_loader)
         for _ in range(self.n_samples):
             im,_ = next(batch_loader)
             im = im.to(self.device)
