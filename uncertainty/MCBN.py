@@ -1,7 +1,7 @@
 #Monte Carlo Batch Normalization
 from uncertainty import ensemble
 import torch
-from copy import copy
+from copy import copy,deepcopy
 import uncertainty as unc
 from collections import defaultdict
 
@@ -74,18 +74,19 @@ class Fast_MCBN(MonteCarloBatchNormalization):
         super().__init__(model, n_samples, None, as_ensemble, return_uncs, softmax, name)
         self.__get_BN_parameters(batch_loader)
         self.reset_normal_mode()
+        self.eval()
 
     def __get_BN_parameters(self,batch_loader):
-        self.set_BN_mode()
         self.params = defaultdict(list)
         batch_loader = iter(batch_loader)
+        self.set_BN_mode()
         for _ in range(self.n_samples):
             im,_ = next(batch_loader)
             im = im.to(self.device)
             with torch.no_grad():
                 self.model(im)
                 for m in self._BN_modules:
-                    self.params[m].append((m.running_mean,m.running_var))
+                    self.params[m].append((deepcopy(m.running_mean),deepcopy(m.running_var)))
 
     def __set_BN_parameters(self,i):
         for m in self._BN_modules:
@@ -109,6 +110,6 @@ if __name__ == '__main__':
     DATA_PATH = r'C:\Users\luisf\Documents\GitHub\Uncertainty_Estimation\notebooks-scripts\ScriptsUncEst\data'
     model = VGG_16(num_classes=10)
     loader = Cifar10(data_dir=DATA_PATH).test_dataloader
-    model_mcbn = Fast_MCBN(model,n_samples = 5, as_ensemble = True,batch_loader = loader)
+    model_mcbn = Fast_MCBN(model,n_samples = 3, as_ensemble = True,batch_loader = loader)
     #print(model_mcbn.params.keys())
     
