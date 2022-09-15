@@ -25,7 +25,7 @@ def get_vgg_layers(pretrained = False, conv_drop = True, drop_rate = 0.3):
 
 
 #generalizar para qualquer input (???)
-class VGG_16(Model_CNN):
+class VGG_16_old(Model_CNN):
     def __init__(self,num_classes=10,drop_rate = 0.3,conv_drop = True,input_size = (32,32,3), pretrained = False, name = 'VGG16', softmax = 'log'):
         """CNN Builder."""
         cifar_input = (32,32,3) #CHANGE THIS EVENTUALLY
