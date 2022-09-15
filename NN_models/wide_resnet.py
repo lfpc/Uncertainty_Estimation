@@ -199,7 +199,7 @@ class WideResNet(nn.Module):
         
         self.bn1 = nn.BatchNorm2d(nChannels[3])
         self.relu = nn.ReLU(inplace=True)
-        self.classifier_layer = nn.Linear(nChannels[3], num_classes)
+        self.classifier = nn.Linear(nChannels[3], num_classes)
         self.nChannels = nChannels[3]
 
         for m in self.modules():
@@ -222,7 +222,7 @@ class WideResNet(nn.Module):
         out = self.relu(self.bn1(out))
         out = F.avg_pool2d(out, 8)
         out = out.view(-1, self.nChannels)
-        out = self.classifier_layer(out)
+        out = self.classifier(out)
         if self.softmax == 'log':
             out = F.log_softmax(out,dim=-1)
         elif self.softmax:

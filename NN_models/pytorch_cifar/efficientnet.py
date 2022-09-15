@@ -117,7 +117,7 @@ class EfficientNet(nn.Module):
         self.name = name
         self.bn1 = nn.BatchNorm2d(32)
         self.layers = self._make_layers(in_channels=32)
-        self.linear = nn.Linear(cfg['out_channels'][-1], num_classes)
+        self.classifier = nn.Linear(cfg['out_channels'][-1], num_classes)
 
     def _make_layers(self, in_channels):
         layers = []
@@ -148,7 +148,7 @@ class EfficientNet(nn.Module):
         dropout_rate = self.cfg['dropout_rate']
         if self.training and dropout_rate > 0:
             out = F.dropout(out, p=dropout_rate)
-        out = self.linear(out)
+        out = self.classifier(out)
         return out
 
 
