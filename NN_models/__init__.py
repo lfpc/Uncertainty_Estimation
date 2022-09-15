@@ -164,7 +164,7 @@ class Model_CNN_with_g_and_h(Model_CNN_with_g):
 
 
 from .wide_resnet import WideResNet
-from .vgg import VGG_16
+from .vgg import VGG_16_old
 from .CNN8 import CNN8
 from .pytorch_cifar import *
 import torchvision.models as pytorch
