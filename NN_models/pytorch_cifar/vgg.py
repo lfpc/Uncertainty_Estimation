@@ -36,12 +36,9 @@ class VGG(nn.Module):
                            nn.ReLU(inplace=True)]
             if conv_drop:
                 layers += nn.Dropout(self.drop_rate)
-                in_channels = x
+            in_channels = x
         layers += [nn.AvgPool2d(kernel_size=1, stride=1)]
         return nn.Sequential(*layers)
-
-def VGG_16(**kwargs):
-    return VGG('VGG16',**kwargs)
 
 def test():
     net = VGG('VGG11')
