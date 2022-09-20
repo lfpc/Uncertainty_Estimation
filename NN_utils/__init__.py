@@ -10,7 +10,9 @@ import NN_models
 import pkgutil
 import warnings
 from IPython.display import clear_output
-from os.path import join
+from os.path import join,isfile
+import random
+from os import listdir
 
 def apply_softmax(model,softmax = True):
     if softmax == 'log':
@@ -269,6 +271,34 @@ def get_defined_models(module = NN_models):
             if isinstance(mod,torch.nn.Module):
                 d.update(get_defined_models(mod))
     return d
+
+def weights_files(weights_path,suffix = '.pt'):
+    #Get all weight files in weights_path
+    files = [f for f in listdir(weights_path) if isfile(join(weights_path, f)) and f.endswith(suffix)]
+    files = sorted(files)
+    return files
+
+def upload_weights(weights_path,file = 0):
+    '''Return state dict of desired file in weights path'''
+    files = weights_files(weights_path)
+    if isinstance(file,int):
+        weights = files[file]
+        weights = join(weights_path,weights)
+    elif file == 'random':
+        weights = random.choice(files)
+        weights = join(weights_path,weights)
+    elif file == 'max':
+        return upload_weights(0, weights_path)
+    elif isinstance(file,str):
+        if file in files:
+            weights = join(weights_path,file)
+        elif file+'.pt' in files:
+            weights = join(weights_path,file+'.pt')
+        else: raise Exception("No file named ", file)
+    state_dict = torch.load(weights)
+    return state_dict
+
+
 
 def identify_from_statedict(state_dict, models_dict = None, name = None):
     '''Given a state dict, identify which model in models_dict corresponds to it'''
