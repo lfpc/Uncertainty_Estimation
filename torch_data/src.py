@@ -1,8 +1,6 @@
 import copy
-from torch.utils.data import Subset
-from torch.utils.data import random_split
+from torch.utils.data import Subset, Dataset,random_split, DataLoader
 from sklearn.model_selection import train_test_split
-from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import numpy as np
 from random import randrange
@@ -84,7 +82,8 @@ class DataGenerator():
                     validation_data = None,
                     test_data = None,
                     seed = None,
-                    dataloader = True):
+                    dataloader:bool = True,
+                    validation_as_train:bool = False):
 
 
         self.params = params
@@ -92,10 +91,11 @@ class DataGenerator():
         self.training_data = training_data
         self.train_len = len(self.training_data) if training_data is not None else 0
         self.validation_data = validation_data
+        self.validation_as_train = validation_as_train
         if validation_data is not None:
             self.params['validation_size'] = len(validation_data)/(self.train_len+len(validation_data))
         elif self.params['validation_size'] > 0 and self.training_data is not None:
-            self.__split_validation()
+            self.__split_validation(validation_as_train)
         
         self.test_data = test_data
         
@@ -106,12 +106,16 @@ class DataGenerator():
 
     def __split_validation(self):
         self.complete_train_data = copy.copy(self.training_data)
-        self.training_data, self.validation_data = split_data(self.training_data,self.params['validation_size'],self.transforms_test)
+        if self.validation_as_train:
+            self.training_data, self.validation_data = split_data(self.training_data,self.params['validation_size'],self.transforms_train)
+        else:
+            self.training_data, self.validation_data = split_data(self.training_data,self.params['validation_size'],self.transforms_test)
         self.val_len = len(self.training_data)- self.train_len
 
     def generate_dataloaders(self,seed = None):
         if self.validation_data is not None:
-            self.validation_dataloader = DataLoader(self.validation_data, batch_size=self.params['test_batch_size'],shuffle = False,num_workers=2,pin_memory=True)
+            batch_size = self.params['train_batch_size'] if self.validation_as_train else self.params['test_batch_size'] 
+            self.validation_dataloader = DataLoader(self.validation_data, batch_size=batch_size,shuffle = self.validation_as_train,num_workers=2,pin_memory=True)
         if self.training_data is not None:
             self.train_dataloader = DataLoader(self.training_data, batch_size=self.params['train_batch_size'],shuffle = True,num_workers=2,pin_memory=True)
         if self.test_data is not None:
@@ -206,3 +210,24 @@ class Noisy_DataGenerator(DataGenerator):
             infos += f"Noisy validation data = {self.val_len*self.noise_size} \n"
         infos += f"Validation data length = {self.val_len} \n Test data length = {self.test_len}"
         return infos   
+
+
+class custom_subset(Dataset):
+    r"""
+    Subset of a dataset at specified indices.
+
+    Arguments:
+        dataset (Dataset): The whole Dataset
+        indices (sequence): Indices in the whole set selected for subset
+        labels(sequence) : targets as required for the indices. will be the same length as indices
+    """
+    def __init__(self, dataset, labels):
+        self.dataset = dataset
+        self.targets = labels
+    def __getitem__(self, idx):
+        image = self.dataset[idx][0]
+        target = self.targets[idx]
+        return (image, target)
+
+    def __len__(self):
+        return len(self.targets)
