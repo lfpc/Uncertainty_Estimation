@@ -38,7 +38,8 @@ class Cifar10(DataGenerator):
                 data_dir = "data",
                 train = True,
                 test = True,
-                dataloader = True):
+                dataloader = True,
+                **kwargs):
         training_data = self.training_data(root=data_dir,
                                                 train=True,
                                                 download=download,
@@ -47,7 +48,7 @@ class Cifar10(DataGenerator):
                                         train=False,
                                         download=download,
                                         transform=self.transforms_test) if test else None
-        super().__init__(params,training_data,None,test_data,dataloader)
+        super().__init__(params,training_data,None,test_data,dataloader,**kwargs)
         
 
 class Cifar100(DataGenerator):

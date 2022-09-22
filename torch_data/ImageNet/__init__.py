@@ -21,7 +21,8 @@ class ImageNet(DataGenerator):
                       val = False,
                       test = True,
                       dataloader=True,
-                      transforms = None):
+                      transforms = None,
+                      **kwargs):
 
         if exists(join(data_dir,'ImageNet')):
             data_dir = join(data_dir,'ImageNet')
@@ -35,7 +36,7 @@ class ImageNet(DataGenerator):
         test_data = datasets.imagenet.ImageNet(join(data_dir),split = 'val',transform = self.transforms_test) if test else None
         if val and test:
             raise Warning("val and test are the same since original test has no labels")
-        super().__init__(params, training_data, validation_data, test_data, dataloader)
+        super().__init__(params, training_data, validation_data, test_data, dataloader,**kwargs)
         #self.classes = self.get_classes(join(data_dir,'imagenet1k_classes.txt'))
     def get_classes(self,file = 'imagenet1k_classes.txt'):
         import json
