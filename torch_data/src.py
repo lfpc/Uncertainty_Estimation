@@ -95,7 +95,7 @@ class DataGenerator():
         if validation_data is not None:
             self.params['validation_size'] = len(validation_data)/(self.train_len+len(validation_data))
         elif self.params['validation_size'] > 0 and self.training_data is not None:
-            self.__split_validation(validation_as_train)
+            self.__split_validation()
         
         self.test_data = test_data
         
