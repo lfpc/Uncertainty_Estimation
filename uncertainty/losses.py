@@ -4,6 +4,23 @@ import NN_utils as utils
 from uncertainty import entropy,get_TCP
 from NN_utils.train_and_eval import correct_class
 from scipy.optimize import root_scalar
+import torch.nn.functional as F
+
+class FocalLoss(torch.nn.CrossEntropyLoss):
+    ''' Focal loss for classification tasks on imbalanced datasets '''
+
+    def __init__(self, gamma,  reduction='mean'):
+        super().__init__(reduction='none')
+        self._reduction = reduction
+        self.gamma = gamma
+
+    def forward(self, input_, target):
+        cross_entropy = super().forward(input_, target)
+        input_prob = torch.gather(F.softmax(input_, dim = -1), 1, target.unsqueeze(1)).view(-1)
+        loss = torch.pow(1 - input_prob, self.gamma) * cross_entropy
+        return torch.mean(loss) if self._reduction == 'mean' else torch.sum(loss) if self._reduction == 'sum' else loss
+
+
 
 class aux_loss_fs(torch.nn.Module):
     '''Cross Entropy between g (uncertainty variable) and a 'right' vector,
@@ -33,7 +50,7 @@ class LCE(torch.nn.Module):
     def forward(self, y_pred,g,y_true):
         
         with torch.no_grad():
-            y_true_onehot = torch.nn.functional.one_hot(y_true,y_pred.shape[-1])
+            y_true_onehot = F.one_hot(y_true,y_pred.shape[-1])
         y = g*y_pred+(1-g)*y_true_onehot
         loss_t = self.criterion(y,y_true)
         loss_g = torch.mean(-torch.log(g))
@@ -73,7 +90,7 @@ class penalized_uncertainty(torch.nn.Module):
 def entropy_const(w):
     H = torch.exp(entropy(w,reduction = 'sum'))/w.size(0)
     return H
-normalize_tensor = (lambda x,dim=-1: torch.nn.functional.normalize(x, p=1,dim=dim))
+normalize_tensor = (lambda x,dim=-1: F.normalize(x, p=1,dim=dim))
 
 def IPM_selectivenet(r,const,lamb = 32):
     #optimize x such that const >0 with quadratic penalty
@@ -227,7 +244,7 @@ class sigmoid_loss(torch.nn.Module):
         self.eps = eps
         self.bound = bound
     def forward(self, output,y_true):
-        y = torch.nn.functional.one_hot(y_true,self.n_classes)        
+        y = F.one_hot(y_true,self.n_classes)        
         loss = self.CrossEntropy(output,y)
         loss += self.CrossEntropy(1-output,1-y)
         # arrumar [(1-y).bool()]

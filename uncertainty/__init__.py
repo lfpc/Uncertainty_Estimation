@@ -20,10 +20,10 @@ def entropy(y, reduction = 'none'):
     return entropy
 
 
-def get_MCP(y):
+def get_MCP(y,normalize = False):
     ''' Returns the Maximum Class/Softmax Probability of a predicted output.
     Returns the value of the probability of the class with more probability'''
-    if not is_probabilities(y): #if y is not a probabilities tensor
+    if not is_probabilities(y) and normalize: #if y is not a probabilities tensor
         y = torch.nn.functional.softmax(y,dim=-1) #apply softmax
 
     return torch.max(y,-1).values

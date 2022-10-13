@@ -6,7 +6,7 @@ import numpy as np
 from random import randrange
 import torch
 
-def split_data(training_data,val_size,val_transforms, method = 'range', seed = None):
+def split_data(training_data,val_size,val_transforms = None, method = 'range', seed = None):
     '''to develop'''
     assert method == 'range' or method == 'random' or method == 'idx'
     
@@ -21,9 +21,10 @@ def split_data(training_data,val_size,val_transforms, method = 'range', seed = N
         train_idx, val_idx = train_test_split(list(range(len(training_data))), test_size=val_size, shuffle = False)
         train_subset = Subset(training_data, train_idx)
         val_subset = Subset(training_data, val_idx)
-
-    val_subset = copy.deepcopy(val_subset)
-    val_subset.dataset.transform = val_transforms
+        
+    if val_transforms is not None:
+        val_subset = copy.deepcopy(val_subset)
+        val_subset.dataset.transform = val_transforms
 
     return train_subset, val_subset
 

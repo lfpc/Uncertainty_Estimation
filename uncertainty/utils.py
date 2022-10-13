@@ -43,7 +43,7 @@ def dontknow_mask(uncertainty, coverage = None, threshold = None):
     '''Returns a DontKnow Tensor: 1 for the most (coverage most) uncertain samples
     and 0 for the rest'''
     assert xor(is_number(coverage),is_number(threshold))
-    if threshold is None and coverage is not None:
+    if threshold is None:
         with torch.no_grad():
             n_pred = uncertainty.shape[0]
 
@@ -57,7 +57,6 @@ def dontknow_mask(uncertainty, coverage = None, threshold = None):
     elif coverage is None:
         with torch.no_grad():
             dontknow = uncertainty>threshold
-
     return dontknow
 
     

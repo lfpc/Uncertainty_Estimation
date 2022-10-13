@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from NN_utils import train_and_eval as TE
 from sklearn.metrics import roc_curve as ROC
-from NN_utils import apply_mask, slice_dict
+from NN_utils import slice_dict
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 from itertools import cycle
@@ -14,12 +14,27 @@ from scipy.stats import spearmanr,pearsonr
 from pandas import DataFrame
 #from sklearn.calibration import calibration_curve as sk_calibration_curve
 
+def get_n_biggest(vec,n):
+    '''Returns the indexes of the N biggest values in vec'''
+    if 0<n<1:
+        n = int(n*vec.size(0))
+    unc = torch.argsort(vec, descending = True)
+    return unc[0:n]
 
+def masked_coverage(y_pred,y_true, uncertainty, coverage):
+    
+    #dk_mask = unc_utils.dontknow_mask(uncertainty, coverage)
+    #y_pred, y_true = torch.masked_select(y_pred,1-dk_mask),torch.masked_select(y_true,1-dk_mask)#apply_mask(y_pred,y_true,1-dk_mask)
+    N = round((coverage)*uncertainty.shape[0])
+    id = get_n_biggest(uncertainty,N)
+    y_pred = y_pred[id]
+    y_true = y_true[id]
+    
+    return y_pred,y_true
 
 def acc_coverage(y_pred,y_true, uncertainty, coverage):
     '''Returns the total accuracy of model in some dataset excluding the 1-c most uncertain samples'''
-    dk_mask = unc_utils.dontknow_mask(uncertainty, coverage)
-    y_pred, y_true = apply_mask(y_pred,y_true,1-dk_mask)
+    y_pred,y_true = masked_coverage(y_pred,y_true, uncertainty, coverage)
     acc = TE.correct_total(y_pred,y_true)/y_true.size(0)
     return acc
 
