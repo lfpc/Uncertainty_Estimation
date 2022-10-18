@@ -18,7 +18,7 @@ def get_n_biggest(vec,n):
     '''Returns the indexes of the N biggest values in vec'''
     if 0<n<1:
         n = int(n*vec.size(0))
-    unc = torch.argsort(vec, descending = True)
+    unc = torch.argsort(vec, descending = False)
     return unc[0:n]
 
 def masked_coverage(y_pred,y_true, uncertainty, coverage):

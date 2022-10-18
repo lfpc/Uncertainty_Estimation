@@ -28,11 +28,11 @@ def get_MCP(y,normalize = False):
 
     return torch.max(y,-1).values
 
-def MCP_unc(y):
+def MCP_unc(y,normalize = False):
     '''Returns the Maximum Class/Softmax Probability of a predicted output
      as an uncertainty estimation, since MCP is a certainty quantification.
     '''
-    return 1-get_MCP(y)
+    return 1-get_MCP(y, normalize)
 
 
 def get_TCP(y_pred,y_true):

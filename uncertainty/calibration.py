@@ -58,7 +58,7 @@ class _ECELoss(torch.nn.Module):
                 avg_confidence_in_bin = confidences[in_bin].mean()
                 ece += torch.abs(avg_confidence_in_bin - accuracy_in_bin) * prop_in_bin
 
-        return 
+        return ece
 
 class Binning():
     def __init__(self,p,hits,n = 10, bounds = (0,1),division = 'normal'):
