@@ -1,7 +1,5 @@
 '''ResNet in PyTorch.
-
 For Pre-activation ResNet, see 'preact_resnet.py'.
-
 Reference:
 [1] Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun
     Deep Residual Learning for Image Recognition. arXiv:1512.03385
@@ -71,12 +69,11 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, num_blocks, num_classes=10,conv_drop = False,drop_rate = 0,name = 'ResNet', softmax = False):
+    def __init__(self, block, num_blocks, num_classes=10, name = 'ResNet'):
         super(ResNet, self).__init__()
         self.in_planes = 64
         self.name = name
-        self.softmax = softmax
-        self.conv_drop = conv_drop
+
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
                                stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
@@ -84,8 +81,7 @@ class ResNet(nn.Module):
         self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
         self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
         self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
-        self.classifier = nn.Linear(512*block.expansion, num_classes)
-        self.dropout = nn.Dropout(drop_rate)
+        self.linear = nn.Linear(512*block.expansion, num_classes)
 
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1]*(num_blocks-1)
@@ -98,37 +94,28 @@ class ResNet(nn.Module):
     def forward(self, x):
         out = F.relu(self.bn1(self.conv1(x)))
         out = self.layer1(out)
-        if self.conv_drop:
-            out = self.dropout(out)
         out = self.layer2(out)
-        if self.conv_drop:
-            out = self.dropout(out)
         out = self.layer3(out)
-        if self.conv_drop:
-            out = self.dropout(out)
         out = self.layer4(out)
         out = F.avg_pool2d(out, 4)
         out = out.view(out.size(0), -1)
-        out = self.dropout(out)
-        out = self.classifier(out)
-        if self.softmax == 'log':
-            out = F.log_softmax(out,dim=-1)
-        elif self.softmax:
-            out = F.softmax(out,dim=-1)
+        out = self.linear(out)
         return out
 
 
-def ResNet18(**kwargs):
-    return ResNet(BasicBlock, [2, 2, 2, 2],**kwargs)
+#def ResNet18(**kwargs):
+#    return ResNet(BasicBlock, [2, 2, 2, 2],**kwargs)
 
+class ResNet18(ResNet):
+    def __init__(self, num_classes, name = 'ResNet18'):
+        super().__init__(BasicBlock, [2, 2, 2, 2], num_classes, name)
+
+class ResNet50(ResNet):
+    def __init__(self, num_classes, name = 'ResNet50'):
+        super().__init__(Bottleneck, [3, 4, 6, 3], num_classes, name)
 
 def ResNet34(**kwargs):
     return ResNet(BasicBlock, [3, 4, 6, 3],**kwargs)
-
-
-def ResNet50(**kwargs):
-    return ResNet(Bottleneck, [3, 4, 6, 3],**kwargs)
-
 
 def ResNet101(**kwargs):
     return ResNet(Bottleneck, [3, 4, 23, 3],**kwargs)

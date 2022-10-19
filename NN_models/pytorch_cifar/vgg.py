@@ -12,37 +12,35 @@ cfg = {
 
 
 class VGG(nn.Module):
-    def __init__(self, vgg_name,num_classes = 10,name = 'VGG',conv_drop = False,drop_rate = 0.3):
+    def __init__(self, vgg_name, num_classes):
         super(VGG, self).__init__()
-        self.features = self._make_layers(cfg[vgg_name], conv_drop)
+        self.features = self._make_layers(cfg[vgg_name])
         self.classifier = nn.Linear(512, num_classes)
-        self.name = name
-        self.drop_rate = drop_rate
+        self.name = vgg_name
+
     def forward(self, x):
         out = self.features(x)
         out = out.view(out.size(0), -1)
         out = self.classifier(out)
         return out
 
-    def _make_layers(self, cfg,conv_drop = False):
+    def _make_layers(self, cfg):
         layers = []
         in_channels = 3
         for x in cfg:
             if x == 'M':
                 layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
             else:
-                layers += [nn.Conv2d(in_channels, x, kernel_size=3, padding='same'),
+                layers += [nn.Conv2d(in_channels, x, kernel_size=3, padding=1),
                            nn.BatchNorm2d(x),
                            nn.ReLU(inplace=True)]
                 in_channels = x
-            if conv_drop:
-                layers += nn.Dropout(self.drop_rate)
-            
         layers += [nn.AvgPool2d(kernel_size=1, stride=1)]
         return nn.Sequential(*layers)
 
-def VGG_16(**kwargs):
-    return VGG('VGG16',**kwargs)
+class VGG16(VGG):
+    def __init__(self, num_classes):
+        super().__init__('VGG16',num_classes)
 
 def test():
     net = VGG('VGG11')
