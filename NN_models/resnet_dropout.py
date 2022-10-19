@@ -167,6 +167,7 @@ class ResNetDropout(nn.Module):
       width_per_group: int = 64,
       replace_stride_with_dilation: Optional[List[bool]] = None,
       norm_layer: Optional[Callable[..., nn.Module]] = None,
+      conv1_size:int = 3,
       name = 'ResNetDropout'
   ) -> None:
     super(ResNetDropout, self).__init__()
@@ -187,7 +188,7 @@ class ResNetDropout(nn.Module):
     self.groups = groups
     self.base_width = width_per_group
     self.conv1 = nn.Conv2d(
-        3, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
+        3, self.inplanes, kernel_size=conv1_size, stride=2, padding=3, bias=False)
     self.bn1 = norm_layer(self.inplanes)
     self.relu = nn.ReLU(inplace=True)
     self.dropout = Dropout2d(p=dropout_rate, inplace=False)
@@ -288,9 +289,9 @@ def _resnet_dropout(block: Type[Union[BasicBlock,
   return model
 
 class ResNet18_Dropout(ResNetDropout):
-    def __init__(self, num_classes:int,dropout_rate:float = 0.1, name = 'ResNet18_Dropout'):
-        super().__init__(BasicBlock, [2, 2, 2, 2], dropout_rate, num_classes, name)
+    def __init__(self, num_classes:int,dropout_rate:float = 0.1, name = 'ResNet18_Dropout', **kwargs):
+        super().__init__(BasicBlock, [2, 2, 2, 2], dropout_rate, num_classes, name, **kwargs)
 
 class ResNet50_Dropout(ResNetDropout):
-    def __init__(self, num_classes:int,dropout_rate:float = 0.1, name = 'ResNet50_Dropout'):
-        super().__init__(Bottleneck, [3, 4, 6, 3], dropout_rate, num_classes, name)
+    def __init__(self, num_classes:int,dropout_rate:float = 0.1, name = 'ResNet50_Dropout', **kwargs):
+        super().__init__(Bottleneck, [3, 4, 6, 3], dropout_rate, num_classes, name, **kwargs)
