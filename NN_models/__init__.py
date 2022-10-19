@@ -73,7 +73,7 @@ from .CNN8 import CNN8
 from .pytorch_cifar import *
 from .resnet_dropout import ResNet18_Dropout, ResNet50_Dropout
 import torchvision.models as pytorch
-from torchvision.models import vgg16_bn, convnext_small, efficientnet_b0
+from torchvision.models import vgg16_bn, convnext_small, efficientnet_b0,resnet50
 
 
 pretrained_models = {
