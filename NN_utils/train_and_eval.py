@@ -30,26 +30,28 @@ def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,s
 
 def predicted_class(y_pred):
     '''Returns the predicted class for a given softmax output.'''
-    if y_pred.shape[-1] == 1:
-        y_pred = y_pred.view(-1)
-        y_pred = (y_pred>0.5).float()
-        
-    else:
-        y_pred = torch.max(y_pred, 1)[1]
+    with torch.no_grad():
+        if y_pred.shape[-1] == 1:
+            y_pred = y_pred.view(-1)
+            y_pred = (y_pred>0.5).float()
+            
+        else:
+            y_pred = torch.max(y_pred, 1)[1]
     return y_pred
 
 def correct_class(y_pred,y_true):
     '''Returns a bool tensor indicating if each prediction is correct'''
-
-    y_pred = predicted_class(y_pred)
-    correct = (y_pred==y_true)
+    with torch.no_grad():
+        y_pred = predicted_class(y_pred)
+        correct = (y_pred==y_true)
     
     return correct
 
 def correct_total(y_pred,y_true):
     '''Returns the number of correct predictions in a batch where dk_mask=0'''
-    correct = correct_class(y_pred,y_true)
-    correct_total = torch.sum(correct).item()
+    with torch.no_grad():
+        correct = correct_class(y_pred,y_true)
+        correct_total = torch.sum(correct).item()
     return correct_total
 
 def calc_loss_batch(model,loss_criterion,data,set_eval = True):
@@ -58,11 +60,12 @@ def calc_loss_batch(model,loss_criterion,data,set_eval = True):
         model.eval()
     dev = next(model.parameters()).device
     running_loss = 0
-    for image,label in data:
-        image,label = image.to(dev, non_blocking=True), label.to(dev, non_blocking=True)
-        output = model(image)
-        loss = loss_criterion(output,label)
-        running_loss += loss            
+    with torch.no_grad():
+        for image,label in data:
+            image,label = image.to(dev, non_blocking=True), label.to(dev, non_blocking=True)
+            output = model(image)
+            loss = loss_criterion(output,label)
+            running_loss += loss            
     return running_loss/len(data)
 
 def model_acc(model,data,set_eval = True):
@@ -88,15 +91,16 @@ def model_acc_and_loss(model,loss_criterion,data, set_eval = True):
     running_loss = 0
     total = 0
     correct= 0
-    for image,label in data:
-        image,label = image.to(dev, non_blocking=True), label.to(dev, non_blocking=True)
-        output = model(image)
-        loss = loss_criterion(output,label)
-        running_loss += loss.item()
-        total += label.size(0)
-        correct += correct_total(output,label) 
-    loss = running_loss/len(data)
-    acc = (correct*100/total)
+    with torch.no_grad():
+        for image,label in data:
+            image,label = image.to(dev, non_blocking=True), label.to(dev, non_blocking=True)
+            output = model(image)
+            loss = loss_criterion(output,label)
+            running_loss += loss.item()
+            total += label.size(0)
+            correct += correct_total(output,label) 
+        loss = running_loss/len(data)
+        acc = (correct*100/total)
     return acc,loss
 
 

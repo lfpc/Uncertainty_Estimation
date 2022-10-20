@@ -38,14 +38,30 @@ class VGG(nn.Module):
         layers += [nn.AvgPool2d(kernel_size=1, stride=1)]
         return nn.Sequential(*layers)
 
-class VGG16(VGG):
+class VGG_Dropout(VGG):
+    def __init__(self, vgg_name, num_classes, drop_rate = 0.5):
+        super().__init__(vgg_name, num_classes)
+        self.classifier = nn.Sequential(
+            nn.Dropout(drop_rate),
+            nn.Linear(512, 512),
+            nn.ReLU(True),
+            nn.Dropout(drop_rate),
+            nn.Linear(512, 512),
+            nn.ReLU(True),
+            nn.Linear(512, 10),
+        )
+
+class VGG_16(VGG):
     def __init__(self, num_classes):
         super().__init__('VGG16',num_classes)
 
-def test():
-    net = VGG('VGG11')
-    x = torch.randn(2,3,32,32)
-    y = net(x)
-    print(y.size())
+class VGG_16_Dropout(VGG_Dropout):
+    def __init__(self, num_classes, drop_rate = 0.5):
+        super().__init__('VGG16',num_classes, drop_rate)
 
-# test()
+def test():
+    net = VGG_16(10)
+    print(net)
+
+if __name__ == '__main__':
+    test()
