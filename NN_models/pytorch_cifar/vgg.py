@@ -59,9 +59,6 @@ class VGG_16_Dropout(VGG_Dropout):
     def __init__(self, num_classes, drop_rate = 0.5):
         super().__init__('VGG16',num_classes, drop_rate)
 
-def test():
+if __name__ == '__main__':
     net = VGG_16(10)
     print(net)
-
-if __name__ == '__main__':
-    test()

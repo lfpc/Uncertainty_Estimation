@@ -245,11 +245,11 @@ class selective_metrics():
             else:
                 self.d_uncs[name] = un
         
-    def RC_curves(self,risk = error_coverage, optimum = False,baseline = None):
+    def RC_curves(self,risk = error_coverage, optimal = False,baseline = None):
         self.risk = {}
         for name,un in self.d_uncs.items():
             self.risk[name] = RC_curve(self.output,self.label,un,risk, self.c_list)
-        if optimum:
+        if optimal:
             self.risk['Optimal'] = optimum_RC(self.output,self.label,risk, self.c_list)
         if baseline is not None:
             self.risk['Baseline'] = baseline

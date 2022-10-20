@@ -36,7 +36,7 @@ def predicted_class(y_pred):
             y_pred = (y_pred>0.5).float()
             
         else:
-            y_pred = torch.max(y_pred, 1)[1]
+            y_pred = torch.argmax(y_pred, -1)
     return y_pred
 
 def correct_class(y_pred,y_true):
