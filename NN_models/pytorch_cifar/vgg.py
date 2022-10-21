@@ -39,6 +39,7 @@ class VGG(nn.Module):
         return nn.Sequential(*layers)
 
 class VGG_Dropout(VGG):
+    '''Took from https://github.com/chengyangfu/pytorch-vgg-cifar10'''
     def __init__(self, vgg_name, num_classes, drop_rate = 0.5):
         super().__init__(vgg_name, num_classes)
         self.classifier = nn.Sequential(

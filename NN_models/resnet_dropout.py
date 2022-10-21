@@ -188,7 +188,7 @@ class ResNetDropout(nn.Module):
     self.groups = groups
     self.base_width = width_per_group
     self.conv1 = nn.Conv2d(
-        3, self.inplanes, kernel_size=conv1_size, stride=2, padding=3, bias=False)
+        3, self.inplanes, kernel_size=conv1_size, stride=1, padding=1, bias=False)
     self.bn1 = norm_layer(self.inplanes)
     self.relu = nn.ReLU(inplace=True)
     self.dropout = Dropout2d(p=dropout_rate, inplace=False)
@@ -265,7 +265,7 @@ class ResNetDropout(nn.Module):
     x = self.bn1(x)
     x = self.relu(x)
     x = self.dropout(x)
-    x = self.maxpool(x)
+    #x = self.maxpool(x)
 
     x = self.layer1(x)
     x = self.layer2(x)
