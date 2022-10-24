@@ -173,6 +173,7 @@ class ResNetDropout(nn.Module):
     super(ResNetDropout, self).__init__()
     if norm_layer is None:
       norm_layer = nn.BatchNorm2d
+    self.conv1_size = conv1_size
     self._norm_layer = norm_layer
     self.name = name
     self.inplanes = 64
@@ -187,8 +188,10 @@ class ResNetDropout(nn.Module):
           'or a 3-element tuple, got {}'.format(replace_stride_with_dilation))
     self.groups = groups
     self.base_width = width_per_group
-    self.conv1 = nn.Conv2d(
-        3, self.inplanes, kernel_size=conv1_size, stride=1, padding=1, bias=False)
+    if conv1_size >3:
+      self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=conv1_size, stride=2, padding=3, bias=False)
+    else:
+      self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=conv1_size, stride=1, padding=1, bias=False)
     self.bn1 = norm_layer(self.inplanes)
     self.relu = nn.ReLU(inplace=True)
     self.dropout = Dropout2d(p=dropout_rate, inplace=False)
@@ -265,7 +268,8 @@ class ResNetDropout(nn.Module):
     x = self.bn1(x)
     x = self.relu(x)
     x = self.dropout(x)
-    #x = self.maxpool(x)
+    if self.conv1_size > 3:
+      x = self.maxpool(x)
 
     x = self.layer1(x)
     x = self.layer2(x)

@@ -49,7 +49,7 @@ class VGG_Dropout(VGG):
             nn.Dropout(drop_rate),
             nn.Linear(512, 512),
             nn.ReLU(True),
-            nn.Linear(512, 10),
+            nn.Linear(512, num_classes),
         )
 
 class VGG_16(VGG):
