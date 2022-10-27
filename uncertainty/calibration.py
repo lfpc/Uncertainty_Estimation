@@ -44,13 +44,13 @@ class _ECELoss(torch.nn.Module):
         self.bin_uppers = bin_boundaries[1:]
         self.SM = softmax
 
-    def forward(self, logits, labels):
+    def forward(self, y, labels):
         if self.SM:
-            y = softmax(logits, dim=1)
+            y = softmax(y, dim=1)
         confidences, predictions = torch.max(y, 1)
         accuracies = predictions.eq(labels)
 
-        ece = torch.zeros(1, device=logits.device)
+        ece = torch.zeros(1, device=y.device)
         for bin_lower, bin_upper in zip(self.bin_lowers, self.bin_uppers):
             # Calculated |confidence - accuracy| in each bin
             in_bin = confidences.gt(bin_lower.item()) * confidences.le(bin_upper.item())
