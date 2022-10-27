@@ -1,26 +1,44 @@
 import torch
 from NN_utils import indexing_2D, is_probabilities,round_decimal
-import uncertainty.utils as utils
+#import uncertainty.utils as utils
 from warnings import warn
 
-def entropy(y, reduction = 'none'):
-    '''Returns the entropy of a probabilities tensor.'''
-    
-    if not is_probabilities(y): #if y is not a probabilities tensor
-        y = torch.nn.functional.softmax(y,dim=-1) #apply softmax
-        warn("Input vector is not probabilty vector - Applying Softmax")
-    
-    entropy = torch.special.entr(y) #entropy element wise
-    entropy = torch.sum(entropy,-1)
-    
-    
-    if reduction == 'mean':
-        entropy = torch.mean(entropy)
-    elif reduction == 'sum':
-        entropy = torch.sum(entropy)
-        
-    return entropy
+def entropy(y, **kwargs):
+    return Entropy.entropy(y,**kwargs)
 
+class Entropy(torch.nn.Module):
+    @staticmethod
+    def entropy(y, normalize = False,reduction = 'none'):
+        '''Returns the entropy of a probabilities tensor.'''
+        
+        if normalize: #if y is not a probabilities tensor
+            y = torch.nn.functional.softmax(y,dim=-1) #apply softmax 
+        elif not is_probabilities(y): 
+            warn("Input vector is not probabilty vector")
+        
+        entropy = torch.special.entr(y) #entropy element wise
+        entropy = torch.sum(entropy,-1)
+        
+        
+        if reduction == 'mean':
+            entropy = torch.mean(entropy)
+        elif reduction == 'sum':
+            entropy = torch.sum(entropy)
+            
+        return entropy
+
+    def __init__(self,reduction = None, normalization = None) -> None:
+        super().__init__()
+        if isinstance(normalization,str):
+            self.normalization = torch.nn.functional.__dict__[normalization]
+        else: self.normalization = normalization
+        self.reduction = reduction
+    def forward(self,y):
+        if self.normalization is not None:
+            y = self.normalization(y,dim=-1)
+        return entropy(y,False,self.reduction)
+
+    
 
 def get_MCP(y,normalize = False):
     ''' Returns the Maximum Class/Softmax Probability of a predicted output.

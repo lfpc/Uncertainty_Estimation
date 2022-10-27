@@ -34,7 +34,7 @@ class _ECELoss(torch.nn.Module):
     "Obtaining Well Calibrated Probabilities Using Bayesian Binning." AAAI.
     2015.
     """
-    def __init__(self, n_bins=15):
+    def __init__(self, n_bins=15, softmax = False):
         """
         n_bins (int): number of confidence interval bins
         """
@@ -42,9 +42,11 @@ class _ECELoss(torch.nn.Module):
         bin_boundaries = torch.linspace(0, 1, n_bins + 1)
         self.bin_lowers = bin_boundaries[:-1]
         self.bin_uppers = bin_boundaries[1:]
+        self.SM = softmax
 
     def forward(self, logits, labels):
-        softmaxes = softmax(logits, dim=1)
+        if self.SM:
+            softmaxes = softmax(logits, dim=1)
         confidences, predictions = torch.max(softmaxes, 1)
         accuracies = predictions.eq(labels)
 
