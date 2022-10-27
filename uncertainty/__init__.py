@@ -14,7 +14,8 @@ class Entropy(torch.nn.Module):
         if normalize: #if y is not a probabilities tensor
             y = torch.nn.functional.softmax(y,dim=-1) #apply softmax 
         elif not is_probabilities(y): 
-            warn("Input vector is not probabilty vector")
+            idx = is_probabilities(y).nonzero()
+            warn(f"Input vector is not probabilty vector - Sum indexes {idx} = {y[idx]}")
         
         entropy = torch.special.entr(y) #entropy element wise
         entropy = torch.sum(entropy,-1)

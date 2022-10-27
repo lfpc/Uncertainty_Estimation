@@ -251,7 +251,7 @@ def is_probabilities(y, tol = 1e-5, dim = -1):
     if it sums to 1 (with float tol) and have all values greater than 0'''
 
     is_prob = torch.logical_and(torch.all(torch.abs((torch.sum(y,dim=dim) - 1)) < tol),
-    torch.all(y>0)) 
+    torch.all(y>=0)) 
 
     return is_prob
 
