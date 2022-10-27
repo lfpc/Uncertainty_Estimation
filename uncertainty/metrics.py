@@ -66,7 +66,7 @@ def ROC_curve(output,y_true, uncertainty, return_threholds = False):
 
 def AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
     risk_list = RC_curve(y_pred,y_true,uncertainty, risk, c_list)
-    return torch.trapezoid(risk_list,x = c_list, dim = -1)
+    return np.trapz(risk_list,x = c_list, dim = -1)
 
 def AUROC(output,y_true,uncertainty):
     fpr,tpr = ROC_curve(output,y_true,uncertainty)

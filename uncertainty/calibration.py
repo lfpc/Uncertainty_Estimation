@@ -46,8 +46,8 @@ class _ECELoss(torch.nn.Module):
 
     def forward(self, logits, labels):
         if self.SM:
-            softmaxes = softmax(logits, dim=1)
-        confidences, predictions = torch.max(softmaxes, 1)
+            y = softmax(logits, dim=1)
+        confidences, predictions = torch.max(y, 1)
         accuracies = predictions.eq(labels)
 
         ece = torch.zeros(1, device=logits.device)
