@@ -227,31 +227,41 @@ class Trainer():
             self.hist_val = hist_train(model,loss_criterion,validation_data, risk_dict = risk_dict)
         self.update_hist()
             
-    def fit(self,data = None,n_epochs = 1, live_plot = True,update_hist = True, 
-            save_checkpoint = False, PATH = '.'):
+    def fit(self,data = None,n_epochs = 1, live_plot = False,update_hist = True, 
+            save_checkpoint = False, PATH = '.', resume = False):
+        if live_plot is True and (not (hasattr(self,'hist_train') and hasattr(self,'hist_val'))):
+            live_plot = False
         if data is None:
-            data = self.training_data
-        if not live_plot == 'print':
-            progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
-            progress = tqdm(data,position=1, leave=True, desc = 'Epoch progress:')
-        else: 
-            progress_epoch = range(n_epochs)
-            progress = data
-        if save_checkpoint:
-            acc = 0
-        for e in progress_epoch:
-            if not live_plot == 'print':
+            data = self.hist_train.data
+        if not resume:
+            if live_plot != 'print':
+                self.__progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
+                progress = tqdm(data,position=1, leave=True, desc = 'Epoch progress:')
+            else: 
+                self.__progress_epoch = range(n_epochs)
+                progress = data
+            if save_checkpoint:
+                self.acc = 0
+        else: n_epochs += self.epoch
+        if live_plot != 'print':
+            self.__progress_epoch.disable = False
+        while self.epoch < n_epochs:
+        #for e in self.__progress_epoch:
+            if live_plot != 'print':
+                
                 desc = 'Progress:'
                 if hasattr(self,'hist_train'):
                     desc = f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} |' +desc
                 if hasattr(self,'hist_val'):
                     desc = f'Acc_val (max): {self.hist_val.acc_list[-1]:.2f} ({max(self.hist_val.acc_list):.2f}) | ' + desc
 
-                progress_epoch.set_description(desc)
+                self.__progress_epoch.set_description(desc)
                 progress.disable = False
                 progress.reset()
 
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
+            if live_plot != 'print':
+                self.__progress_epoch.update()
             self.update_hist(dataset = update_hist)
             self.epoch += 1
             if self.lr_scheduler is not None:
@@ -264,12 +274,12 @@ class Trainer():
                     desc_dict['Validation loss'] = self.hist_val.loss_list
                     desc_dict['MIN Val loss'] = int(np.argmin(self.hist_val.loss_list))
                 utils.live_plot(desc_dict,title = f'Loss {type(self.loss_fn).__name__}',adjust=True)
-                display(progress_epoch.container)
+                display(self.__progress_epoch.container)
             elif live_plot == 'print':
                 print('Epoch ', self.epoch, ', loss = ', loss)
             if save_checkpoint:
-                if self.hist_val.acc_list[-1] >= acc:
-                    acc = self.hist_val.acc_list[-1]
+                if self.hist_val.acc_list[-1] >= self.acc:
+                    self.acc = self.hist_val.acc_list[-1]
                     self.save_state_dict(PATH,self.model.name+'_checkpoint')
 
     def update_hist(self, dataset = 'all'):

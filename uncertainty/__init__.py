@@ -1,12 +1,14 @@
 import torch
 from NN_utils import indexing_2D, is_probabilities,round_decimal
 import uncertainty.utils as utils
+from warnings import warn
 
 def entropy(y, reduction = 'none'):
     '''Returns the entropy of a probabilities tensor.'''
     
     if not is_probabilities(y): #if y is not a probabilities tensor
         y = torch.nn.functional.softmax(y,dim=-1) #apply softmax
+        warn("Input vector is not probabilty vector - Applying Softmax")
     
     entropy = torch.special.entr(y) #entropy element wise
     entropy = torch.sum(entropy,-1)
