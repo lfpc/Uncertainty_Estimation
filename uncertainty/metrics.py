@@ -105,7 +105,7 @@ class BCELoss_unc(torch.nn.BCELoss):
     def forward(self,y_pred,y_true, unc = None):
         with torch.no_grad():
             hits = TE.correct_class(y_pred,y_true).float()
-        if unc in None:
+        if unc is None:
             unc = 1-torch.max(y_pred,-1).values
         elif callable(unc):
             unc = unc(y_pred)
@@ -118,7 +118,7 @@ class MSELoss_unc(torch.nn.MSELoss):
     def forward(self,y_pred,y_true, unc = None):
         with torch.no_grad():
             hits = TE.correct_class(y_pred,y_true).float()
-        if unc in None:
+        if unc is None:
             unc = 1-torch.max(y_pred,-1).values
         elif callable(unc):
             unc = unc(y_pred)
