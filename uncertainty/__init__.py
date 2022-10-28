@@ -8,14 +8,15 @@ def entropy(y, **kwargs):
 
 class Entropy(torch.nn.Module):
     @staticmethod
-    def entropy(y, normalize = False,reduction = 'none'):
+    def entropy(y, normalize = True,reduction = 'none'):
         '''Returns the entropy of a probabilities tensor.'''
         
         if normalize: #if y is not a probabilities tensor
             y = torch.nn.functional.softmax(y,dim=-1) #apply softmax 
         elif not is_probabilities(y): 
             idx = is_probabilities(y).nonzero()
-            warn(f"Input vector is not probabilty vector - Sum indexes {idx} = {y[idx]}")
+            w = f'Input vector is not probabilty vector - Sum indexes {idx} = {y[idx]}'
+            warn(w)
         
         entropy = torch.special.entr(y) #entropy element wise
         entropy = torch.sum(entropy,-1)

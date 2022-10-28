@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 from itertools import cycle
 import uncertainty as unc
-from uncertainty import utils as unc_utils
+from uncertainty import MCP_unc, utils as unc_utils
 from sklearn.metrics import auc,brier_score_loss
 from scipy.stats import spearmanr,pearsonr
 from pandas import DataFrame
@@ -93,9 +93,13 @@ def E_AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(
     opt_aurc = auc(c_list,optimum_RC(y_pred,y_true,risk, c_list))
     return aurc - opt_aurc
 
-def Brier(y_pred,y_true,uncertainty):
-    wrong = 1-TE.correct_class(y_pred,y_true)
-    return brier_score_loss(wrong, uncertainty)
+def Brier(y_pred,y_true,uncertainty = None):
+    if uncertainty is None:
+        uncertainty = MCP_unc(y_pred,normalize=True)
+    elif callable(uncertainty):
+        uncertainty = uncertainty(y_pred)
+    
+    return brier_score_loss(TE.correct_class(y_pred,y_true), 1-uncertainty)
 
 def calibration_curve(
     y_true,
