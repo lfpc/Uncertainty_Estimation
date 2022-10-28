@@ -93,13 +93,12 @@ def E_AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(
     opt_aurc = auc(c_list,optimum_RC(y_pred,y_true,risk, c_list))
     return aurc - opt_aurc
 
-def Brier(y_pred,y_true,uncertainty = None):
-    if uncertainty is None:
-        uncertainty = MCP_unc(y_pred,normalize=True)
-    elif callable(uncertainty):
-        uncertainty = uncertainty(y_pred)
+def Brier(y_pred,y_true,n_classes = -1):
     
-    return brier_score_loss(TE.correct_class(y_pred,y_true), 1-uncertainty)
+    y_true = torch.nn.functional.one_hot(y_true, n_classes)
+    return torch.mean(torch.sum(torch.square(y_pred-y_true),-1))
+    #return brier_score_loss(TE.correct_class(y_pred,y_true), 1-uncertainty)
+
 
 def calibration_curve(
     y_true,
