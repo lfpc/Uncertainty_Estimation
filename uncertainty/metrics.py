@@ -99,6 +99,32 @@ def Brier(y_pred,y_true,n_classes = -1):
     return torch.mean(torch.sum(torch.square(y_pred-y_true),-1))
     #return brier_score_loss(TE.correct_class(y_pred,y_true), 1-uncertainty)
 
+class BCELoss_unc(torch.nn.BCELoss):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+    def forward(self,y_pred,y_true, unc = None):
+        with torch.no_grad():
+            hits = TE.correct_class(y_pred,y_true).float()
+        if unc in None:
+            unc = 1-torch.max(y_pred,-1).values
+        elif callable(unc):
+            unc = unc(y_pred)
+        loss = super().forward(1-unc,hits)
+        return loss
+
+class MSELoss_unc(torch.nn.MSELoss):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+    def forward(self,y_pred,y_true, unc = None):
+        with torch.no_grad():
+            hits = TE.correct_class(y_pred,y_true).float()
+        if unc in None:
+            unc = 1-torch.max(y_pred,-1).values
+        elif callable(unc):
+            unc = unc(y_pred)
+        loss = super().forward(1-unc,hits)
+        return loss
+
 
 def calibration_curve(
     y_true,
