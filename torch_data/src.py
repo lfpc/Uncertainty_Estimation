@@ -6,7 +6,7 @@ import numpy as np
 from random import randrange
 import torch
 
-def split_data(training_data,val_size,val_transforms = None, method = 'range', seed = None):
+def split_data(training_data,val_size,val_transforms = None, method = 'pre_defined', seed = 0):
     '''to develop'''
     assert method == 'range' or method == 'random' or method == 'idx'
     
@@ -17,8 +17,8 @@ def split_data(training_data,val_size,val_transforms = None, method = 'range', s
             train_subset, val_subset = random_split(training_data, [train_size, val_size],generator=torch.Generator().manual_seed(seed))
         else:
             train_subset, val_subset = random_split(training_data, [train_size, val_size])
-    elif method == 'range':
-        train_idx, val_idx = train_test_split(list(range(len(training_data))), test_size=val_size, shuffle = False)
+    elif method == 'pre_defined':
+        train_idx, val_idx = train_test_split(list(range(len(training_data))), random_state = seed,test_size=val_size,stratify = training_data.targets)
         train_subset = Subset(training_data, train_idx)
         val_subset = Subset(training_data, val_idx)
         
