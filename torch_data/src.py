@@ -8,7 +8,7 @@ import torch
 
 def split_data(training_data,val_size,val_transforms = None, method = 'pre_defined', seed = 0):
     '''to develop'''
-    assert method == 'range' or method == 'random' or method == 'idx'
+    assert method == 'pre_defined' or method == 'random' or method == 'idx'
     
     if method == 'random':
         val_size = int(val_size*len(training_data))
