@@ -10,18 +10,16 @@ class TinyImageNet(DataGenerator):
 
     MEAN = (0.485, 0.456, 0.406)
     STD = (0.229, 0.224, 0.225)
-    transforms_train = transforms.Compose([
-                    transforms.Resize(256, interpolation=transforms.InterpolationMode.BILINEAR),
-                    transforms.RandomCrop(224),
-                    transforms.RandomHorizontalFlip(),
-                    transforms.ToTensor(),
-                    #transforms.RandomRotation(15),
-                    transforms.Normalize(MEAN, STD)])
-    transforms_test = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Resize(256, interpolation=transforms.InterpolationMode.BILINEAR),
-    transforms.CenterCrop(224),
-    transforms.Normalize(MEAN, STD),])
+
+    train_transform = transforms.Compose([
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(64, padding=4),
+            transforms.ToTensor(),
+            transforms.Normalize(MEAN, STD)
+        ])
+
+    test_transform = transforms.Compose(
+            [transforms.ToTensor(), transforms.Normalize(MEAN, STD)])
 
     classes = "Apply get_classes(data_dir)"
     n_classes = 200
@@ -56,6 +54,25 @@ class TinyImageNet(DataGenerator):
             self.classes.append(words[1].split('\n')[0])
         self.classes = tuple(self.classes)
         return self.classes
+
+class TinyImageNet_224(TinyImageNet):
+    transforms_train = transforms.Compose([
+                    transforms.Resize(256, interpolation=transforms.InterpolationMode.BILINEAR),
+                    transforms.RandomCrop(224),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.ToTensor(),
+                    #transforms.RandomRotation(15),
+                    transforms.Normalize(TinyImageNet.MEAN, TinyImageNet.STD)])
+    transforms_test = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Resize(256, interpolation=transforms.InterpolationMode.BILINEAR),
+    transforms.CenterCrop(224),
+    transforms.Normalize(TinyImageNet.MEAN, TinyImageNet.STD),])
+    def __init__(self, params=DataGenerator.params, data_dir="data", train=True, val=False, test=True, dataloader=True):
+        super().__init__(params, data_dir, train, val, test, dataloader)
+
+
+
 
 if __name__ == '__main__':
     print(transforms.Resize(256, interpolation=transforms.InterpolationMode.BICUBIC))
