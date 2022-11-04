@@ -18,7 +18,7 @@ class TinyImageNet(DataGenerator):
             transforms.Normalize(MEAN, STD)
         ])
 
-    transforms_train = transforms.Compose(
+    transforms_test = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize(MEAN, STD)])
 
     classes = "Apply get_classes(data_dir)"
