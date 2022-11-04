@@ -229,7 +229,7 @@ class Trainer():
             
     def fit(self,data = None,n_epochs = 1, live_plot = False,update_hist = True, 
             save_checkpoint = False, PATH = '.', resume = False):
-        if live_plot is True and (not (hasattr(self,'hist_train') and hasattr(self,'hist_val'))):
+        if live_plot is True and (not (hasattr(self,'hist_train') or hasattr(self,'hist_val'))):
             live_plot = False
         if data is None:
             data = self.hist_train.data
