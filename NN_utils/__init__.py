@@ -288,12 +288,17 @@ def upload_weights(weights_path,file = 0):
         weights = random.choice(files)
         weights = join(weights_path,weights)
     elif file == 'max':
+        #to develop
         return upload_weights(0, weights_path)
     elif isinstance(file,str):
+        subfiles = list(filter(lambda x: file in x, files))
         if file in files:
             weights = join(weights_path,file)
         elif file+'.pt' in files:
             weights = join(weights_path,file+'.pt')
+        elif file in subfiles:
+            warnings.warn(f"Uploading first file with {file} in its name")
+            weights = join(weights_path,subfiles[0])
         else: raise Exception("No file named ", file)
     state_dict = torch.load(weights)
     return state_dict

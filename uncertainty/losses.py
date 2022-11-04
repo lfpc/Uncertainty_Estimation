@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from math import log
 import NN_utils as utils
@@ -5,6 +6,116 @@ from uncertainty import entropy,get_TCP
 from NN_utils.train_and_eval import correct_class
 from scipy.optimize import root_scalar
 import torch.nn.functional as F
+import os
+
+
+
+
+class HypersphericalLoss(torch.nn.Module):
+    def __init__(self, polars, reduction = 'mean') -> None:
+        super().__init__()
+        self.polars = polars
+        self.loss_fn = torch.nn.CosineSimilarity(eps=1e-9)
+        self.reduction = reduction
+    def forward(self,y_pred,y_true):
+        y_true = self.polars[y_true]
+        loss = (1 - self.loss_fn(y_pred,y_true)).pow(2)
+        if self.reduction == 'mean':
+            loss = loss.mean()
+        elif self.reduction == 'sum':
+            loss = loss.sum()
+        return loss
+    @classmethod
+    def from_file(cls,polars_file,**kwargs):
+        classpolars = torch.from_numpy(np.load(polars_file)).float()
+        return cls(classpolars,**kwargs)
+    @classmethod
+    def from_values(cls,path,classes,dims,**kwargs):
+        polars_file = os.path.join(path,f'prototypes-{dims}d-{classes}c.npy')
+        if os.path.isdir(path):
+            classpolars = torch.from_numpy(np.load(polars_file)).float()
+        else: 
+            classpolars = HypersphericalLoss.get_prototypes(classes,dims,save_dir = path)
+        return cls(classpolars,**kwargs)
+    @staticmethod
+    def __prototype_loss(prototypes):
+        # Dot product of normalized prototypes is cosine similarity.
+        product = torch.matmul(prototypes, prototypes.t()) + 1
+        # Remove diagnonal from loss.
+        product -= 2. * torch.diag(torch.diag(product))
+        # Minimize maximum cosine similarity.
+        loss = product.max(dim=1)[0]
+        return loss.mean(), product.max()
+    @staticmethod
+    def __prototype_loss_sem(prototypes, triplets):
+        product = torch.matmul(prototypes, prototypes.t()) + 1
+        product -= 2. * torch.diag(torch.diag(product))
+        loss1 = -product[triplets[:,0], triplets[:,1]]
+        loss2 = product[triplets[:,2], triplets[:,3]]
+        return loss1.mean() + loss2.mean(), product.max()
+    @staticmethod
+    def get_prototypes(classes, dims,
+                        save_dir = None,
+                        learning_rate = 0.1,
+                        momentum = 0.9,
+                        epochs:int = 10000,
+                        wtvfile = "",
+                        nn:int = 2):
+
+        # Initialize prototypes and optimizer.
+        if os.path.exists(wtvfile):
+            use_wtv = True
+            wtvv = np.load(wtvfile)
+            for i in range(wtvv.shape[0]):
+                wtvv[i] /= np.linalg.norm(wtvv[i])
+            wtvv = torch.from_numpy(wtvv)
+            wtvsim = torch.matmul(wtvv, wtvv.t()).float()
+            
+            # Precompute triplets.
+            nns, others = [], []
+            for i in range(wtvv.shape[0]):
+                sorder = np.argsort(wtvsim[i,:])[::-1]
+                nns.append(sorder[:nn])
+                others.append(sorder[nn:-1])
+            triplets = []
+            for i in range(wtvv.shape[0]):
+                for j in range(len(nns[i])):
+                    for k in range(len(others[i])):
+                        triplets.append([i,j,i,k])
+            triplets = np.array(triplets).astype(int)
+        else:
+            use_wtv = False
+
+
+        prototypes = torch.randn(classes, dims)
+        prototypes = torch.nn.Parameter(F.normalize(prototypes, p=2, dim=1))
+        optimizer = torch.optim.SGD([prototypes], lr=learning_rate, momentum=momentum)
+
+        # Optimize for separation.
+        for i in range(epochs):
+            # Compute loss.
+            loss, sep = HypersphericalLoss.__prototype_loss(prototypes)
+            if use_wtv:
+                loss2 = HypersphericalLoss.__prototype_loss_sem(prototypes, triplets)
+                loss += loss2
+
+            # Update.
+            loss.backward()
+            optimizer.step()
+            # Renormalize prototypes.
+            prototypes = torch.nn.Parameter(F.normalize(prototypes, p=2, dim=1))
+            optimizer = torch.optim.SGD([prototypes], lr=learning_rate, \
+                    momentum=momentum)
+            print(f'Epoch {i+1}/{epochs}')
+        
+        # Store result.
+        if save_dir is not None:
+            np.save(os.path.join(save_dir,f'prototypes-{dims}d-{classes}c.npy'),prototypes.data.numpy())
+        return prototypes
+    
+        
+
+
 
 class FocalLoss(torch.nn.CrossEntropyLoss):
     ''' Focal loss for classification tasks on imbalanced datasets '''

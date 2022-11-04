@@ -11,14 +11,14 @@ class TinyImageNet(DataGenerator):
     MEAN = (0.485, 0.456, 0.406)
     STD = (0.229, 0.224, 0.225)
 
-    train_transform = transforms.Compose([
+    transforms_train = transforms.Compose([
             transforms.RandomHorizontalFlip(),
             transforms.RandomCrop(64, padding=4),
             transforms.ToTensor(),
             transforms.Normalize(MEAN, STD)
         ])
 
-    test_transform = transforms.Compose(
+    transforms_train = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize(MEAN, STD)])
 
     classes = "Apply get_classes(data_dir)"
