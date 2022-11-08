@@ -234,6 +234,7 @@ class Trainer():
         if data is None:
             data = self.hist_train.data
         if not resume:
+            n_epochs += self.epoch
             if live_plot != 'print':
                 self.__progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
                 progress = tqdm(data,position=1, leave=True, desc = 'Epoch progress:')
@@ -242,7 +243,7 @@ class Trainer():
                 progress = data
             if save_checkpoint:
                 self.acc = 0
-        else: n_epochs += self.epoch
+            
         if live_plot != 'print':
             self.__progress_epoch.disable = False
         while self.epoch < n_epochs:

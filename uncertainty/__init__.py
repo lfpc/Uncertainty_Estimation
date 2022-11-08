@@ -15,6 +15,7 @@ class Entropy(torch.nn.Module):
         if not is_probabilities(y) and normalize: 
             idx = is_probabilities(y).nonzero()
             w = f'Input vector is not probabilty vector - Sum indexes {idx} = {y[idx]} - Applying softmax'
+            #idx retornando tensor vazio
             warn(w)
             y = torch.nn.functional.softmax(y,dim=-1) #apply softmax 
         

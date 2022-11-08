@@ -347,7 +347,7 @@ class confid_loss(torch.nn.Module):
         return loss
 
 
-class sigmoid_loss(torch.nn.Module):
+class OVALoss(torch.nn.Module):
     def __init__(self,n_classes, reduction = 'mean', eps = 1e-5,bound = 100):
         super().__init__()
         self.n_classes = n_classes
