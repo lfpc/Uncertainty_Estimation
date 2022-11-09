@@ -229,20 +229,23 @@ class Trainer():
             
     def fit(self,data = None,n_epochs = 1, live_plot = False,update_hist = True, 
             save_checkpoint = False, PATH = '.', resume = False):
+
         if live_plot is True and (not (hasattr(self,'hist_train') or hasattr(self,'hist_val'))):
             live_plot = False
         if data is None:
             data = self.hist_train.data
+
         if not resume:
             n_epochs += self.epoch
             if live_plot != 'print':
                 self.__progress_epoch = trange(n_epochs,position=0, leave=True, desc = 'Progress:')
-                progress = tqdm(data,position=1, leave=True, desc = 'Epoch progress:')
             else: 
                 self.__progress_epoch = range(n_epochs)
-                progress = data
             if save_checkpoint:
                 self.acc = 0
+        if live_plot != 'print':
+            progress = tqdm(data,position=1, leave=True, desc = 'Epoch progress:')
+        else: progress = data
             
         if live_plot != 'print':
             self.__progress_epoch.disable = False
@@ -261,12 +264,15 @@ class Trainer():
                 progress.reset()
 
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
+            
             if live_plot != 'print':
                 self.__progress_epoch.update()
             self.update_hist(dataset = update_hist)
             self.epoch += 1
+
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
+
             if live_plot is True:
                 desc_dict = {}
                 if hasattr(self,'hist_train'):
@@ -278,6 +284,7 @@ class Trainer():
                 display(self.__progress_epoch.container)
             elif live_plot == 'print':
                 print('Epoch ', self.epoch, ', loss = ', loss)
+                
             if save_checkpoint:
                 if self.hist_val.acc_list[-1] >= self.acc:
                     self.acc = self.hist_val.acc_list[-1]
