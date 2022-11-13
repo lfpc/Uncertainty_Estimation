@@ -76,7 +76,7 @@ class Binning():
         self.ece = self.__ECE(p)  
         
     @classmethod
-    def from_model(cls,model,dataloader,method = get_MCP,n = 10, bounds = (0,1),division = 'normal'):
+    def from_model(cls,model,dataloader,method = get_MCP,**kwargs):
         dev = next(model.parameters()).device
         p = torch.tensor([],device = dev)
         hits = torch.tensor([],device = dev)
@@ -88,7 +88,7 @@ class Binning():
                 p = torch.cat((p,p1))
                 h = correct_class(output,label)
                 hits = torch.cat((hits,h))
-        return cls(p,hits,n,bounds,division)
+        return cls(p,hits,**kwargs)
     @staticmethod
     def Adaptative_Binning_Bounds(p,n=10,bounds = (0,1)):
         q = torch.linspace(bounds[0],bounds[1],n+1, device = p.device)
