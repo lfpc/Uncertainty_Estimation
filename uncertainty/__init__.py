@@ -11,6 +11,8 @@ class Entropy(torch.nn.Module):
     def entropy(y, normalize = True,reduction = 'none'):
         '''Returns the entropy of a probabilities tensor.'''
         
+        if y.numel() == 0:
+            return torch.nan
         #if y is not a probabilities tensor
         if not is_probabilities(y) and normalize: 
             idx = is_probabilities(y).nonzero()

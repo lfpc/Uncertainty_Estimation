@@ -270,9 +270,10 @@ class selective_metrics():
     def add_uncs(self,unc_fn:dict):
         for name,un in unc_fn.items():
             if callable(un):
-                self.d_uncs[name] = un(self.output)
+                with torch.no_grad():
+                    self.d_uncs[name] = un(self.output).view(-1)
             else:
-                self.d_uncs[name] = un
+                self.d_uncs[name] = un.view(-1)
         
     def RC_curves(self,risk = error_coverage, optimal = False,baseline = None):
         self.risk = {}
