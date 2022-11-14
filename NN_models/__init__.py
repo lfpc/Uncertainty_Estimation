@@ -73,11 +73,12 @@ from .CNN8 import CNN8
 from .pytorch_cifar import *
 from .resnet_dropout import ResNet18_Dropout, ResNet50_Dropout
 import torchvision.models as pytorch
-from torchvision.models import vgg16_bn, convnext_small, efficientnet_b0,resnet50
+from torchvision.models import vgg16_bn, convnext_small,convnext_tiny, efficientnet_b0,resnet50
 
 
 pretrained_models = {
 pytorch.resnet50: pytorch.ResNet50_Weights.DEFAULT,
 pytorch.efficientnet_b0:pytorch.EfficientNet_B0_Weights.DEFAULT,
 pytorch.vgg16_bn:pytorch.VGG16_BN_Weights.DEFAULT,
-pytorch.convnext_small:pytorch.ConvNeXt_Small_Weights.DEFAULT}
+pytorch.convnext_small:pytorch.ConvNeXt_Small_Weights.DEFAULT,
+pytorch.convnext_tiny:pytorch.ConvNeXt_Tiny_Weights.DEFAULT}
