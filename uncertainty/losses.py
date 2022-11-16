@@ -25,6 +25,9 @@ class HypersphericalLoss(torch.nn.Module):
         elif self.reduction == 'sum':
             loss = loss.sum()
         return loss
+    def to(self,dev):
+        self.polars = self.polars.to(dev)
+        return super().to(dev)
     @classmethod
     def from_file(cls,polars_file,**kwargs):
         classpolars = torch.from_numpy(np.load(polars_file)).float()
