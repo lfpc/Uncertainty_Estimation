@@ -221,6 +221,7 @@ class Trainer():
         self.epoch = 0
         self.lr_scheduler = lr_scheduler
 
+
         if training_data is not None:
             self.hist_train = hist_train(model,loss_criterion,training_data, risk_dict = risk_dict)
         if validation_data is not None:

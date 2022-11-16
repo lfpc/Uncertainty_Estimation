@@ -8,7 +8,6 @@ class HypersphericalPrototypeNetwork(torch.nn.Module):
         super().__init__()
         self.model = model
         self.polars = polars
-        self.eval_predict = eval_predict
     @classmethod
     def from_file(cls,model,polars_file):
         classpolars = torch.from_numpy(np.load(polars_file)).float()
@@ -23,8 +22,7 @@ class HypersphericalPrototypeNetwork(torch.nn.Module):
         return cls(model,classpolars)
     def forward(self,x):
         y = self.model(x)
-        if self.eval_predict and not self.training:
-            y = self.predict(y)
+        y = self.predict(y)
         return y
     def predict(self, x):
         x = torch.nn.functional.normalize(x, p=2, dim=1)
