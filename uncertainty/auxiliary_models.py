@@ -14,14 +14,14 @@ class HypersphericalPrototypeNetwork(torch.nn.Module):
         return cls(model,classpolars)
     @classmethod
     def from_values(cls,model,path,classes:int,dims:int):
-        polars_file = os.path.join(path,f'prototypes-{dims}d-{classes}c.npy')
         if os.path.isdir(path):
+            polars_file = os.path.join(path,f'prototypes-{dims}d-{classes}c.npy')
             classpolars = torch.from_numpy(np.load(polars_file)).float()
         else: 
             classpolars = HypersphericalLoss.get_prototypes(classes,dims,save_dir = path)
         return cls(model,classpolars)
     def forward(self,x):
-        y = super().forward(x)
+        y = self.model.forward(x)
         return self.predict(y)
     def predict(self, x):
         x = torch.nn.functional.normalize(x, p=2, dim=1)
