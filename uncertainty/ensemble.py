@@ -34,14 +34,13 @@ class Ensemble(nn.Module):
     def __init__(self,model, #model
                  return_uncs:bool = False, #return tuple (output,uncs_dict)
                  as_ensemble:bool = True, #output as average of models
-                 softmax = False, #apply SM to ensemble output
+                 softmax = False, #apply SM before uncertainties
                  name = 'Ensemble'
                  ):
         super().__init__()
 
         self.return_uncs = return_uncs
         self.as_ensemble = as_ensemble
-        self.softmax = softmax
         self.model = model
         self.name = name
         try:
@@ -74,8 +73,6 @@ class Ensemble(nn.Module):
     def deterministic(self,x):
         self.eval()
         self.y = self.model(x)
-        if self.softmax and not self.model.softmax:
-            self.y = torch.nn.functional.softmax(self.y,dim=-1)
         return self.y
 
     def ensemble_forward(self,x):
@@ -85,8 +82,6 @@ class Ensemble(nn.Module):
         if self.return_uncs:
             d_uncs = self.get_unc()
             return mean,d_uncs
-        if self.softmax:
-            mean = nn.functional.softmax(mean,dim=-1)
         return mean
         
     def forward(self,x):
@@ -140,16 +135,6 @@ class DeepEnsemble(Ensemble):
         super(Ensemble,self).eval()
         for model in self.model:
             model.eval()
-
-    def apply_softmax(self, method = 'all'):
-        if method == 'all':
-            for model in self.model:
-                model.softmax = True
-        elif method == 'final':
-            for _,model in self.model:
-                model.softmax = False
-            self.softmax = True
-        
     def get_samples(self,x):
         ensemble = []
         for model in self.model:
