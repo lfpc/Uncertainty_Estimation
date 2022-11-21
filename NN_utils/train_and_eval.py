@@ -22,7 +22,7 @@ def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,s
             loss = loss_criterion(output,label)
             loss.backward()
             optimizer.step()
-            running_loss += loss.item()
+            running_loss += loss
         if print_loss:
             print('Epoch ', epoch+1, ', loss = ', running_loss/len(data))
             
@@ -51,7 +51,7 @@ def correct_total(y_pred,y_true):
     '''Returns the number of correct predictions in a batch where dk_mask=0'''
     with torch.no_grad():
         correct = correct_class(y_pred,y_true)
-        correct_total = torch.sum(correct).item()
+        correct_total = torch.sum(correct)
     return correct_total
 
 def calc_loss_batch(model,loss_criterion,data,set_eval = True):
@@ -96,7 +96,7 @@ def model_acc_and_loss(model,loss_criterion,data, set_eval = True):
             image,label = image.to(dev, non_blocking=True), label.to(dev, non_blocking=True)
             output = model(image)
             loss = loss_criterion(output,label)
-            running_loss += loss.item()
+            running_loss += loss
             total += label.size(0)
             correct += correct_total(output,label) 
         loss = running_loss/len(data)
@@ -292,10 +292,13 @@ class Trainer():
 
             loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
             
-            if live_plot != 'print':
-                self.__progress_epoch.update()
             self.update_hist(dataset = update_hist)
             self.epoch += 1
+            if live_plot != 'print':
+                self.__progress_epoch.update()
+            else:
+                print('Epoch ', self.epoch, ', loss = ', loss.item())
+            
 
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
@@ -309,8 +312,7 @@ class Trainer():
                     desc_dict['MIN Val loss'] = int(np.argmin(self.hist_val.loss_list))
                 utils.live_plot(desc_dict,title = f'Loss {type(self.loss_fn).__name__}',adjust=True)
                 display(self.__progress_epoch.container)
-            elif live_plot == 'print':
-                print('Epoch ', self.epoch, ', loss = ', loss)
+            
                 
             if save_checkpoint:
                 if criterion_val[-1] >= self.acc:
