@@ -252,7 +252,7 @@ class Trainer():
             if (criterion == 'loss' or criterion is None):
                 criterion_val = self.hist_val.loss_list
             else:
-                criterion_val = self.hist_val.risk_dict[criterion]
+                criterion_val = self.hist_val.risk[criterion]
 
         if live_plot is True and (not (hasattr(self,'hist_train') or hasattr(self,'hist_val'))):
             live_plot = False
