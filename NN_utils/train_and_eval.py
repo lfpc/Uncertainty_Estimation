@@ -127,30 +127,48 @@ class hist_train():
 
     '''Accumulate results while training. Every time update_hist() is called, 
     it evaluates the usefull metrics over the dataset data and stores it in a list.'''
-    def __init__(self,model,loss_criterion,data,risk_dict = None):
+    def __init__(self,model,loss_criterion,data,
+                risk_dict = {'accuracy': correct_total}, risk_dict_extra = {}):
         
         self.model = model
         self.loss_criterion = loss_criterion
         self.data = data
         self.risk_dict = risk_dict
+        self.risk_dict_extra = risk_dict_extra
         self.risk = defaultdict(list)
         
-        self.acc_list = []
         self.loss_list = []
 
+    def get_risks(self):
+        self.model.eval()
+        dev = next(self.model.parameters()).device
+        running_loss = 0
+        total = 0
+        correct= 0
+        risks = dict.fromkeys(self.risk_dict.keys(), 0.0)
+        with torch.no_grad():
+            for image,label in self.data:
+                image,label = image.to(dev, non_blocking=True), label.to(dev, non_blocking=True)
+                output = self.model(image)
+                loss = self.loss_criterion(output,label)
+                running_loss += loss.item()
+                total += label.size(0)
+                correct += correct_total(output,label) 
+                for name, risk_fn in self.risk_dict.items():
+                    risks[name] += risk_fn(output,label).item()
+            for name, risk in self.risks.items():
+                self.risk[name].append(risk/total)
+            self.loss_list.append(running_loss/len(self.data))
 
     def update_hist(self):
         '''Update acc_list's and loss_list.
         If coverage is defined (different than 1), updates acc_c lists'''
         self.model.eval()
+        self.get_risks()
         with torch.no_grad():
-            acc, loss = model_acc_and_loss(self.model,self.loss_criterion,self.data)
-            self.acc_list.append(acc)
-            self.loss_list.append(loss)
-            if self.risk_dict is not None:
-                for name, risk_fn in self.risk_dict.items():
-                    risk = risk_fn(self.model,self.data).item()
-                    self.risk[name].append(risk)
+            for name, risk_fn in self.risk_dict_extra.items():
+                risk = risk_fn(self.model,self.data).item()
+                self.risk[name].append(risk)
 
     def load_hist(self,hist):
         if isinstance(hist,pd.DataFrame):
@@ -229,7 +247,12 @@ class Trainer():
         self.update_hist()
             
     def fit(self,data = None,n_epochs = 1, live_plot = False,update_hist = True, 
-            save_checkpoint = False, PATH = '.', resume = False):
+            save_checkpoint = False, PATH = '.', criterion = 'accuracy',resume = False):
+        if hasattr(self,'hist_val'):
+            if (criterion == 'loss' or criterion is None):
+                criterion_val = self.hist_val.loss_list
+            else:
+                criterion_val = self.hist_val.risk_dict[criterion]
 
         if live_plot is True and (not (hasattr(self,'hist_train') or hasattr(self,'hist_val'))):
             live_plot = False
@@ -256,9 +279,12 @@ class Trainer():
                 
                 desc = 'Progress:'
                 if hasattr(self,'hist_train'):
-                    desc = f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.acc_list[-1]:.2f} |' +desc
+                    if criterion in self.hist_train.risk_dict.keys():
+                        desc = f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.risk_dict[criterion][-1]:.2f} |' +desc
+                    else:
+                        desc = f'Loss: {self.hist_train.loss_list[-1]:.4f}|' +desc
                 if hasattr(self,'hist_val'):
-                    desc = f'Acc_val (max): {self.hist_val.acc_list[-1]:.2f} ({max(self.hist_val.acc_list):.2f}) | ' + desc
+                    desc = f'Acc_val (max): {criterion_val[-1]:.2f} ({max(criterion_val):.2f}) | ' + desc
 
                 self.__progress_epoch.set_description(desc)
                 progress.disable = False
@@ -287,8 +313,8 @@ class Trainer():
                 print('Epoch ', self.epoch, ', loss = ', loss)
                 
             if save_checkpoint:
-                if self.hist_val.acc_list[-1] >= self.acc:
-                    self.acc = self.hist_val.acc_list[-1]
+                if criterion_val[-1] >= self.acc:
+                    self.acc = criterion_val[-1]
                     self.save_state_dict(PATH,self.model.name+'_checkpoint')
 
     def update_hist(self, dataset = 'all'):
