@@ -156,7 +156,7 @@ class hist_train():
                 correct += correct_total(output,label) 
                 for name, risk_fn in self.risk_dict.items():
                     risks[name] += risk_fn(output,label).item()
-            for name, risk in self.risks.items():
+            for name, risk in risks.items():
                 self.risk[name].append(risk/total)
             self.loss_list.append(running_loss/len(self.data))
 
