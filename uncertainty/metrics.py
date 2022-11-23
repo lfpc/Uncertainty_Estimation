@@ -42,16 +42,16 @@ def error_coverage(y_pred,y_true, uncertainty, coverage):
     '''Returns the 0-1 loss of model in some dataset excluding the 1-c most uncertain samples'''
     return 1-acc_coverage(y_pred,y_true, uncertainty, coverage)
 
-def RC_curve(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
+def RC_curve(y_pred,y_true,uncertainty, risk = error_coverage, c_list = torch.arange(0.05,1.05,0.05)):
     ''' Returns an array with the accuracy of the model in the data dataset
      excluding the most uncertain (total number set by the coverage) samples.
      Each item in the output array is the accuracy when the coverage is given by same item in c_list'''
 
-    risk_list = np.array([])
+    risk_list = torch.tensor([],device = y_pred.device)
     with torch.no_grad():
         for c in c_list:
             r = risk(y_pred,y_true, uncertainty, c)
-            risk_list = np.append(risk_list,r)
+            risk_list = torch.cat(risk_list,r)
     return risk_list
 
 def ROC_curve(output,y_true, uncertainty, return_threholds = False):
@@ -64,9 +64,9 @@ def ROC_curve(output,y_true, uncertainty, return_threholds = False):
     else:
         return fpr,tpr
 
-def AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
+def AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = torch.arange(0.05,1.05,0.05)):
     risk_list = RC_curve(y_pred,y_true,uncertainty, risk, c_list)
-    return np.trapz(risk_list,x = c_list, axis = -1)
+    return torch.trapz(risk_list,x = c_list, dim = -1)
 
 def AUROC(output,y_true,uncertainty):
     fpr,tpr = ROC_curve(output,y_true,uncertainty)
@@ -84,11 +84,11 @@ def correlation(self,a,b,metric = 'spearman'):
     return rho
     
 
-def optimum_RC(y_pred,y_true,risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
+def optimum_RC(y_pred,y_true,risk = error_coverage, c_list = torch.arange(0.05,1.05,0.05)):
     uncertainty = torch.logical_not(TE.correct_class(y_pred,y_true)).float()
     return RC_curve(y_pred,y_true,uncertainty, risk, c_list)
 
-def E_AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
+def E_AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = torch.arange(0.05,1.05,0.05)):
     aurc = AURC(y_pred,y_true,uncertainty, risk, c_list)
     opt_aurc = auc(c_list,optimum_RC(y_pred,y_true,risk, c_list))
     return aurc - opt_aurc
@@ -205,7 +205,7 @@ class selective_metrics():
     
     def __init__(self,model,
                 dataset = None, 
-                c_list = np.arange(0.05,1.05,0.05),
+                c_list = torch.arange(0.05,1.05,0.05),
                 name = None,
                 labels = None) -> None:
         if name is None:
@@ -291,8 +291,12 @@ class selective_metrics():
         figure(figsize=self.FIGSIZE, dpi=80)
         self.RC_curves(**kwargs)
         for name,risk in self.risk.items():
-            label = name+f' | AURC = {auc(self.c_list,risk)}' if aurc else name
-            plt.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
+            label = name+f' | AURC = {torch.trapz(risk,x = self.c_list, dim = -1).item()}' if aurc else name
+            
+            try:
+                plt.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
+            except:
+                plt.plot(self.c_list,risk.cpu(), label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
         
         plt.xlabel("Coverage", fontsize=self.LABEL_FONTSIZE)
         plt.ylabel("Risk", fontsize=self.LABEL_FONTSIZE)
