@@ -292,11 +292,7 @@ class selective_metrics():
         self.RC_curves(**kwargs)
         for name,risk in self.risk.items():
             label = name+f' | AURC = {torch.trapz(risk,x = torch.tensor(self.c_list,device = risk.device), dim = -1).item()}' if aurc else name
-            
-            try:
-                plt.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
-            except:
-                plt.plot(self.c_list,risk.cpu(), label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
+            plt.plot(self.c_list,risk.cpu(), label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
         
         plt.xlabel("Coverage", fontsize=self.LABEL_FONTSIZE)
         plt.ylabel("Risk", fontsize=self.LABEL_FONTSIZE)
