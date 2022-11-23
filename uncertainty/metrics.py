@@ -196,7 +196,6 @@ def ECE(y_true,
 
 class selective_metrics():
     LINES = ["-","--","-.",":"]
-    linecycler = cycle(LINES)
     FIGSIZE = (8,6)
     LABEL_FONTSIZE = 18
     TICKS_FONTSIZE = 12
@@ -224,6 +223,7 @@ class selective_metrics():
         if dataset is not None:
             self.get_uncs(dataset)
         self.fix_scale = False
+        self.linecycler = cycle(self.LINES)
         
 
     def set_uncs(self,uncs):
