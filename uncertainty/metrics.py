@@ -291,7 +291,7 @@ class selective_metrics():
         figure(figsize=self.FIGSIZE, dpi=80)
         self.RC_curves(**kwargs)
         for name,risk in self.risk.items():
-            label = name+f' | AURC = {torch.trapz(risk,x = self.c_list, dim = -1).item()}' if aurc else name
+            label = name+f' | AURC = {torch.trapz(risk,x = torch.tensor(self.c_list,device = risk.device), dim = -1).item()}' if aurc else name
             
             try:
                 plt.plot(self.c_list,risk, label = label, linewidth = self.LINEWIDTH,linestyle = next(self.linecycler))
