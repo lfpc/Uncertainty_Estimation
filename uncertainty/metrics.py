@@ -51,7 +51,7 @@ def RC_curve(y_pred,y_true,uncertainty, risk = error_coverage, c_list = torch.ar
     with torch.no_grad():
         for c in c_list:
             r = risk(y_pred,y_true, uncertainty, c)
-            risk_list = torch.cat(risk_list,r)
+            risk_list = torch.cat((risk_list,r))
     return risk_list
 
 def ROC_curve(output,y_true, uncertainty, return_threholds = False):
