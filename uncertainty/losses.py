@@ -351,24 +351,25 @@ class confid_loss(torch.nn.Module):
 
 
 class OVALoss(torch.nn.Module):
-    def __init__(self,n_classes, reduction = 'mean', eps = 1e-5,bound = 100):
+    def __init__(self,n_classes:int,from_logits:bool = True, reduction = 'mean', eps:float = 1e-20,bound = 100):
         super().__init__()
         self.n_classes = n_classes
         self.reduction = reduction
-        self.eps = eps
+        self.eps = torch.tensor(eps)
         self.bound = bound
+        self.from_logits = from_logits
     def forward(self, output,y_true):
+        if self.from_logits:
+            output = F.sigmoid(output)
         y = F.one_hot(y_true,self.n_classes)        
         loss = self.CrossEntropy(output,y)
         loss += self.CrossEntropy(1-output,1-y)
         # arrumar [(1-y).bool()]
         loss = torch.sum(loss,dim=-1)
         if self.reduction == 'mean':
-            #if torch.isnan(torch.mean(loss)):
-            #    return loss
             loss = torch.mean(loss)
         elif self.reduction == 'sum':
             loss = torch.sum(loss)
         return loss
     def CrossEntropy(self,output,y):
-        return torch.clamp(-y*torch.log(output+self.eps),min=-self.bound,max=self.bound)
+        return torch.clamp(-y*torch.log(output+self.eps),min=0.0,max=self.bound)
