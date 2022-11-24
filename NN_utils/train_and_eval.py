@@ -231,13 +231,14 @@ class Trainer():
     '''Class for easily training/fitting a Pytorch's NN model. Creates 2 'hist' classes,
     keeping usefull metrics and values.'''
     def __init__(self,model,optimizer,loss_criterion,training_data = None,validation_data = None,
-                    lr_scheduler = None,risk_dict = None):
+                    lr_scheduler = None,risk_dict:dict = None, name:str = None):
 
         self.model = model
         self.optimizer = optimizer
         self.loss_fn = loss_criterion
         self.epoch = 0
         self.lr_scheduler = lr_scheduler
+        self.name = name
 
 
         if training_data is not None:
@@ -317,7 +318,7 @@ class Trainer():
             if save_checkpoint:
                 if criterion_val[-1] >= self.acc:
                     self.acc = criterion_val[-1]
-                    self.save_state_dict(PATH,self.model.name+'_checkpoint')
+                    self.save_state_dict(PATH,self.name+'_checkpoint')
 
     def update_hist(self, dataset = 'all'):
         '''Updates hist classes.
