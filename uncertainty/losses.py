@@ -360,7 +360,7 @@ class OVALoss(torch.nn.Module):
         self.from_logits = from_logits
     def forward(self, output,y_true):
         if self.from_logits:
-            output = F.sigmoid(output)
+            output = torch.sigmoid(output)
         y = F.one_hot(y_true,self.n_classes)        
         loss = self.CrossEntropy(output,y)
         loss += self.CrossEntropy(1-output,1-y)
