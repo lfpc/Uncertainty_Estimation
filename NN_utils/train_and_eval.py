@@ -231,7 +231,7 @@ class Trainer():
     '''Class for easily training/fitting a Pytorch's NN model. Creates 2 'hist' classes,
     keeping usefull metrics and values.'''
     def __init__(self,model,optimizer,loss_criterion,training_data = None,validation_data = None,
-                    lr_scheduler = None,risk_dict:dict = None,risk_dict_extra:dict = None, name:str = None):
+                    lr_scheduler = None,risk_dict:dict = {},risk_dict_extra:dict = {}, name:str = None):
 
         self.model = model
         self.optimizer = optimizer
@@ -281,7 +281,7 @@ class Trainer():
                 desc = 'Progress:'
                 if hasattr(self,'hist_train'):
                     if criterion in self.hist_train.risk_dict.keys():
-                        desc = f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.risk_dict[criterion][-1]:.2f} |' +desc
+                        desc = f'Loss: {self.hist_train.loss_list[-1]:.4f} | Acc_train: {self.hist_train.risk[criterion][-1]:.2f} |' +desc
                     else:
                         desc = f'Loss: {self.hist_train.loss_list[-1]:.4f}|' +desc
                 if hasattr(self,'hist_val'):
