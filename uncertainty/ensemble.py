@@ -19,10 +19,10 @@ def MonteCarlo_maxvar(MC_array, y = None):
     var = torch.var(indexing_3D(MC_array,y), axis=0,unbiased=False)
     return var
 
-def mutual_info(pred_array):
+def mutual_info(pred_array, **kwargs):
     '''Returns de Mutual Information (Gal, 2016) of a probability tensor'''
-    ent = unc.entropy(torch.mean(pred_array, axis=0))
-    MI = ent - torch.mean(unc.entropy(pred_array), axis=0) 
+    ent = unc.entropy(torch.mean(pred_array, axis=0), **kwargs)
+    MI = ent - torch.mean(unc.entropy(pred_array,**kwargs), axis=0) 
     return MI
 
 

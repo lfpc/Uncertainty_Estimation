@@ -231,7 +231,7 @@ class Trainer():
     '''Class for easily training/fitting a Pytorch's NN model. Creates 2 'hist' classes,
     keeping usefull metrics and values.'''
     def __init__(self,model,optimizer,loss_criterion,training_data = None,validation_data = None,
-                    lr_scheduler = None,risk_dict:dict = {},risk_dict_extra:dict = {}, name:str = None):
+                    lr_scheduler = None,risk_dict:dict = {'accuracy': correct_total},risk_dict_extra:dict = {}, name:str = None):
 
         self.model = model
         self.optimizer = optimizer
@@ -343,7 +343,11 @@ class Trainer():
             self.hist_train.save_df(join(path,name_), method)
 
     def save_state_dict(self,path, name = None):
-        if name is None: name = self.model.name
+        if name is None:
+            if self.name is None:
+                name = self.model.name
+            else:
+                name = self.name
         name = name + '.pt'
         torch.save(self.model.state_dict(), join(path,name))
 
