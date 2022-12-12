@@ -32,3 +32,4 @@ class HypersphericalPrototypeNetwork(torch.nn.Module):
         self.model.to(device)
         self.polars.to(device)
         super().to(device)
+        return self
