@@ -7,7 +7,7 @@ class HypersphericalPrototypeNetwork(torch.nn.Module):
     def __init__(self,model, polars) -> None:
         super().__init__()
         self.model = model
-        self.polars = polars
+        self.polars = torch.nn.parameter.Parameter(polars)
     @classmethod
     def from_file(cls,model,polars_file):
         classpolars = torch.from_numpy(np.load(polars_file)).float()
@@ -28,8 +28,3 @@ class HypersphericalPrototypeNetwork(torch.nn.Module):
         x = torch.nn.functional.normalize(x, p=2, dim=1)
         x = torch.mm(x, self.polars.t())
         return x
-    def to(self,device):
-        self.model.to(device)
-        self.polars.to(device)
-        super().to(device)
-        return self
