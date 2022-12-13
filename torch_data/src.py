@@ -124,7 +124,7 @@ class DataGenerator():
             
 
 
-    def get_sample(self,data = 'test',dev = None,size = None):
+    def get_sample(self,data = 'test',device = None,size = None):
         if data == 'train':
             dataloader = iter(self.train_dataloader)
         elif data == 'test':
@@ -132,8 +132,8 @@ class DataGenerator():
         elif data == 'val':
             dataloader = iter(self.validation_dataloader)
         image,label = next(dataloader)
-        if dev is not None:
-            image,label = image.to(dev),label.to(dev)
+        if device is not None:
+            image,label = image.to(device),label.to(device)
         if size is not None:
             image,label = image[0:size],label[0:size]
         return image,label

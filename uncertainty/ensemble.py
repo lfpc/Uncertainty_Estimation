@@ -32,68 +32,43 @@ class Ensemble(nn.Module):
             'MI': mutual_info}
 
     def __init__(self,model, #model
-                 return_uncs:bool = False, #return tuple (output,uncs_dict)
-                 as_ensemble:bool = True, #output as average of models
-                 softmax = False, #apply SM before uncertainties
-                 name = 'Ensemble'
-                 ):
+                 inference = 'mean', #output as average of models
+                ):
         super().__init__()
 
-        self.return_uncs = return_uncs
-        self.as_ensemble = as_ensemble
+        self.inference = inference
         self.model = model
-        self.name = name
-        try:
-            self.device = next(self.model.parameters()).device
-        except:
-            self.device = torch.device('cpu')
-            
-        self.eval()
-        if not self.as_ensemble:
+
+        if self.inference == 'deterministic':
             self.uncs = copy(self.uncs)
             self.uncs['SR (Ensemble)'] = lambda x: unc.MCP_unc(torch.mean(x,axis = 0))
             self.uncs['Entropy (Ensemble)'] = lambda x: unc.entropy(torch.mean(x,axis = 0))
     
-    def to(self,device):
-        super().to(device)
-        self.device = device
-        self.model.to(device)
-        return self
-
-    def eval(self):
-        super().eval()
-        self.model.eval()
-        return self
-        
     def get_samples(self,x):
         '''Default ensemble model is to assume that self.model returns samples'''
         self.ensemble = self.model(x)
         return self.ensemble
 
     def deterministic(self,x):
-        self.eval()
         self.y = self.model(x)
         return self.y
 
     def ensemble_forward(self,x):
-
         self.get_samples(x)
         mean = torch.mean(self.ensemble,axis = 0)
-        if self.return_uncs:
-            d_uncs = self.get_unc()
-            return mean,d_uncs
         return mean
         
-    def forward(self,x):
-        if self.as_ensemble:
-            y = self.ensemble_forward(x)
-        else:
-            y = self.deterministic(x)
+    def forward(self,x, inference = None):
+        if inference is None:
+            inference = self.inference
+        if inference == 'mean':
+            return self.ensemble_forward(x)
+        elif inference == 'samples':
+            return self.get_samples(x)
+        elif inference == 'deterministic':
             self.get_samples(x) #needed if get_unc get called, as usually does
-        if self.return_uncs:
-            d_uncs = self.get_unc()
-            return y,d_uncs
-        return y
+            return self.deterministic(x)
+            
 
     def get_unc(self, x = None):
         if x is not None:
@@ -101,51 +76,37 @@ class Ensemble(nn.Module):
             self.deterministic(x)
         d_uncs = {}
         for name,fn in self.uncs.items():
-            if name == 'Var(Max)' and self.as_ensemble is False:
+            if name == 'Var(Max)' and self.deterministic_inference:
                 d_uncs[name] = fn(self.ensemble,torch.argmax(self.y,dim = -1)) 
             else:    
                 d_uncs[name] = fn(self.ensemble)
         return d_uncs
 
-    def load_state_dict(self, state_dict, strict: bool = True):
-        return self.model.load_state_dict(state_dict, strict)
+    def load_state_dict(self, state_dict, **kwargs):
+        return self.model.load_state_dict(state_dict, **kwargs)
 
 
 class DeepEnsemble(Ensemble):
 
     def __init__(self,models, #models for deep ensemble
-                 return_uncs:bool = False, #return tuple (output,uncs_dict)
-                 softmax = False, #apply SM to ensemble output
-                 name = 'DeepEnsemble'
+                 inference = 'mean',
+                 apply_softmax:bool = True, #apply SM to models before mean
                  ):
         if isinstance(models,dict):
             self.models_dict = models
             models = tuple(models.values())
-        super().__init__(models,return_uncs, softmax = softmax, name = name)
-        self.p = nn.Parameter(torch.tensor(0.5,requires_grad = True)) #dummy parameter
-        self.device = next(self.model[0].parameters()).device
+        super().__init__(models, inference)
+        self.model = torch.nn.ParameterList()
+        for m in models:
+            self.model.append(m)
+        self.apply_softmax = apply_softmax
     
-    def to(self,device):
-        super(Ensemble,self).to(device)
-        for model in self.model:
-            model.to(device)
-        self.device = device
-        return self
-    def eval(self):
-        super(Ensemble,self).eval()
-        for model in self.model:
-            model.eval()
     def get_samples(self,x):
         ensemble = []
         for model in self.model:
             pred = model(x)
+            if self.apply_softmax:
+                pred = nn.functional.softmax(pred,dim=-1)
             ensemble.append(pred)
         self.ensemble = torch.stack(ensemble)
         return self.ensemble
-
-    def deterministic(self,x):
-        model = self.model[0]
-        y = model(x)
-        if self.softmax and not model.softmax:
-            y = torch.nn.functional.softmax(y,dim=-1)
-        return y
