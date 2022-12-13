@@ -58,14 +58,12 @@ class Ensemble(nn.Module):
         mean = torch.mean(self.ensemble,axis = 0)
         return mean
         
-    def forward(self,x, inference = None):
-        if inference is None:
-            inference = self.inference
-        if inference == 'mean':
+    def forward(self,x):
+        if self.inference == 'mean':
             return self.ensemble_forward(x)
-        elif inference == 'samples':
+        elif self.inference == 'samples':
             return self.get_samples(x)
-        elif inference == 'deterministic':
+        elif self.inference == 'deterministic':
             self.get_samples(x) #needed if get_unc get called, as usually does
             return self.deterministic(x)
             
@@ -76,7 +74,7 @@ class Ensemble(nn.Module):
             self.deterministic(x)
         d_uncs = {}
         for name,fn in self.uncs.items():
-            if name == 'Var(Max)' and self.deterministic_inference:
+            if name == 'Var(Max)' and self.inference == 'deterministic':
                 d_uncs[name] = fn(self.ensemble,torch.argmax(self.y,dim = -1)) 
             else:    
                 d_uncs[name] = fn(self.ensemble)

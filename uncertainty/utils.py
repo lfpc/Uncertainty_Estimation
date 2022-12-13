@@ -111,10 +111,7 @@ def accumulate_results(model,data, output_and_label = (True,True)):
                 label_list = torch.cat((label_list,label))
 
             output = model(image)
-            if model.return_uncs:
-                output,d_uncs = output
-            else:
-                d_uncs = model.get_unc()
+            d_uncs = model.get_unc()
             if output_and_label[0]:
                 output_list = torch.cat((output_list,output))
             for name,unc in d_uncs.items():
