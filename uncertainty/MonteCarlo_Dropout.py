@@ -42,8 +42,8 @@ def get_MCD(model,X,n=10):
     return mean, var, MI
 
 class MonteCarloDropout(ensemble.Ensemble):
-    def __init__(self,model, n_samples, as_ensemble = True,return_uncs = False, softmax = False, name = 'MCDO'):
-        super().__init__(model, return_uncs, as_ensemble, softmax, name= name)
+    def __init__(self,model, n_samples:int, inference:str = 'mean'):
+        super().__init__(model, inference=inference)
         self.n_samples = n_samples
         self.__get_Dropout_modules()
         self.set_dropout()
@@ -63,7 +63,7 @@ class MonteCarloDropout(ensemble.Ensemble):
         #unc_utils.enable_dropout(self.model)
 
     def get_samples(self,x, enable = False):
-        if not self.as_ensemble:
+        if self.inference == 'deterministic':
             enable = True
         self.ensemble = mcd_pred(self.model,x,self.n_samples, enable=enable)
         return self.ensemble

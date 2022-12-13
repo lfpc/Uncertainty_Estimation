@@ -86,9 +86,9 @@ class TTA(ensemble.Ensemble):
                   Add(-0.1),
                   FiveCrop(32,4)]
 
-    def __init__(self, model,as_ensemble:bool = True, transforms = transforms,
-                 return_uncs:bool =False, softmax=False, use_main:bool = True, name = 'TTA'):
-        super().__init__(model, return_uncs,as_ensemble, softmax,name=name)
+    def __init__(self, model, transforms = transforms,
+                  use_main:bool = True, inference:str = 'mean'):
+        super().__init__(model, inference=inference)
         self.use_main = use_main
         self.transforms = transforms
 
