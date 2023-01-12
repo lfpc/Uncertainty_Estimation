@@ -7,7 +7,31 @@ from NN_utils.train_and_eval import correct_class
 from scipy.optimize import root_scalar
 import torch.nn.functional as F
 import os
+from scipy.spatial.distance import cdist
 
+
+class MaximumClassSeparation(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+
+    @staticmethod
+    def V(order):
+        if order == 1:
+            return np.array([[1, -1]])
+        else:
+            col1 = np.zeros((order, 1))
+            col1[0] = 1
+            row1 = -1 / order * np.ones((1, order))
+            return np.concatenate((col1, np.concatenate((row1, np.sqrt(1 - 1 / (order**2)) * MaximumClassSeparation.V(order - 1)), axis=0)), axis=1)
+    @staticmethod
+    def create_prototypes(nr_prototypes):
+        assert nr_prototypes > 0
+        prototypes = MaximumClassSeparation.V(nr_prototypes - 1).T
+        assert prototypes.shape == (nr_prototypes, nr_prototypes - 1)
+        assert np.all(np.abs(np.sum(np.power(prototypes, 2), axis=1) - 1) <= 1e-6)
+        distances = cdist(prototypes, prototypes)
+        assert distances[~np.eye(*distances.shape, dtype=bool)].std() <= 1e-3
+        return prototypes.astype(np.float32)
 
 
 
