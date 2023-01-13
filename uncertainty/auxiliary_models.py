@@ -3,6 +3,19 @@ import numpy as np
 import os
 from .losses import HypersphericalLoss
 
+class Platt_Model(torch.nn.Module):
+    def __init__(self,model,A = 1.0,B = 0.0):
+        '''Model with outputs z' = Az+ B, where z is the logits vector output of the main model'''
+        super().__init__()
+        self.model = model
+        self.A = torch.nn.Parameter(torch.tensor(A,requires_grad = True))
+        self.B = torch.nn.Parameter(torch.tensor(B,requires_grad = True))
+        self.to(next(model.parameters()).device)
+    def forward(self,x):
+        logits = self.model(x)
+        return logits*self.A + self.B
+
+
 class HypersphericalPrototypeNetwork(torch.nn.Module):
     def __init__(self,model, polars) -> None:
         super().__init__()

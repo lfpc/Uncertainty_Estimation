@@ -7,18 +7,6 @@ from uncertainty import get_MCP
 from NN_utils.train_and_eval import correct_class
 
 
-class Platt_Model(torch.nn.Module):
-    def __init__(self,model,A = 1.0,B = 0.0):
-        '''Model with outputs z' = Az+ B, where z is the logits vector output of the main model'''
-        super().__init__()
-        self.model = model
-        self.A = torch.nn.Parameter(torch.tensor(A,requires_grad = True))
-        self.B = torch.nn.Parameter(torch.tensor(B,requires_grad = True))
-        self.to(next(model.parameters()).device)
-    def forward(self,x):
-        logits = self.model(x)
-        return logits*self.A + self.B
-
 '''From https://github.com/gpleiss/temperature_scaling/blob/master/temperature_scaling.py :'''
 class _ECELoss(torch.nn.Module):
     """
