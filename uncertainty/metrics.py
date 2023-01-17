@@ -94,7 +94,8 @@ def E_AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(
     return aurc - opt_aurc
 
 def Brier(y_pred,y_true,n_classes = -1):
-    
+    if n_classes == -1:
+        n_classes = y_pred.size(-1)
     y_true = torch.nn.functional.one_hot(y_true, n_classes)
     return torch.mean(torch.sum(torch.square(y_pred-y_true),-1))
     #return brier_score_loss(TE.correct_class(y_pred,y_true), 1-uncertainty)
