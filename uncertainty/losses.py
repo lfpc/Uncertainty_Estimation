@@ -227,7 +227,7 @@ class penalized_uncertainty(torch.nn.Module):
 
 class SelectiveNetLoss(torch.nn.Module):
     def __init__(self,c:float, criterion = torch.nn.CrossEntropyLoss(reduction='none'), lamb = 32,
-                 alpha:float = 1.0, aux_head:str = 'aux',reduction = 'mean'):
+                 alpha:float = 1.0, reduction = 'mean'):
         super().__init__()
 
         self.criterion = criterion #criterion must have reduction set to 'none'
@@ -238,7 +238,6 @@ class SelectiveNetLoss(torch.nn.Module):
         self.c = c #coverage
         self.alpha = alpha
         self.reduction = reduction
-        self.aux_head = aux_head
 
     def lagrangian(self,const):
         #variant of the well-known Interior Point Method (IPM)
@@ -259,11 +258,7 @@ class SelectiveNetLoss(torch.nn.Module):
 
     def forward(self,output,y_true):
         
-        if self.aux_head == 'self':
-            y_pred,g = output
-            y_h = y_pred
-        elif self.aux_head == 'aux':
-            y_pred,g,y_h = output
+        y_pred,g,y_h = output
             
         g = g.view(-1)
         

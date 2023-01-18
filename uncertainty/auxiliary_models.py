@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import os
 from .losses import HypersphericalLoss
+from copy import copy,deepcopy
 
 class Platt_Model(torch.nn.Module):
     def __init__(self,model,A = 1.0,B = 0.0):
@@ -41,3 +42,42 @@ class HypersphericalPrototypeNetwork(torch.nn.Module):
         x = torch.nn.functional.normalize(x, p=2, dim=1)
         x = torch.mm(x, self.polars.t())
         return x
+
+class SelectiveNet(torch.nn.Module):
+    def __init__(self, features,classifier, g_layer, aux_head:str = 'aux') -> None:
+        super().__init__()
+        self.features= features
+        self.classifier = classifier
+        if aux_head == 'aux':
+            self.aux_head = deepcopy(classifier)
+        elif aux_head == 'self':
+            self.aux_head = self.classifier
+        self.g_layer = g_layer
+    def forward(self,x):
+        z = self.features(x)
+        y = self.classifier(z)
+        g = self.g_layer(z)
+        h = self.aux_head(z)
+        return y,g,h
+    @classmethod
+    def from_model(cls, model, **kwargs):
+        if any('classifier' in n for n,_ in model.named_children()):
+            classifier = copy(model.classifier)
+            model.classifier = torch.nn.Identity()
+        elif any('fc' in n for n,_ in model.named_children()):
+            classifier = copy(model.fc)
+            model.fc = torch.nn.Identity()
+        elif any('linear' in n for n,_ in model.named_children()):
+            classifier = copy(model.linear)
+            model.linear = torch.nn.Identity()
+        if not 'g_layer' in kwargs:
+            in_features = classifier.in_features
+            g_layer = torch.nn.Sequential(
+                        torch.nn.Linear(in_features, 512),
+                        torch.nn.ReLU(),
+                        torch.nn.BatchNorm1d(512),
+                        torch.nn.Linear(512,1),
+                        torch.nn.Sigmoid())
+
+        return cls(model, classifier,g_layer, **kwargs)
+
