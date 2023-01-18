@@ -226,8 +226,8 @@ class penalized_uncertainty(torch.nn.Module):
             self.L0 = new_L0
 
 class SelectiveNetLoss(torch.nn.Module):
-    def __init__(self,criterion = torch.nn.CrossEntropyLoss(reduction='none'), c = 0.8, lamb = 32,
-                 alpha = 1.0, aux_head = 'aux',reduction = 'mean'):
+    def __init__(self,c:float, criterion = torch.nn.CrossEntropyLoss(reduction='none'), lamb = 32,
+                 alpha:float = 1.0, aux_head:str = 'aux',reduction = 'mean'):
         super().__init__()
 
         self.criterion = criterion #criterion must have reduction set to 'none'
