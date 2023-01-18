@@ -144,7 +144,6 @@ class hist_train():
         dev = next(self.model.parameters()).device
         running_loss = 0
         total = 0
-        correct= 0
         risks = dict.fromkeys(self.risk_dict.keys(), 0.0)
         with torch.no_grad():
             for image,label in self.data:
@@ -153,7 +152,6 @@ class hist_train():
                 loss = self.loss_criterion(output,label)
                 running_loss += loss.item()
                 total += label.size(0)
-                correct += correct_total(output,label) 
                 for name, risk_fn in self.risk_dict.items():
                     risks[name] += risk_fn(output,label).item()
             for name, risk in risks.items():
@@ -161,7 +159,6 @@ class hist_train():
             self.loss_list.append(running_loss/len(self.data))
 
     def update_hist(self):
-        self.model.eval()
         self.get_risks()
         with torch.no_grad():
             for name, risk_fn in self.risk_dict_extra.items():
