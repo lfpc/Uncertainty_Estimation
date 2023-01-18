@@ -243,7 +243,7 @@ class SelectiveNetLoss(torch.nn.Module):
         #variant of the well-known Interior Point Method (IPM)
         return self.lamb*torch.square(torch.nn.functional.relu(const))
     
-    def selective_risk(self,y_pred,y_true,g):
+    def selective_risk(self,y_pred,g,y_true):
         
         loss = self.criterion(y_pred,y_true)*g
         loss /= g.mean()

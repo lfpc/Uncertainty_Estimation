@@ -161,8 +161,6 @@ class hist_train():
             self.loss_list.append(running_loss/len(self.data))
 
     def update_hist(self):
-        '''Update acc_list's and loss_list.
-        If coverage is defined (different than 1), updates acc_c lists'''
         self.model.eval()
         self.get_risks()
         with torch.no_grad():
