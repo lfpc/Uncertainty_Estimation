@@ -7,6 +7,7 @@ import pandas as pd
 from tqdm.notebook import tqdm,trange
 from IPython.display import display
 from os.path import join
+import wandb
 
 def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,set_train_mode = True):
     '''Train a Neural Network'''
@@ -349,6 +350,67 @@ class Trainer():
     def save_all(self, path_model, path_hist, name = None):
         self.save_hist(path_hist, name)
         self.save_state_dict(path_model, name)
+
+
+class Trainer_WandB(Trainer):
+    def __init__(self, model, optimizer, loss_criterion, training_data=None, validation_data=None, 
+                lr_scheduler=None, risk_dict: dict = { 'accuracy': correct_total }, risk_dict_extra: dict = {}, 
+                **kwargs):
+        super().__init__(model, optimizer, loss_criterion, None, None, lr_scheduler, risk_dict, risk_dict_extra)
+        self.wb = wandb.init(reinit = True,**kwargs)
+        self.update_hist()
+        self.training_data = training_data
+        self.validation_data = validation_data
+        self.risk_dict = risk_dict
+        self.risk_dict_extra = risk_dict_extra
+
+    def log(self, data):
+        self.model.eval()
+        dev = next(self.model.parameters()).device
+        running_loss = 0
+        total = 0
+        risks = dict.fromkeys(self.risk_dict.keys(), 0.0)
+        with torch.no_grad():
+            for image,label in data:
+                image,label = image.to(dev, non_blocking=True), label.to(dev, non_blocking=True)
+                output = self.model(image)
+                loss = self.loss_criterion(output,label)
+                running_loss += loss.item()
+                total += label.size(0)
+                for name, risk_fn in self.risk_dict.items():
+                    risks[name] += risk_fn(output,label).item()
+            for name, risk in risks.items():
+                self.wb.log({name:risk/total})
+            self.wb.log({'Loss':running_loss/len(data)})
+            for name, risk_fn in self.risk_dict_extra.items():
+                risk = risk_fn(self.model,data).item()
+                self.wb.log({name:risk})
+    def fit(self,data = None,n_epochs = 1, live_plot = False,
+            save_checkpoint = False, PATH = '.', criterion = 'accuracy',resume = False, **kwargs):
+        if resume:
+            self.wb = wandb.init(resume = True, **kwargs)
+        with self.wb:
+            super().fit(self,data,n_epochs, save_checkpoint, PATH, criterion, resume,
+            live_plot = False,update_hist = True)
+    def save_state_dict(self,path, name = None):
+        if name is None:
+            if self.wb.name is None:
+                name = self.model.name
+            else:
+                name = self.wb.name
+        name = name + '.pt'
+        torch.save(self.model.state_dict(), join(path,name))
+
+
+    def update_hist(self,update_hist = True):
+        '''Updates hist classes.
+        Usefull to use before training to keep pre-training values.'''
+        # adicionar modo para criar hist caso o dataset tenha sido adicionado posteriormente
+        if self.training_data is not None and update_hist:
+            self.log(self.training_data)
+
+        if self.validation_data is not None and update_hist:
+            self.log(self.validation_data)
         
 if __name__ == '__main__':
     model =torch.nn.Sequential(torch.nn.Linear(10,10))

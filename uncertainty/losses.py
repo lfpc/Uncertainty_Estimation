@@ -34,7 +34,6 @@ class MaximumClassSeparation(torch.nn.Module):
         return prototypes.astype(np.float32)
 
 
-
 class HypersphericalLoss(torch.nn.Module):
     def __init__(self, polars, reduction = 'mean') -> None:
         super().__init__()
@@ -142,8 +141,6 @@ class HypersphericalLoss(torch.nn.Module):
     
         
 
-
-
 class FocalLoss(torch.nn.CrossEntropyLoss):
     ''' Focal loss for classification tasks on imbalanced datasets '''
 
@@ -176,34 +173,50 @@ class aux_loss_fs(torch.nn.Module):
 
 
 
-class LCE(torch.nn.Module):
+class LCE_Loss(torch.nn.Module):
     '''Defines LCE loss - Devries(2018)'''
-    def __init__(self,criterion,lamb_init,beta,adjust_factor = 1.01):
+    def __init__(self,lamb_init,beta = 0.3,adjust_factor = 1.01, 
+                      criterion = torch.nn.CrossEntropyLoss(), reduction = 'mean', eps:float = 1e-10):
+
         super().__init__()
         self.criterion = criterion
         self.lamb = lamb_init
         self.beta = beta
         self.adjust_factor = adjust_factor
+        self.reduction = reduction
+        self.criterion.reduction = reduction
+        self.eps = eps
  
-    def forward(self, y_pred,g,y_true):
-        
-        with torch.no_grad():
-            y_true_onehot = F.one_hot(y_true,y_pred.shape[-1])
-        y = g*y_pred+(1-g)*y_true_onehot
-        loss_t = self.criterion(y,y_true)
-        loss_g = torch.mean(-torch.log(g))
-        loss = loss_t + self.lamb*loss_g
-        #loss = torch.sum(loss)
-        self.update_lamb(loss_g.item())
-        
-        return loss
-    
     def update_lamb(self,loss_g):
         with torch.no_grad():
             if loss_g > self.beta:
                 self.lamb = self.lamb*self.adjust_factor
             elif loss_g < self.beta:
                 self.lamb = self.lamb/self.adjust_factor
+
+    def loss_g(self,g):
+        return -torch.log(g + self.eps)
+    def forward(self, output,y_true):
+
+        y_pred,g = output
+
+        g = g.view(-1)
+        y_pred = torch.nn.functional.softmax(y_pred,dim=-1)
+        y = g*y_pred+(1-g)*F.one_hot(y_true,y_pred.shape[-1])
+
+        loss_t = self.criterion(y,y_true)
+        loss_g = self.loss_g(g)
+
+        loss = loss_t + self.lamb*loss_g
+        if self.reduction == 'mean':
+            loss = loss.mean()
+        elif self.reduction == 'sum':
+            loss = loss.sum()
+        
+        self.update_lamb(loss_g.mean().item())
+        
+        return loss
+
 
 class penalized_uncertainty(torch.nn.Module):
     def __init__(self,criterion, def_loss = log(10)):
