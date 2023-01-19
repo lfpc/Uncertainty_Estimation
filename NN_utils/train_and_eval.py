@@ -356,15 +356,14 @@ class Trainer_WandB(Trainer):
     def __init__(self, model, optimizer, loss_criterion, training_data=None, validation_data=None, 
                 lr_scheduler=None, risk_dict: dict = { 'accuracy': correct_total }, risk_dict_extra: dict = {}, 
                 **kwargs):
-        super().__init__(model, optimizer, loss_criterion, None, None, lr_scheduler, risk_dict, risk_dict_extra)
         self.wb = wandb.init(reinit = True,**kwargs)
-        self.update_hist()
+        super().__init__(model, optimizer, loss_criterion, None, None, lr_scheduler, risk_dict, risk_dict_extra)
         self.training_data = training_data
         self.validation_data = validation_data
         self.risk_dict = risk_dict
         self.risk_dict_extra = risk_dict_extra
 
-    def log(self, data):
+    def log(self, data, prefix = ''):
         self.model.eval()
         dev = next(self.model.parameters()).device
         running_loss = 0
@@ -380,17 +379,17 @@ class Trainer_WandB(Trainer):
                 for name, risk_fn in self.risk_dict.items():
                     risks[name] += risk_fn(output,label).item()
             for name, risk in risks.items():
-                self.wb.log({name:risk/total})
-            self.wb.log({'Loss':running_loss/len(data)})
+                self.wb.log({prefix+name:risk/total})
+            self.wb.log({prefix+'Loss':running_loss/len(data)})
             for name, risk_fn in self.risk_dict_extra.items():
                 risk = risk_fn(self.model,data).item()
-                self.wb.log({name:risk})
+                self.wb.log({prefix+name:risk})
     def fit(self,data = None,n_epochs = 1, live_plot = False,
-            save_checkpoint = False, PATH = '.', criterion = 'accuracy',resume = False, **kwargs):
+            save_checkpoint = False, PATH = '.', resume = False, **kwargs):
         if resume:
             self.wb = wandb.init(resume = True, **kwargs)
         with self.wb:
-            super().fit(self,data,n_epochs, save_checkpoint, PATH, criterion, resume,
+            super().fit(self,data,n_epochs, save_checkpoint, PATH, resume,
             live_plot = False,update_hist = True)
     def save_state_dict(self,path, name = None):
         if name is None:
@@ -401,16 +400,15 @@ class Trainer_WandB(Trainer):
         name = name + '.pt'
         torch.save(self.model.state_dict(), join(path,name))
 
-
     def update_hist(self,update_hist = True):
         '''Updates hist classes.
         Usefull to use before training to keep pre-training values.'''
         # adicionar modo para criar hist caso o dataset tenha sido adicionado posteriormente
         if self.training_data is not None and update_hist:
-            self.log(self.training_data)
+            self.log(self.training_data, 'Training ')
 
         if self.validation_data is not None and update_hist:
-            self.log(self.validation_data)
+            self.log(self.validation_data, 'Validation ')
         
 if __name__ == '__main__':
     model =torch.nn.Sequential(torch.nn.Linear(10,10))
