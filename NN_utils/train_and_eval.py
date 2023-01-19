@@ -387,7 +387,7 @@ class Trainer_WandB(Trainer):
         if resume:
             self.wb = wandb.init(resume = True, **kwargs)
         with self.wb:
-            super().fit(self,data,n_epochs, live_plot, save_checkpoint, PATH, resume)
+            super().fit(self,data,n_epochs, live_plot,True, save_checkpoint, PATH, resume = resume)
     def save_state_dict(self,path, name = None):
         if name is None:
             if self.wb.name is None:
