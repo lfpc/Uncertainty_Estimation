@@ -248,6 +248,7 @@ class Trainer():
                 criterion_val = self.hist_val.loss_list
             else:
                 criterion_val = self.hist_val.risk[criterion]
+        else: criterion_val = criterion
 
         if live_plot is True and (not (hasattr(self,'hist_train') or hasattr(self,'hist_val'))):
             live_plot = False
@@ -310,9 +311,12 @@ class Trainer():
             
                 
             if save_checkpoint:
-                if criterion_val[-1] >= self.acc:
-                    self.acc = criterion_val[-1]
-                    self.save_state_dict(PATH,self.name+'_checkpoint')
+                save_checkpoint(criterion_val, PATH)
+
+    def save_chekpoint(self,criterion, PATH):
+        if criterion[-1] >= self.acc:
+            self.acc = criterion[-1]
+            self.save_state_dict(PATH,self.name+'_checkpoint')
 
     def update_hist(self, update_hist = 'all'):
         '''Updates hist classes.
@@ -388,6 +392,13 @@ class Trainer_WandB(Trainer):
             self.wb = wandb.init(resume = True, **kwargs)
         with self.wb:
             super().fit(data,n_epochs, live_plot,True, save_checkpoint, PATH, resume = resume)
+    def save_chekpoint(self,criterion, PATH):
+        if self.wb.summary[criterion] >= self.acc:
+            self.acc = self.wb.summary[criterion]
+            self.save_state_dict(PATH,self.name+'_checkpoint')
+
+
+            
     def save_state_dict(self,path, name = None):
         if name is None:
             if self.wb.name is None:
