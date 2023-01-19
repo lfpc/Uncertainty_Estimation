@@ -235,8 +235,6 @@ class Trainer():
         self.epoch = 0
         self.lr_scheduler = lr_scheduler
         self.name = name
-
-
         if training_data is not None:
             self.hist_train = hist_train(model,loss_criterion,training_data, risk_dict = risk_dict,risk_dict_extra = risk_dict_extra)
         if validation_data is not None:
@@ -357,9 +355,9 @@ class Trainer_WandB(Trainer):
                 lr_scheduler=None, risk_dict: dict = { 'accuracy': correct_total }, risk_dict_extra: dict = {}, 
                 **kwargs):
         self.wb = wandb.init(reinit = True,**kwargs)
-        super().__init__(model, optimizer, loss_criterion, None, None, lr_scheduler, risk_dict, risk_dict_extra)
         self.training_data = training_data
         self.validation_data = validation_data
+        super().__init__(model, optimizer, loss_criterion, None, None, lr_scheduler, risk_dict, risk_dict_extra)
         self.risk_dict = risk_dict
         self.risk_dict_extra = risk_dict_extra
 
