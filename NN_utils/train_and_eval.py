@@ -382,12 +382,12 @@ class Trainer_WandB(Trainer):
             for name, risk_fn in self.risk_dict_extra.items():
                 risk = risk_fn(self.model,data).item()
                 self.wb.log({prefix+name:risk})
-    def fit(self,data = None,n_epochs = 1, save_checkpoint = False, PATH = '.', resume = False, **kwargs):
+    def fit(self,data = None,n_epochs = 1, live_plot = False,
+            save_checkpoint = False, PATH = '.', resume = False, **kwargs):
         if resume:
             self.wb = wandb.init(resume = True, **kwargs)
         with self.wb:
-            super().fit(self,data,n_epochs, save_checkpoint, PATH, resume,
-            live_plot = False,update_hist = True)
+            super().fit(self,data,n_epochs, live_plot, save_checkpoint, PATH, resume)
     def save_state_dict(self,path, name = None):
         if name is None:
             if self.wb.name is None:
