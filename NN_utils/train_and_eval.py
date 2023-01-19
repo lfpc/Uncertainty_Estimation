@@ -395,7 +395,7 @@ class Trainer_WandB(Trainer):
     def save_checkpoint(self,criterion, PATH):
         if self.wb.summary['Validation '+criterion] >= self.acc:
             self.acc = self.wb.summary['Validation '+criterion]
-            self.save_state_dict(PATH,self.name+'_checkpoint')
+            self.save_state_dict(PATH,self.wb.name+'_checkpoint')
             self.wb.summary['Best'] = self.acc
 
 
