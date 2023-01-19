@@ -231,7 +231,7 @@ class Trainer():
 
         self.model = model
         self.optimizer = optimizer
-        self.loss_fn = loss_criterion
+        self.loss_criterion = loss_criterion
         self.epoch = 0
         self.lr_scheduler = lr_scheduler
         self.name = name
@@ -285,7 +285,7 @@ class Trainer():
                 progress.disable = False
                 progress.reset()
 
-            loss = train_NN(self.model,self.optimizer,progress,self.loss_fn,1, print_loss = False) #model.train applied internally here
+            loss = train_NN(self.model,self.optimizer,progress,self.loss_criterion,1, print_loss = False) #model.train applied internally here
             
             self.update_hist(dataset = update_hist)
             self.epoch += 1
@@ -305,7 +305,7 @@ class Trainer():
                 if hasattr(self,'hist_val'):
                     desc_dict['Validation loss'] = self.hist_val.loss_list
                     desc_dict['MIN Val loss'] = int(np.argmin(self.hist_val.loss_list))
-                utils.live_plot(desc_dict,title = f'Loss {type(self.loss_fn).__name__}',adjust=True)
+                utils.live_plot(desc_dict,title = f'Loss {type(self.loss_criterion).__name__}',adjust=True)
                 display(self.__progress_epoch.container)
             
                 
