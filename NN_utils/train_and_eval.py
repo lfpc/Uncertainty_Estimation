@@ -357,9 +357,9 @@ class Trainer_WandB(Trainer):
         self.wb = wandb.init(reinit = True,**kwargs)
         self.training_data = training_data
         self.validation_data = validation_data
-        super().__init__(model, optimizer, loss_criterion, None, None, lr_scheduler, risk_dict, risk_dict_extra)
         self.risk_dict = risk_dict
         self.risk_dict_extra = risk_dict_extra
+        super().__init__(model, optimizer, loss_criterion, None, None, lr_scheduler, risk_dict, risk_dict_extra)
 
     def log(self, data, prefix = ''):
         self.model.eval()
