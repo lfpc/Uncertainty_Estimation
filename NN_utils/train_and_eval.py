@@ -287,7 +287,7 @@ class Trainer():
 
             loss = train_NN(self.model,self.optimizer,progress,self.loss_criterion,1, print_loss = False) #model.train applied internally here
             
-            self.update_hist(dataset = update_hist)
+            self.update_hist(update_hist)
             self.epoch += 1
             if live_plot != 'print':
                 self.__progress_epoch.update()
@@ -314,14 +314,14 @@ class Trainer():
                     self.acc = criterion_val[-1]
                     self.save_state_dict(PATH,self.name+'_checkpoint')
 
-    def update_hist(self, dataset = 'all'):
+    def update_hist(self, update_hist = 'all'):
         '''Updates hist classes.
         Usefull to use before training to keep pre-training values.'''
         # adicionar modo para criar hist caso o dataset tenha sido adicionado posteriormente
-        if (dataset == 'all' or dataset == 'train' or dataset == True) and hasattr(self,'hist_train'):
+        if (update_hist == 'all' or update_hist == 'train' or update_hist == True) and hasattr(self,'hist_train'):
             self.hist_train.update_hist()
 
-        if (dataset == 'all' or dataset == 'val' or dataset == True) and hasattr(self,'hist_val'):
+        if (update_hist == 'all' or update_hist == 'val' or update_hist == True) and hasattr(self,'hist_val'):
             self.hist_val.update_hist() 
 
     def save_hist(self,path, name = None, method = 'pickle-df'):
