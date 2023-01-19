@@ -387,11 +387,11 @@ class Trainer_WandB(Trainer):
                 risk = risk_fn(self.model,data).item()
                 self.wb.log({prefix+name:risk})
     def fit(self,data = None,n_epochs = 1, live_plot = False,
-            save_checkpoint = False, PATH = '.', resume = False, **kwargs):
+            save_checkpoint = False, PATH = '.', resume = False, criterion = 'accuracy', **kwargs):
         if resume:
             self.wb = wandb.init(resume = True, **kwargs)
         with self.wb:
-            super().fit(data,n_epochs, live_plot,True, save_checkpoint, PATH, resume = resume)
+            super().fit(data,n_epochs, live_plot,True, save_checkpoint, PATH,criterion=criterion, resume = resume)
     def save_checkpoint(self,criterion, PATH):
         if self.wb.summary['Validation '+criterion] >= self.acc:
             self.acc = self.wb.summary['Validation '+criterion]
