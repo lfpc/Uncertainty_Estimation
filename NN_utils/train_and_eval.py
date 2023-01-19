@@ -393,8 +393,8 @@ class Trainer_WandB(Trainer):
         with self.wb:
             super().fit(data,n_epochs, live_plot,True, save_checkpoint, PATH, resume = resume)
     def save_checkpoint(self,criterion, PATH):
-        if self.wb.summary[criterion] >= self.acc:
-            self.acc = self.wb.summary[criterion]
+        if self.wb.summary['Validation '+criterion] >= self.acc:
+            self.acc = self.wb.summary['Validation '+criterion]
             self.save_state_dict(PATH,self.name+'_checkpoint')
             self.wb.summary['Best'] = self.acc
 
