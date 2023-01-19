@@ -269,7 +269,7 @@ class SelectiveNetLoss(torch.nn.Module):
         loss = self.alpha*loss + (1-self.alpha)*loss_h
         return loss
 
-class confid_loss(torch.nn.Module):
+class TCP_Loss(torch.nn.Module):
     def __init__(self, criterion = torch.nn.MSELoss()):
         super().__init__()
         self.criterion = criterion

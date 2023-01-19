@@ -43,22 +43,18 @@ class HypersphericalPrototypeNetwork(torch.nn.Module):
         x = torch.mm(x, self.polars.t())
         return x
 
-class SelectiveNet(torch.nn.Module):
-    def __init__(self, features,classifier, g_layer, aux_head:str = 'aux') -> None:
+class GNet(torch.nn.Module):
+    def __init__(self, features,classifier, g_layer) -> None:
         super().__init__()
         self.features= features
         self.classifier = classifier
-        if aux_head == 'aux':
-            self.aux_head = deepcopy(classifier)
-        elif aux_head == 'self':
-            self.aux_head = self.classifier
         self.g_layer = g_layer
+
     def forward(self,x):
         z = self.features(x)
         y = self.classifier(z)
         g = self.g_layer(z)
-        h = self.aux_head(z)
-        return y,g,h
+        return y,g
     @classmethod
     def from_model(cls, model, **kwargs):
         if any('classifier' in n for n,_ in model.named_children()):
@@ -80,4 +76,19 @@ class SelectiveNet(torch.nn.Module):
                         torch.nn.Sigmoid())
 
         return cls(model, classifier,g_layer, **kwargs)
+
+
+class SelectiveNet(GNet):
+    def __init__(self, features,classifier, g_layer, aux_head:str = 'aux') -> None:
+        super().__init__(features, classifier, g_layer)
+        if aux_head == 'aux':
+            self.aux_head = deepcopy(classifier)
+        elif aux_head == 'self':
+            self.aux_head = self.classifier
+    def forward(self,x):
+        z = self.features(x)
+        y = self.classifier(z)
+        g = self.g_layer(z)
+        h = self.aux_head(z)
+        return y,g,h
 
