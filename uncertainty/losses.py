@@ -201,7 +201,9 @@ class LCE_Loss(torch.nn.Module):
         y_pred,g = output
 
         y_pred = torch.nn.functional.softmax(y_pred,dim=-1)
-        y = g*y_pred+(1-g)*F.one_hot(y_true,y_pred.shape[-1])
+        with torch.no_grad():
+            OH = F.one_hot(y_true,y_pred.shape[-1])
+        y = g*y_pred+(1-g)*OH
         y = torch.log(y)
         loss_t = self.criterion(y,y_true)
         loss_g = self.loss_g(g)
@@ -212,7 +214,8 @@ class LCE_Loss(torch.nn.Module):
         elif self.reduction == 'sum':
             loss = loss.sum()
         
-        self.update_lamb(loss_g.mean().item())
+        if self.training:
+            self.update_lamb(loss_g.mean().item())
         
         return loss
 

@@ -14,6 +14,8 @@ def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,s
     dev = next(model.parameters()).device
     if set_train_mode:
         model.train()
+        try: loss_criterion.train()
+        except: pass
     for epoch in range(n_epochs):
         running_loss = 0
         for image,label in data:
@@ -59,6 +61,8 @@ def calc_loss_batch(model,loss_criterion,data,set_eval = True):
     '''Calculate the average loss over a dataset.'''
     if set_eval:
         model.eval()
+        try: loss_criterion.eval()
+        except: pass
     dev = next(model.parameters()).device
     running_loss = 0
     with torch.no_grad():
@@ -88,6 +92,8 @@ def model_acc_and_loss(model,loss_criterion,data, set_eval = True):
     '''Calculate the average loss and the accuracy over a dataset.'''
     if set_eval:
         model.eval()
+        try: loss_criterion.eval()
+        except: pass
     dev = next(model.parameters()).device
     running_loss = 0
     total = 0
@@ -142,6 +148,8 @@ class hist_train():
 
     def get_risks(self):
         self.model.eval()
+        try: self.loss_criterion.eval()
+        except: pass
         dev = next(self.model.parameters()).device
         running_loss = 0
         total = 0
@@ -367,6 +375,8 @@ class Trainer_WandB(Trainer):
 
     def log(self, data, prefix = ''):
         self.model.eval()
+        try: self.loss_criterion.eval()
+        except: pass
         dev = next(self.model.parameters()).device
         running_loss = 0
         total = 0
