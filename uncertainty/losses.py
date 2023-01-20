@@ -184,7 +184,7 @@ class LCE_Loss(torch.nn.Module):
         self.beta = beta
         self.adjust_factor = adjust_factor
         self.reduction = reduction
-        self.criterion.reduction = reduction
+        self.criterion.reduction = 'none'
         self.eps = eps
  
     def update_lamb(self,loss_g):
