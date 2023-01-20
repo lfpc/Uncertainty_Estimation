@@ -176,7 +176,7 @@ class aux_loss_fs(torch.nn.Module):
 class LCE_Loss(torch.nn.Module):
     '''Defines LCE loss - Devries(2018)'''
     def __init__(self,lamb_init,beta = 0.3,adjust_factor = 1.01, 
-                      criterion = torch.nn.CrossEntropyLoss(), reduction = 'mean', eps:float = 1e-10):
+                      criterion = torch.nn.NLLLoss(), reduction = 'mean', eps:float = 1e-10):
 
         super().__init__()
         self.criterion = criterion
@@ -202,7 +202,7 @@ class LCE_Loss(torch.nn.Module):
 
         y_pred = torch.nn.functional.softmax(y_pred,dim=-1)
         y = g*y_pred+(1-g)*F.one_hot(y_true,y_pred.shape[-1])
-
+        y = torch.log(y)
         loss_t = self.criterion(y,y_true)
         loss_g = self.loss_g(g)
 
