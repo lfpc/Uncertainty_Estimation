@@ -5,7 +5,7 @@ import NN_utils as utils
 from uncertainty import entropy,get_TCP
 from NN_utils.train_and_eval import correct_class
 from scipy.optimize import root_scalar
-import torch.nn.functional as F
+#import torch.nn.functional as F
 import os
 from scipy.spatial.distance import cdist
 
@@ -114,7 +114,7 @@ class HypersphericalLoss(torch.nn.Module):
 
 
         prototypes = torch.randn(classes, dims)
-        prototypes = torch.nn.Parameter(F.normalize(prototypes, p=2, dim=1))
+        prototypes = torch.nn.Parameter(torch.nn.functional.normalize(prototypes, p=2, dim=1))
         optimizer = torch.optim.SGD([prototypes], lr=learning_rate, momentum=momentum)
 
         # Optimize for separation.
@@ -129,7 +129,7 @@ class HypersphericalLoss(torch.nn.Module):
             loss.backward()
             optimizer.step()
             # Renormalize prototypes.
-            prototypes = torch.nn.Parameter(F.normalize(prototypes, p=2, dim=1))
+            prototypes = torch.nn.Parameter(torch.nn.functional.normalize(prototypes, p=2, dim=1))
             optimizer = torch.optim.SGD([prototypes], lr=learning_rate, \
                     momentum=momentum)
             print(f'Epoch {i+1}/{epochs}')
@@ -151,7 +151,7 @@ class FocalLoss(torch.nn.CrossEntropyLoss):
 
     def forward(self, input_, target):
         cross_entropy = super().forward(input_, target)
-        input_prob = torch.gather(F.softmax(input_, dim = -1), 1, target.unsqueeze(1)).view(-1)
+        input_prob = torch.gather(torch.nn.functional.softmax(input_, dim = -1), 1, target.unsqueeze(1)).view(-1)
         loss = torch.pow(1 - input_prob, self.gamma) * cross_entropy
         return torch.mean(loss) if self._reduction == 'mean' else torch.sum(loss) if self._reduction == 'sum' else loss
 
@@ -175,7 +175,7 @@ class aux_loss_fs(torch.nn.Module):
 
 class LCE_Loss(torch.nn.Module):
     '''Defines LCE loss - Devries(2018)'''
-    def __init__(self,lamb_init,beta = 0.3,adjust_factor = 1.01, 
+    def __init__(self,lamb_init,beta = 0.3,adjust_factor = 1.01,
                       criterion = torch.nn.NLLLoss(), reduction = 'mean', eps:float = 1e-10):
 
         super().__init__()
@@ -188,24 +188,23 @@ class LCE_Loss(torch.nn.Module):
         self.eps = eps
  
     def update_lamb(self,loss_g):
-        with torch.no_grad():
-            if loss_g > self.beta:
-                self.lamb = self.lamb*self.adjust_factor
-            elif loss_g < self.beta:
-                self.lamb = self.lamb/self.adjust_factor
+        if loss_g > self.beta:
+            self.lamb = self.lamb*self.adjust_factor
+        elif loss_g < self.beta:
+            self.lamb = self.lamb/self.adjust_factor
 
     def loss_g(self,g):
-        return -torch.log(g + self.eps)
+        return (-1)*torch.log(g + self.eps)
     def forward(self, output,y_true):
 
         y_pred,g = output
-
-        y_pred = torch.nn.functional.softmax(y_pred,dim=-1)
         with torch.no_grad():
-            OH = F.one_hot(y_true,y_pred.shape[-1])
-        y = g*y_pred+(1-g)*OH
-        y = torch.log(y)
-        loss_t = self.criterion(y,y_true)
+            OH = torch.nn.functional.one_hot(y_true,y_pred.shape[-1])
+            
+        y_pred = torch.nn.functional.softmax(y_pred,dim=-1)
+        y_pred = g*y_pred+(1-g)*OH
+        y_pred = torch.log(y_pred+self.eps)
+        loss_t = self.criterion(y_pred,y_true)
         loss_g = self.loss_g(g)
 
         loss = loss_t + self.lamb*loss_g
@@ -213,9 +212,9 @@ class LCE_Loss(torch.nn.Module):
             loss = loss.mean()
         elif self.reduction == 'sum':
             loss = loss.sum()
-        
         if self.training:
-            self.update_lamb(loss_g.mean().item())
+            with torch.no_grad():
+                self.update_lamb(loss_g.mean().item())
         
         return loss
 
@@ -308,7 +307,7 @@ class OVALoss(torch.nn.Module):
     def forward(self, output,y_true):
         if self.from_logits:
             output = torch.sigmoid(output)
-        y = F.one_hot(y_true,self.n_classes)        
+        y = torch.nn.functional.one_hot(y_true,self.n_classes)        
         loss = self.CrossEntropy(output,y)
         loss += self.CrossEntropy(1-output,1-y)
         # arrumar [(1-y).bool()]

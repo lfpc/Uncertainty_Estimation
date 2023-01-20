@@ -92,11 +92,11 @@ class DeepEnsemble(Ensemble):
                  ):
         if isinstance(models,dict):
             self.models_dict = models
-            models = tuple(models.values())
+            models = list(models.values())
         super().__init__(models, inference)
-        self.model = torch.nn.ParameterList()
-        for m in models:
-            self.model.append(m)
+        self.model = torch.nn.ParameterList(models)
+        #for m in models:
+        #    self.model.append(m)
         self.apply_softmax = apply_softmax
     
     def get_samples(self,x):

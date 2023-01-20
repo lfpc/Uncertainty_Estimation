@@ -371,6 +371,7 @@ class Trainer_WandB(Trainer):
         self.validation_data = validation_data
         self.risk_dict = risk_dict
         self.risk_dict_extra = risk_dict_extra
+        self.risk = {}
         super().__init__(model, optimizer, loss_criterion, None, None, lr_scheduler, risk_dict, risk_dict_extra)
 
     def log(self, data, prefix = ''):
@@ -391,11 +392,14 @@ class Trainer_WandB(Trainer):
                 for name, risk_fn in self.risk_dict.items():
                     risks[name] += risk_fn(output,label).item()
             for name, risk in risks.items():
-                self.wb.log({prefix+name:risk/total})
-            self.wb.log({prefix+'Loss':running_loss/len(data)})
+                self.risk[prefix+name] = risk/total
+                #self.wb.log({prefix+name:risk/total})
+            self.risk[prefix+'Loss'] = running_loss/len(data)
+            #self.wb.log({prefix+'Loss':running_loss/len(data)})
             for name, risk_fn in self.risk_dict_extra.items():
                 risk = risk_fn(self.model,data).item()
-                self.wb.log({prefix+name:risk})
+                self.risk[prefix+name] = risk
+                #self.wb.log({prefix+name:risk})
     def fit(self,data = None,n_epochs = 1, live_plot = False,
             save_checkpoint = False, PATH = '.', resume = False, criterion = 'accuracy', **kwargs):
         if resume:
@@ -406,10 +410,7 @@ class Trainer_WandB(Trainer):
         if self.wb.summary['Validation '+criterion] >= self.acc:
             self.acc = self.wb.summary['Validation '+criterion]
             self.save_state_dict(PATH,self.wb.name+'_checkpoint')
-            self.wb.summary['Best'] = self.acc
-
-
-            
+            self.wb.summary['Best'] = self.acc       
     def save_state_dict(self,path, name = None):
         if name is None:
             if self.wb.name is None:
@@ -428,6 +429,7 @@ class Trainer_WandB(Trainer):
 
         if self.validation_data is not None and update_hist:
             self.log(self.validation_data, 'Validation ')
+        self.wb.log(self.risk)
         
 if __name__ == '__main__':
     model =torch.nn.Sequential(torch.nn.Linear(10,10))
