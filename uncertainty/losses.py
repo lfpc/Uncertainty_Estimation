@@ -200,7 +200,6 @@ class LCE_Loss(torch.nn.Module):
 
         y_pred,g = output
 
-        g = g.view(-1)
         y_pred = torch.nn.functional.softmax(y_pred,dim=-1)
         y = g*y_pred+(1-g)*F.one_hot(y_true,y_pred.shape[-1])
 
