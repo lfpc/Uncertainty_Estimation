@@ -45,17 +45,23 @@ class HypersphericalPrototypeNetwork(torch.nn.Module):
         return x
 
 class GNet(torch.nn.Module):
-    def __init__(self, features,classifier, g_layer) -> None:
+    def __init__(self, features,classifier, g_layer, fine_tunning = False) -> None:
         super().__init__()
         self.features= features
         self.classifier = classifier
         self.g_layer = g_layer
         self.frozen = False
+        self.fine_tunning = fine_tunning
+        if self.fine_tunning:
+            self.features_g = deepcopy(features)
 
     def forward(self,x):
         z = self.features(x)
         y = self.classifier(z)
-        g = self.g_layer(z)
+        if self.fine_tunning:
+            g = self.g_layer(self.features_g(x))
+        else:
+            g = self.g_layer(z)
         return y,g
     def freeze(self, layers = None):
         freeze_params(self.features, layers= layers)
