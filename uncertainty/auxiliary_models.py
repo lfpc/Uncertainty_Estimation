@@ -50,7 +50,7 @@ class GNet(torch.nn.Module):
         self.features= features
         self.classifier = classifier
         self.g_layer = g_layer
-        self.freeze = False
+        self.frozen = False
 
     def forward(self,x):
         z = self.features(x)
@@ -60,14 +60,14 @@ class GNet(torch.nn.Module):
     def freeze(self, layers = None):
         freeze_params(self.features, layers= layers)
         freeze_params(self.classifier, layers= layers)
-        self.freeze = True
+        self.frozen = True
     def unfreeze(self, layers = None):
         unfreeze_params(self.features, layers= layers)
         unfreeze_params(self.classifier, layers= layers)
-        self.freeze = False
+        self.frozen = False
     def train(self, mode: bool = True):
         super().train(mode)
-        if self.freeze:
+        if self.frozen:
             self.features.eval()
             self.classifier.eval()
         return self
