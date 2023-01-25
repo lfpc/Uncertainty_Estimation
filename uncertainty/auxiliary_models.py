@@ -3,6 +3,7 @@ import numpy as np
 import os
 from .losses import HypersphericalLoss
 from copy import copy,deepcopy
+from NN_utils import freeze_params, unfreeze_params
 
 class Platt_Model(torch.nn.Module):
     def __init__(self,model,A = 1.0,B = 0.0):
@@ -49,14 +50,30 @@ class GNet(torch.nn.Module):
         self.features= features
         self.classifier = classifier
         self.g_layer = g_layer
+        self.freeze = False
 
     def forward(self,x):
         z = self.features(x)
         y = self.classifier(z)
         g = self.g_layer(z)
         return y,g
+    def freeze(self, layers = None):
+        freeze_params(self.features, layers= layers)
+        freeze_params(self.classifier, layers= layers)
+        self.freeze = True
+    def unfreeze(self, layers = None):
+        unfreeze_params(self.features, layers= layers)
+        unfreeze_params(self.classifier, layers= layers)
+        self.freeze = False
+    def train(self, mode):
+        super().train(mode)
+        if self.freeze:
+            self.features.eval()
+            self.classifier.eval()
+        return self
     @classmethod
-    def from_model(cls, model, **kwargs):
+    def from_model(cls, model, g_layer = None,**kwargs):
+        model = copy(model)
         if any('classifier' in n for n,_ in model.named_children()):
             classifier = copy(model.classifier)
             model.classifier = torch.nn.Identity()
@@ -66,7 +83,7 @@ class GNet(torch.nn.Module):
         elif any('linear' in n for n,_ in model.named_children()):
             classifier = copy(model.linear)
             model.linear = torch.nn.Identity()
-        if not 'g_layer' in kwargs:
+        if g_layer is None:
             in_features = classifier.in_features
             g_layer = torch.nn.Sequential(
                         torch.nn.Linear(in_features, 512),

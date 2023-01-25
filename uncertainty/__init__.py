@@ -69,8 +69,8 @@ def get_TCP(y_pred,y_true, normalize = True):
 
     return TCP
 
-def TCP_unc(y,label):
+def TCP_unc(y,label, normalize = True):
     '''Returns the True Class Probability of a predicted output
      as an uncertainty estimation, since TCP is a certainty quantification.
     '''
-    return (1-get_TCP(y,label))
+    return (1-get_TCP(y,label, normalize))
