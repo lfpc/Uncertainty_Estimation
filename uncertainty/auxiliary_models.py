@@ -65,7 +65,7 @@ class GNet(torch.nn.Module):
         unfreeze_params(self.features, layers= layers)
         unfreeze_params(self.classifier, layers= layers)
         self.freeze = False
-    def train(self, mode):
+    def train(self, mode: bool = True):
         super().train(mode)
         if self.freeze:
             self.features.eval()
