@@ -319,3 +319,33 @@ class OVALoss(torch.nn.Module):
         return loss
     def CrossEntropy(self,output,y):
         return torch.clamp(-y*torch.log(output+self.eps),min=0.0,max=self.bound)
+
+class BCELoss_Hits(torch.nn.BCELoss):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+    def forward(self,y_pred,y_true, g = None, unc = None):
+        assert g is None or unc is None
+        with torch.no_grad():
+            hits = correct_class(y_pred,y_true).float()
+        if unc is None and g is None:
+            g = torch.max(y_pred,-1).values
+        elif unc is not None:
+            g = 1-unc
+        loss = super().forward(g,hits)
+        return loss
+    
+
+class MSELoss_Hits(torch.nn.MSELoss):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+    def forward(self,y_pred,y_true, g = None, unc = None):
+        assert g is None or unc is None
+        with torch.no_grad():
+            hits = correct_class(y_pred,y_true).float()
+        if unc is None and g is None:
+            g = torch.max(y_pred,-1).values
+        elif unc is not None:
+            g = 1-unc
+        loss = super().forward(g,hits)
+        return loss
+    

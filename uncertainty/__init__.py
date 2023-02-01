@@ -6,6 +6,11 @@ from warnings import warn
 def entropy(y, **kwargs):
     return Entropy.entropy(y,**kwargs)
 
+def normalized_entropy(y,**kwargs):
+    '''Entropy normalized so it returns values between 0 and 1'''
+    n_classes = y.shape[-1]
+    return entropy(y,**kwargs)/torch.log(n_classes)
+
 class Entropy(torch.nn.Module):
     @staticmethod
     def entropy(y, normalize = True,reduction = 'none'):
