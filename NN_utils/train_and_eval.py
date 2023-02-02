@@ -398,7 +398,7 @@ class Trainer_WandB(Trainer):
                     risks[name] += risk_fn(output,label).item()
                 if len(self.risk_dict_accumulate)>0:
                     outputs.append(output)
-                    labels.append(output)
+                    labels.append(label)
             for name, risk in risks.items():
                 self.risk[prefix+name] = risk/total
                 #self.wb.log({prefix+name:risk/total})
