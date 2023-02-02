@@ -29,7 +29,7 @@ class CorruptedDataset(datasets.VisionDataset):
                     'saturate',
                     'frost']
 
-    def __init__(self, data_dir :str,im_size: tuple, names:list = corruptions,levels:tuple = (1,2,3,4,5),
+    def __init__(self, data_dir :str,im_size: tuple, names:list = corruptions,levels:tuple = (0,1,2,3,4,5),
                  transform= None, target_transform = None, natural_data = None):
         super().__init__(
                    data_dir, transform=transform,
@@ -38,23 +38,24 @@ class CorruptedDataset(datasets.VisionDataset):
         self.data = np.empty(im_size).astype(np.uint8)
         self.targets = np.array([])
         
+        if 0 in levels:
+            data = natural_data.data
+            targets = natural_data.targets
+            self.data = np.concatenate((self.data,data))
+            self.targets = np.concatenate((self.targets,targets))
+
+
         for name in names:
             assert name in self.corruptions
-            if name == 'natural' and natural_data is not False:
-                data = natural_data.data
-                targets = natural_data.targets
-                self.data = np.concatenate((self.data,data))
-                self.targets = np.concatenate((self.targets,targets))
-            else: 
-                data_path = os.path.join(data_dir, name + '.npy')
-                target_path = os.path.join(data_dir, 'labels.npy')
-                data = np.load(data_path)
-                targets = np.load(target_path)
-                for l in levels:
-                    l1 = (l-1)*10000
-                    l2 = l*10000
-                    self.data = np.concatenate((self.data,data[l1:l2]))
-                    self.targets = np.concatenate((self.targets,targets[l1:l2]))
+            data_path = os.path.join(data_dir, name + '.npy')
+            target_path = os.path.join(data_dir, 'labels.npy')
+            data = np.load(data_path)
+            targets = np.load(target_path)
+            for l in levels:
+                l1 = (l-1)*10000
+                l2 = l*10000
+                self.data = np.concatenate((self.data,data[l1:l2]))
+                self.targets = np.concatenate((self.targets,targets[l1:l2]))
             
         
     def __getitem__(self, index):
@@ -78,7 +79,7 @@ class Cifar10C(CorruptedDataset):
 
     def __init__(self, data_dir :str, names:list = CorruptedDataset.corruptions,levels:tuple = (1,2,3,4,5),
                  transform=cifar.Cifar10.transforms_test, target_transform=None, natural_data = None):
-        if 'natural' in names:
+        if 0 in levels:
             if natural_data is None:
                 parent_data_dir = os.path.abspath(os.path.join(data_dir,os.pardir))
                 natural_data = cifar.Cifar10(data_dir = parent_data_dir).test_data
@@ -95,7 +96,7 @@ class Cifar100C(CorruptedDataset):
 
     def __init__(self, data_dir :str, names:list = CorruptedDataset.corruptions,levels:tuple = (1,2,3,4,5),
                  transform=cifar.Cifar100.transforms_test, target_transform=None, natural_data = None):
-        if 'natural' in names:
+        if 0 in levels:
             if natural_data is None:
                 parent_data_dir = os.path.abspath(os.path.join(data_dir,os.pardir))
                 natural_data = cifar.Cifar100(data_dir = parent_data_dir).test_data
