@@ -62,6 +62,8 @@ class CIFAR10_1(data.Dataset):
                  transform=None,
                  target_transform=None,
                  download=False):
+        
+        root = os.path.join(root,'cifar10_1')
         self.root = os.path.expanduser(root)
         self.transform = transform
         self.target_transform = target_transform
