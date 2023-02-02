@@ -364,12 +364,14 @@ class Trainer():
 
 class Trainer_WandB(Trainer):
     def __init__(self, model, optimizer, loss_criterion, training_data=None, validation_data=None, 
-                lr_scheduler=None, risk_dict: dict = { 'accuracy': correct_total }, risk_dict_extra: dict = {}, 
+                lr_scheduler=None, 
+                risk_dict: dict = { 'accuracy': correct_total }, risk_dict_extra: dict = {}, risk_dict_accumulate: dict = {}, 
                 **kwargs):
         self.wb = wandb.init(reinit = True,**kwargs)
         self.training_data = training_data
         self.validation_data = validation_data
         self.risk_dict = risk_dict
+        self.risk_dict_accumulate = risk_dict_accumulate
         self.risk_dict_extra = risk_dict_extra
         self.risk = {}
         super().__init__(model, optimizer, loss_criterion, None, None, lr_scheduler, risk_dict, risk_dict_extra)
@@ -382,6 +384,9 @@ class Trainer_WandB(Trainer):
         running_loss = 0
         total = 0
         risks = dict.fromkeys(self.risk_dict.keys(), 0.0)
+        if len(self.risk_dict_accumulate)>0:
+            outputs = []
+            labels = []
         with torch.no_grad():
             for image,label in data:
                 image,label = image.to(dev, non_blocking=True), label.to(dev, non_blocking=True)
@@ -391,6 +396,9 @@ class Trainer_WandB(Trainer):
                 total += label.size(0)
                 for name, risk_fn in self.risk_dict.items():
                     risks[name] += risk_fn(output,label).item()
+                if len(self.risk_dict_accumulate)>0:
+                    outputs.append(output)
+                    labels.append(output)
             for name, risk in risks.items():
                 self.risk[prefix+name] = risk/total
                 #self.wb.log({prefix+name:risk/total})
@@ -400,6 +408,13 @@ class Trainer_WandB(Trainer):
                 risk = risk_fn(self.model,data).item()
                 self.risk[prefix+name] = risk
                 #self.wb.log({prefix+name:risk})
+            if len(self.risk_dict_accumulate)>0:
+                outputs = torch.cat(outputs)
+                labels = torch.cat(labels)
+                for name, risk_fn in self.risk_dict_accumulate.items():
+                    risk = risk_fn(outputs,labels)
+                    self.risk[prefix+name] = risk
+                
     def fit(self,data = None,n_epochs = 1, live_plot = False,
             save_checkpoint = False, PATH = '.', resume = False, criterion = 'accuracy', **kwargs):
         if resume:
