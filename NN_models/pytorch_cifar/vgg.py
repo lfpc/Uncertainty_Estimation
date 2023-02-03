@@ -79,7 +79,7 @@ class Conv2dSame(torch.nn.Module):
 
 
 class VGG_16_Dropout(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, num_classes):
         super().__init__()
         self.conv1 = Conv2dSame(3, 64, 3)
         self.conv1_bn = nn.BatchNorm2d(64)
@@ -129,7 +129,7 @@ class VGG_16_Dropout(torch.nn.Module):
 
         self.fc1 = nn.Linear(512, 512)
         self.dropout_fc = nn.Dropout(0.5)
-        self.classifier = nn.Linear(512, 10)
+        self.classifier = nn.Linear(512, num_classes)
 
     def forward(self, x):
         out = F.relu(self.conv1(x))
