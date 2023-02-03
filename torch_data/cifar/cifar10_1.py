@@ -39,7 +39,7 @@ def load_new_test_data(root, version='default'):
     return imagedata, labels
 
 
-class CIFAR10_1(data.Dataset):
+class Cifar10_1(data.Dataset):
     images_url = 'https://github.com/modestyachts/CIFAR-10.1/blob/master/datasets/cifar10.1-data.npy?raw=true'
     images_md5 = '29615bb88ff99bca6b147cee2520f010'
     images_filename = 'cifar10.1-data.npy'
