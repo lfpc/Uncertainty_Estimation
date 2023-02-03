@@ -13,17 +13,16 @@ def normalized_entropy(y,**kwargs):
 
 class Entropy(torch.nn.Module):
     @staticmethod
-    def entropy(y, normalize = True,reduction = 'none'):
+    def entropy(y, normalize = False,reduction = 'none'):
         '''Returns the entropy of a probabilities tensor.'''
         
         if y.numel() == 0:
             return torch.nan
+        if not normalize and not is_probabilities(y):
+            warn(f'Input vector is not probabilty vector')
         #if y is not a probabilities tensor
         if not is_probabilities(y) and normalize: 
             idx = is_probabilities(y).nonzero()
-            w = f'Input vector is not probabilty vector - Sum indexes {idx} = {y[idx]} - Applying softmax'
-            #idx retornando tensor vazio
-            warn(w)
             y = torch.nn.functional.softmax(y,dim=-1) #apply softmax 
         
         entropy = torch.special.entr(y) #entropy element wise
