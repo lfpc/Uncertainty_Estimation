@@ -111,7 +111,6 @@ class Noisy_Cifar100(Noisy_DataGenerator,Cifar100):
                 download, name)
 from .corrupted import Cifar100C,Cifar10C,CIFAR_C_loader
 from .cifar10_1 import Cifar10_1
-from .imbalance import ImbalanceCifar10,ImbalanceCifar100, ImbalanceBinaryCifar10, ImbalanceBinaryCifar100
 
 if __name__ == '__main__':
     data = Cifar10()
