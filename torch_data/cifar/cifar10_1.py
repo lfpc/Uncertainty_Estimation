@@ -10,6 +10,7 @@ from PIL import Image
 import torch.utils.data as data
 
 from torchvision.datasets.utils import download_url, check_integrity
+from torchvision import transforms
 
 def load_new_test_data(root, version='default'):
     data_path = root
@@ -47,6 +48,12 @@ class Cifar10_1(data.Dataset):
     labels_url = 'https://github.com/modestyachts/CIFAR-10.1/blob/master/datasets/cifar10.1-labels.npy?raw=true'
     labels_md5 = 'a27460fa134ae91e4a5cb7e6be8d269e'
     labels_filename = 'cifar10.1-labels.npy'
+    MEAN = (0.4914, 0.4822, 0.4465)
+    STD = (0.2023, 0.1994, 0.2010)
+
+    transforms_test = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(MEAN, STD),])
 
     classes = [
         'airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse',
@@ -59,7 +66,7 @@ class Cifar10_1(data.Dataset):
 
     def __init__(self,
                  root,
-                 transform=None,
+                 transform= transforms_test,
                  target_transform=None,
                  download=False):
         
@@ -112,8 +119,7 @@ class Cifar10_1(data.Dataset):
     def _check_integrity(self):
         data_path = os.path.join(self.root, self.images_filename)
         labels_path = os.path.join(self.root, self.labels_filename)
-        return (check_integrity(data_path, self.images_md5) and 
-            check_integrity(labels_path, self.labels_md5))
+        return (check_integrity(data_path) and check_integrity(labels_path))
 
     def download(self):
         if self._check_integrity():
