@@ -1,16 +1,9 @@
-import io
 import os
-import os.path
-import pickle
-
 import numpy as np
-
 from PIL import Image
-
-import torch.utils.data as data
-
 from torchvision.datasets.utils import download_url, check_integrity
 from torchvision import transforms
+from torch.utils.data import DataLoader, Dataset
 
 def load_new_test_data(root, version='default'):
     data_path = root
@@ -40,7 +33,7 @@ def load_new_test_data(root, version='default'):
     return imagedata, labels
 
 
-class Cifar10_1(data.Dataset):
+class Cifar10_1_dataset(Dataset):
     images_url = 'https://github.com/modestyachts/CIFAR-10.1/blob/master/datasets/cifar10.1-data.npy?raw=true'
     images_md5 = '29615bb88ff99bca6b147cee2520f010'
     images_filename = 'cifar10.1-data.npy'
@@ -144,3 +137,6 @@ class Cifar10_1(data.Dataset):
             self.target_transform.__repr__().replace('\n',
                                                      '\n' + ' ' * len(tmp)))
         return 
+
+def Cifar10_1(PATH,batch_size = 100,shuffle=False,num_workers=2,pin_memory=True, **kwargs):
+    return DataLoader(Cifar10_1_dataset(PATH), batch_size=batch_size, shuffle = shuffle, num_workers = num_workers, pin_memory = pin_memory, **kwargs)
