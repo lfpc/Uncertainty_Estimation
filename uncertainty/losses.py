@@ -349,3 +349,14 @@ class MSELoss_Hits(torch.nn.MSELoss):
         loss = super().forward(g,hits)
         return loss
     
+class LogitNormLoss(torch.nn.CrossEntropyLoss):
+    '''Adapted from https://github.com/hongxin001/logitnorm_ood'''
+    def __init__(self, t=1.0,eps = 1e-7, **kwargs):
+        super(LogitNormLoss, self).__init__(**kwargs)
+        self.t = t
+        self.eps = eps
+
+    def forward(self, x, target):
+        norms = torch.norm(x, p=2, dim=-1, keepdim=True) + self.eps
+        logit_norm = torch.div(x, norms) / self.t
+        return super().forward(logit_norm, target)
