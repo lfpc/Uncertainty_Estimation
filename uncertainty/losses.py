@@ -357,6 +357,5 @@ class LogitNormLoss(torch.nn.CrossEntropyLoss):
         self.eps = eps
 
     def forward(self, x, target):
-        norms = torch.norm(x, p=2, dim=-1, keepdim=True) + self.eps
-        logit_norm = torch.div(x, norms) / self.t
-        return super().forward(logit_norm, target)
+        x = torch.nn.functional.normalize(x,p = 2., dim=-1) / self.t
+        return super().forward(x, target)
