@@ -1,8 +1,9 @@
 import torch
-from torch_data.src import DataGenerator
+from torch_data.src import DataGenerator, split_data
 import numpy as np
 from os.path import exists, join
 from torchvision import datasets
+from copy import copy
 
 def get_transforms(model = 'resnet50'):
     from NN_models import pytorch,pretrained_models
@@ -18,25 +19,17 @@ class ImageNet(DataGenerator):
     def __init__(self,params=DataGenerator.params, 
                       data_dir = "data",
                       train = False,
-                      val = False,
                       test = True,
                       dataloader=True,
-                      transforms = None,
                       **kwargs):
 
         if exists(join(data_dir,'ImageNet')):
             data_dir = join(data_dir,'ImageNet')
         else: raise Exception("Can't find ImageNet folder in data_dir")
-        
-        if transforms is not None:
-            self.transforms_test = transforms
 
         training_data = datasets.imagenet.ImageNet(join(data_dir),split = 'train', transform = self.transforms_train) if train else None
-        validation_data = datasets.imagenet.ImageNet(join(data_dir),split = 'val',transform = self.transforms_test) if val else None
         test_data = datasets.imagenet.ImageNet(join(data_dir),split = 'val',transform = self.transforms_test) if test else None
-        if val and test:
-            raise Warning("val and test are the same since original test has no labels")
-        super().__init__(params, training_data, validation_data, test_data, dataloader,**kwargs)
+        super().__init__(params, training_data, None, test_data, dataloader,**kwargs)
         #self.classes = self.get_classes(join(data_dir,'imagenet1k_classes.txt'))
     def get_classes(self,file = 'imagenet1k_classes.txt'):
         import json
@@ -44,6 +37,13 @@ class ImageNet(DataGenerator):
             data = f.read()
         js = json.loads(data)
         return js
+    def __split_validation(self):
+        self.complete_test_data = copy(self.test_data)
+        if self.validation_as_train:
+            self.test_data, self.validation_data = split_data(self.test_data,self.params['validation_size'],self.transforms_train)
+        else:
+            self.test_data, self.validation_data = split_data(self.test_data,self.params['validation_size'],self.transforms_test)
+        self.val_len = len(self.test_data)- self.test_len
 
 
 import pathlib

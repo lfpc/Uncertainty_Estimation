@@ -46,7 +46,7 @@ def correct_class(y_pred,y_true):
     '''Returns a bool tensor indicating if each prediction is correct'''
     with torch.no_grad():
         y_pred = predicted_class(y_pred)
-        correct = (y_pred==y_true)
+        correct = y_pred.eq(y_true)
     
     return correct
 
