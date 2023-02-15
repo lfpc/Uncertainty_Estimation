@@ -37,13 +37,6 @@ class ImageNet(DataGenerator):
             data = f.read()
         js = json.loads(data)
         return js
-    def __split_validation(self):
-        self.complete_test_data = copy(self.test_data)
-        if self.validation_as_train:
-            self.test_data, self.validation_data = split_data(self.test_data,self.params['validation_size'],self.transforms_train)
-        else:
-            self.test_data, self.validation_data = split_data(self.test_data,self.params['validation_size'],self.transforms_test)
-        self.val_len = len(self.test_data)- self.test_len
 
 
 import pathlib

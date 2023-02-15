@@ -91,27 +91,41 @@ class DataGenerator():
 
         self.training_data = training_data
         self.train_len = len(self.training_data) if training_data is not None else 0
+        self.test_data = test_data
+        self.test_len = len(self.test_data) if test_data is not None else 0
         self.validation_data = validation_data
         self.validation_as_train = validation_as_train
         if validation_data is not None:
             self.params['validation_size'] = len(validation_data)/(self.train_len+len(validation_data))
-        elif self.params['validation_size'] > 0 and self.training_data is not None:
-            self.__split_validation()
+        elif self.params['validation_size'] > 0:
+            if self.training_data is not None:
+                self.__split_validation()
+            elif self.test_data is not None:
+                self.__split_validation(origin = 'test')
+
         
-        self.test_data = test_data
+        
         
         self.val_len = len(self.validation_data) if self.validation_data is not None else 0
-        self.test_len = len(self.test_data) if test_data is not None else 0
         if dataloader:
             self.generate_dataloaders(seed)
 
-    def __split_validation(self):
-        self.complete_train_data = copy.copy(self.training_data)
+    def __split_validation(self, origin = 'train'):
+        if origin == 'train':
+            data = self.training_data
+            self.complete_train_data = copy.copy(data)
+        elif origin == 'test':
+            data = self.test_data
+            self.complete_test_data = copy.copy(data)
         if self.validation_as_train:
-            self.training_data, self.validation_data = split_data(self.training_data,self.params['validation_size'],self.transforms_train)
+            data, self.validation_data = split_data(data,self.params['validation_size'],self.transforms_train)
         else:
-            self.training_data, self.validation_data = split_data(self.training_data,self.params['validation_size'],self.transforms_test)
-        self.val_len = len(self.training_data)- self.train_len
+            data, self.validation_data = split_data(data,self.params['validation_size'],self.transforms_test)
+        self.val_len = len(self.validation_dataalidation)
+        if origin == 'train':
+            self.training_data = data
+        elif origin == 'test':
+            self.test_data = data
 
     def generate_dataloaders(self,seed = None):
         if self.validation_data is not None:
