@@ -1,3 +1,4 @@
 from .cifar import *
 from .Tiny_Image_Net import TinyImageNet
-from .ImageNet import ImageNet
+from .ImageNetData import ImageNet
+from .ImageNetData.imagenetv2 import ImageNetV2
