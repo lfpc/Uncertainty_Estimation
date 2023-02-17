@@ -5,8 +5,7 @@ import random
 import numpy as np
 from torch_data.src import DataGenerator,Noisy_DataGenerator
 from warnings import warn
-from .corrupted import Cifar100C,Cifar10C,CIFAR_C_loader
-from .cifar10_1 import Cifar10_1
+
 
 
 def seed_worker(worker_id):
@@ -103,7 +102,8 @@ class Cifar100(DataGenerator):
         return Cifar100C(data_dir=data_dir,**kwargs)      
 
 
-
+from .corrupted import Cifar100C,Cifar10C,CIFAR_C_loader
+from .cifar10_1 import Cifar10_1
 
 
 '''#ARRUMAR NOISY CLASSES. PRECISAM CHAMAR CIFAR 10 ANTES  PARA DEFINIR A DATA E TAL
