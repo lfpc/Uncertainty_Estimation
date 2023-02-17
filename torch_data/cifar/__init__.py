@@ -4,6 +4,9 @@ import torch
 import random
 import numpy as np
 from torch_data.src import DataGenerator,Noisy_DataGenerator
+from warnings import warn
+from .corrupted import Cifar100C,Cifar10C,CIFAR_C_loader
+from .cifar10_1 import Cifar10_1
 
 
 def seed_worker(worker_id):
@@ -49,7 +52,11 @@ class Cifar10(DataGenerator):
                                         download=download,
                                         transform=self.transforms_test) if test else None
         super().__init__(params,training_data,None,test_data,dataloader,**kwargs)
-        
+    @staticmethod
+    def v2(data_dir,**kwargs):
+        return Cifar10_1(data_dir, **kwargs)
+    def corrupted(data_dir, **kwargs):
+        return Cifar10C(data_dir=data_dir,**kwargs)   
 
 class Cifar100(DataGenerator):
     MEAN = (0.5070751592371323, 0.48654887331495095, 0.4409178433670343)
@@ -89,8 +96,17 @@ class Cifar100(DataGenerator):
                                     download=download,
                                     transform=self.transforms_test) if test else None
         super().__init__(params,training_data,None,test_data,dataloader,**kwargs)
-        
-#ARRUMAR NOISY CLASSES. PRECISAM CHAMAR CIFAR 10 ANTES  PARA DEFINIR A DATA E TAL
+    @staticmethod
+    def v2():
+        warn('No v2 for Cifar100')
+    def corrupted(data_dir, **kwargs):
+        return Cifar100C(data_dir=data_dir,**kwargs)      
+
+
+
+
+
+'''#ARRUMAR NOISY CLASSES. PRECISAM CHAMAR CIFAR 10 ANTES  PARA DEFINIR A DATA E TAL
 class Noisy_Cifar10(Noisy_DataGenerator,Cifar10):
 
 
@@ -108,9 +124,9 @@ class Noisy_Cifar100(Noisy_DataGenerator,Cifar100):
         self.training_data.root = data_dir
         self.test_data.root = data_dir
         super().__init__(noise_size,noisy_val,params,
-                download, name)
-from .corrupted import Cifar100C,Cifar10C,CIFAR_C_loader
-from .cifar10_1 import Cifar10_1
+                download, name)'''
+
+
 
 if __name__ == '__main__':
     data = Cifar10()

@@ -4,6 +4,7 @@ import numpy as np
 from os.path import exists, join
 from torchvision import datasets
 from copy import copy
+from warnings import warn
 
 def get_transforms(model = 'resnet50'):
     from NN_models import pytorch,pretrained_models
@@ -37,6 +38,11 @@ class ImageNet(DataGenerator):
             data = f.read()
         js = json.loads(data)
         return js
-
+    @staticmethod
+    def v2(data_dir, **kwargs):
+        from .imagenetv2 import ImageNetV2
+        return ImageNetV2(data_dir=data_dir, **kwargs)
+    def corrupted():
+        warn('Corrupted ImageNet not implemented')
 
 
