@@ -76,6 +76,27 @@ import torchvision.models as pytorch
 from torchvision.models import resnet18,vgg16,vgg16_bn, convnext_small,convnext_tiny, efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_v2_s, efficientnet_v2_m,resnet50
 from torchvision.models import wide_resnet50_2,vit_b_16
 
+from timm import create_model
+from timm.data import resolve_data_config, create_transform
+def efficientnetv2_xl(weights = True,**kwargs):
+    if hasattr(weights,'pretrained'):
+        pretrained = weights.pretrained
+    else: pretrained = weights
+
+    return create_model('tf_efficientnetv2_xl.in21k_ft_in1k',pretrained=pretrained,**kwargs)
+
+class timm_wieghts():
+    def __init__(self, model):
+        self.pretrained = True
+        self.model = model
+    def transforms(self):
+        config = resolve_data_config({}, model=self.model)
+        transform = create_transform(**config)
+        return transform
+
+    
+
+
 pretrained_models = {
 pytorch.resnet50: pytorch.ResNet50_Weights.DEFAULT,
 pytorch.resnet18: pytorch.ResNet18_Weights.DEFAULT,
@@ -88,8 +109,6 @@ pytorch.vgg16_bn:pytorch.VGG16_BN_Weights.DEFAULT,
 pytorch.convnext_small:pytorch.ConvNeXt_Small_Weights.DEFAULT,
 pytorch.convnext_tiny:pytorch.ConvNeXt_Tiny_Weights.DEFAULT,
 wide_resnet50_2: pytorch.Wide_ResNet50_2_Weights,
-vit_b_16: pytorch.ViT_B_16_Weights}
+vit_b_16: pytorch.ViT_B_16_Weights,
+efficientnetv2_xl: timm_wieghts(efficientnetv2_xl)}
 
-import timm
-def efficientnetv2_xl(pretrained = True,**kwargs):
-    return timm.create_model('tf_efficientnetv2_xl.in21k_ft_in1k',pretrained=pretrained,**kwargs)
