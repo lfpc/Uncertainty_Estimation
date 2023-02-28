@@ -156,12 +156,18 @@ class DataGenerator():
         return iter(self.test_dataloader)
 
 
-    def change_transforms(self,transforms_train,transforms_test):
-            self.transforms_train = transforms_train
-            self.transforms_test = transforms_test
-
-            self.training_data.transform = transforms_train
-            self.test_data.transform = transforms_test
+    def change_transforms(self,transforms_train = None,transforms_test = None):
+            if transforms_train is not None:
+                self.transforms_train = transforms_train
+                if hasattr(self.training_data,'transform'):
+                    self.training_data.transform = transforms_train
+                else: self.training_data.dataset.transform = transforms_train
+            if transforms_test is not None:
+                self.transforms_test = transforms_test
+                self.test_data.transform = transforms_test
+                if hasattr(self.test_data,'transform'):
+                    self.test_data.transform = transforms_test
+                else: self.test_data.dataset.transform = transforms_test
 
             self.generate_dataloaders()
 
