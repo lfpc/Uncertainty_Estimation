@@ -164,7 +164,6 @@ class DataGenerator():
                 else: self.training_data.dataset.transform = transforms_train
             if transforms_test is not None:
                 self.transforms_test = transforms_test
-                self.test_data.transform = transforms_test
                 if hasattr(self.test_data,'transform'):
                     self.test_data.transform = transforms_test
                 else: self.test_data.dataset.transform = transforms_test
