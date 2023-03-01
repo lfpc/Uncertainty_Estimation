@@ -120,7 +120,7 @@ class DataGenerator():
         if self.validation_as_train:
             data, self.validation_data = split_data(data,self.params['validation_size'],self.transforms_train)
         else:
-            data, self.validation_data = split_data(data,self.params['validation_size'],self.transforms_test)
+            data, self.validation_data = split_data(data,self.params['validation_size'])
         self.val_len = len(self.validation_data)
         if origin == 'train':
             self.training_data = data
