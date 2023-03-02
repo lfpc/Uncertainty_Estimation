@@ -51,7 +51,6 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
 
     def get_samples(self,x):
         ensemble = []
-
         batch_loader = iter(self.batch_loader)
         for _ in range(self.n_samples):
             im_train,_ = next(batch_loader)
@@ -80,9 +79,10 @@ class Fast_MCBN(MonteCarloBatchNormalization):
         self.params = defaultdict(list)
         batch_loader = iter(batch_loader)
         self.set_BN_mode()
+        device = next(self.model.parameters()).device
         for _ in range(self.n_samples):
             im,_ = next(batch_loader)
-            im = im.to(self.device)
+            im = im.to(device)
             with torch.no_grad():
                 self.model(im)
                 for m in self._BN_modules:
