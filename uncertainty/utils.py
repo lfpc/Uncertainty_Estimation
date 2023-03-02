@@ -121,3 +121,19 @@ def accumulate_results(model,data, output_and_label = (True,True)):
                     uncs[name] = torch.cat((uncs[name].to(dev),unc))
 
     return output_list,label_list.long(),uncs
+
+def accumulate_ensemble_results(model,data):
+    '''Accumulate output (of ensemble model) and label of a entire dataset.'''
+    dev = next(model.parameters()).device
+
+    output_list = torch.Tensor([]).to(dev)
+    label_list = torch.Tensor([]).to(dev)
+    with torch.no_grad():
+        for image,label in data:
+            image,label = image.to(dev), label.to(dev)
+            output = model(image)
+
+            label_list = torch.cat((label_list,label),dim=1)
+            output_list = torch.cat((output_list,output),dim=1)
+        
+    return output_list,label_list.long()

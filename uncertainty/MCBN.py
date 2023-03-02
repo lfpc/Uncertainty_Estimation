@@ -61,8 +61,8 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
                 self.model.eval()
                 y = self.model(x)
                 ensemble.append(y)
-                self.ensemble = torch.stack(ensemble)
-        return self.ensemble
+                ensemble = torch.stack(ensemble)
+        return ensemble
 
     def deterministic(self,x):
         self.reset_normal_mode()
@@ -101,8 +101,8 @@ class Fast_MCBN(MonteCarloBatchNormalization):
             with torch.no_grad():
                 y = self.model(x)
             ensemble.append(y)
-        self.ensemble = torch.stack(ensemble)
-        return self.ensemble
+        ensemble = torch.stack(ensemble)
+        return ensemble
 
 if __name__ == '__main__':
     from NN_models import VGG_16

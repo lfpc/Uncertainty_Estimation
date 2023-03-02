@@ -46,16 +46,16 @@ class Ensemble(nn.Module):
     
     def get_samples(self,x):
         '''Default ensemble model is to assume that self.model returns samples'''
-        self.ensemble = self.model(x)
-        return self.ensemble
+        ensemble = self.model(x)
+        return ensemble
 
     def deterministic(self,x):
         self.y = self.model(x)
         return self.y
 
     def ensemble_forward(self,x):
-        self.get_samples(x)
-        mean = torch.mean(self.ensemble,axis = 0)
+        ensemble = self.get_samples(x)
+        mean = torch.mean(ensemble,axis = 0)
         return mean
         
     def forward(self,x):
@@ -106,5 +106,5 @@ class DeepEnsemble(Ensemble):
             if self.apply_softmax:
                 pred = nn.functional.softmax(pred,dim=-1)
             ensemble.append(pred)
-        self.ensemble = torch.stack(ensemble)
-        return self.ensemble
+        ensemble = torch.stack(ensemble)
+        return ensemble
