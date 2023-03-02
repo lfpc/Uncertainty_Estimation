@@ -70,8 +70,8 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
         return super().deterministic(x)
 
 class Fast_MCBN(MonteCarloBatchNormalization):
-    def __init__(self, model, n_samples, batch_loader, as_ensemble=True, return_uncs=False, softmax=False, name='MCBN'):
-        super().__init__(model, n_samples, None, as_ensemble, return_uncs, softmax, name)
+    def __init__(self, model, n_samples, batch_loader, inference = 'mean'):
+        super().__init__(model, n_samples, None, inference=inference)
         self.__get_BN_parameters(batch_loader)
         self.reset_normal_mode()
         self.eval()
@@ -97,11 +97,11 @@ class Fast_MCBN(MonteCarloBatchNormalization):
     def get_samples(self,x):
         ensemble = []
         for i in range(self.n_samples):
+            self.__set_BN_parameters(i)
             with torch.no_grad():
-                self.__set_BN_parameters(i)
                 y = self.model(x)
-                ensemble.append(y)
-                self.ensemble = torch.stack(ensemble)
+            ensemble.append(y)
+        self.ensemble = torch.stack(ensemble)
         return self.ensemble
 
 if __name__ == '__main__':
