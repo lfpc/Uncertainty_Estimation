@@ -37,12 +37,13 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
             m.momentum = copy(self.__momentum[m])
             m.running_mean = copy(self.__running_mean[m])
             m.running_var = copy(self.__running_var[m])
+            m.track_running_stats = False
 
     def set_BN_mode(self):
         for m in self._BN_modules:
             m.train()
             m.track_running_stats = True
-            m.momentum = 1
+            m.momentum = 1.0
             
     def reset_normal_mode(self):
         self.eval()
@@ -61,7 +62,7 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
                 self.model.eval()
                 y = self.model(x)
                 ensemble.append(y)
-                ensemble = torch.stack(ensemble)
+        ensemble = torch.stack(ensemble)
         return ensemble
 
     def deterministic(self,x):
