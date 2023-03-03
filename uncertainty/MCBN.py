@@ -9,7 +9,6 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
     def __init__(self,model, n_samples:int, batch_loader,
                       inference:str = 'mean'):
         super().__init__(model, inference=inference)
-        #assert isinstance(batch_loader.sampler,torch.utils.data.sampler.RandomSampler), "Batch Loader should have shuffle set to True to give randomness"
         self.batch_loader = batch_loader
         self.n_samples = n_samples
 
@@ -29,15 +28,14 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
         self.__running_var= {}
 
         for m in self._BN_modules:
-            self.__momentum[m] = copy(m.momentum)
-            self.__running_mean[m] = copy(m.running_mean)
-            self.__running_var[m] = copy(m.running_var)
+            self.__momentum[m] = deepcopy(m.momentum)
+            self.__running_mean[m] = deepcopy(m.running_mean)
+            self.__running_var[m] = deepcopy(m.running_var)
     def __set_main_attributes(self):
         for m in self._BN_modules:
-            m.momentum = copy(self.__momentum[m])
-            m.running_mean = copy(self.__running_mean[m])
-            m.running_var = copy(self.__running_var[m])
-            m.track_running_stats = False
+            m.momentum = deepcopy(self.__momentum[m])
+            m.running_mean = deepcopy(self.__running_mean[m])
+            m.running_var = deepcopy(self.__running_var[m])
 
     def set_BN_mode(self):
         for m in self._BN_modules:
