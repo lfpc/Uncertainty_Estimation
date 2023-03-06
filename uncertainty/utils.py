@@ -133,7 +133,7 @@ def accumulate_ensemble_results(model,data):
             image,label = image.to(dev), label.to(dev)
             output = model(image)
 
-            label_list = torch.cat((label_list,label),dim=1)
+            label_list = torch.cat((label_list,label))
             output_list = torch.cat((output_list,output),dim=1)
         
     return output_list,label_list.long()
