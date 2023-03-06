@@ -131,7 +131,7 @@ def accumulate_ensemble_results(model,data):
     with torch.no_grad():
         for image,label in data:
             image,label = image.to(dev), label.to(dev)
-            output = model(image)
+            output = model.get_samples(image)
 
             label_list = torch.cat((label_list,label))
             output_list = torch.cat((output_list,output),dim=1)
