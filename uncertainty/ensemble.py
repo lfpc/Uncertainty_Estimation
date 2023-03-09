@@ -33,11 +33,12 @@ class Ensemble(nn.Module):
 
     def __init__(self,model, #model
                  inference = 'mean', #output as average of models
-                ):
+                apply_softmax:bool = False):
         super().__init__()
 
         self.inference = inference
         self.model = model
+        self.apply_softmax = apply_softmax
 
         if self.inference == 'deterministic':
             self.uncs = copy(self.uncs)
@@ -55,6 +56,8 @@ class Ensemble(nn.Module):
 
     def ensemble_forward(self,x):
         ensemble = self.get_samples(x)
+        if self.apply_softmax:
+            ensemble = torch.nn.functional.softmax(ensemble,dim = -1)
         mean = torch.mean(ensemble,axis = 0)
         return mean
         
@@ -64,20 +67,18 @@ class Ensemble(nn.Module):
         elif self.inference == 'samples':
             return self.get_samples(x)
         elif self.inference == 'deterministic':
-            self.get_samples(x) #needed if get_unc get called, as usually does
+            #self.get_samples(x) #needed if get_unc get called, as usually does
             return self.deterministic(x)
             
 
-    def get_unc(self, x = None):
-        if x is not None:
-            self.get_samples(x)
-            self.deterministic(x)
+    def get_unc(self, x):
+        ensemble = self.get_samples(x)
         d_uncs = {}
         for name,fn in self.uncs.items():
             if name == 'Var(Max)' and self.inference == 'deterministic':
-                d_uncs[name] = fn(self.ensemble,torch.argmax(self.y,dim = -1)) 
+                d_uncs[name] = fn(ensemble,torch.argmax(self.y,dim = -1)) 
             else:    
-                d_uncs[name] = fn(self.ensemble)
+                d_uncs[name] = fn(ensemble)
         return d_uncs
 
     def load_state_dict(self, state_dict, **kwargs):
@@ -93,18 +94,13 @@ class DeepEnsemble(Ensemble):
         if isinstance(models,dict):
             self.models_dict = models
             models = list(models.values())
-        super().__init__(models, inference)
+        super().__init__(models, inference, apply_softmax)
         self.model = torch.nn.ParameterList(models)
-        #for m in models:
-        #    self.model.append(m)
-        self.apply_softmax = apply_softmax
     
     def get_samples(self,x):
         ensemble = []
         for model in self.model:
             pred = model(x)
-            if self.apply_softmax:
-                pred = nn.functional.softmax(pred,dim=-1)
             ensemble.append(pred)
         ensemble = torch.stack(ensemble)
         return ensemble

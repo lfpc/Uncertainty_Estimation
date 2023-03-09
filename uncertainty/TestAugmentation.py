@@ -87,12 +87,12 @@ class TTA(ensemble.Ensemble):
                   FiveCrop(32,4)]
 
     def __init__(self, model, transforms = transforms,
-                  use_main:bool = True, inference:str = 'mean'):
-        super().__init__(model, inference=inference)
+                  use_main:bool = True, inference:str = 'mean', apply_softmax:bool = True):
+        super().__init__(model, inference=inference, apply_softmax= apply_softmax)
         self.use_main = use_main
         self.transforms = transforms
 
     def get_samples(self,x):
-        self.ensemble = TestTimeAugmentation(self.model,x,self.transforms,use_main = self.use_main)
-        return self.ensemble
+        ensemble = TestTimeAugmentation(self.model,x,self.transforms,use_main = self.use_main)
+        return ensemble
 

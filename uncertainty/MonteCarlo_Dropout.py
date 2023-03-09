@@ -17,17 +17,15 @@ def mcd_pred(model,X,n=10, enable = True):
     if enable:
         model.eval()
         unc_utils.enable_dropout(model)
-    with torch.no_grad(): 
-        MC_array = []
-        for i in range(n):
-            pred = model(X)
-            MC_array.append(pred)
-        MC_array = torch.stack(MC_array)
+    MC_array = []
+    for i in range(n):
+        pred = model(X)
+        MC_array.append(pred)
+    MC_array = torch.stack(MC_array)
     return MC_array
 
 
 def get_MCD(model,X,n=10):
-
     '''Evaluates n predictions on input with dropout enabled and
      returns the mean, variance and mutual information
     of them. '''
@@ -42,8 +40,8 @@ def get_MCD(model,X,n=10):
     return mean, var, MI
 
 class MonteCarloDropout(ensemble.Ensemble):
-    def __init__(self,model, n_samples:int, inference:str = 'mean'):
-        super().__init__(model, inference=inference)
+    def __init__(self,model, n_samples:int, inference:str = 'mean', apply_softmax:bool = True):
+        super().__init__(model, inference=inference, apply_softmax=apply_softmax)
         self.n_samples = n_samples
         self.__get_Dropout_modules()
         self.set_dropout()
@@ -65,8 +63,8 @@ class MonteCarloDropout(ensemble.Ensemble):
     def get_samples(self,x, enable = False):
         if self.inference == 'deterministic':
             enable = True
-        self.ensemble = mcd_pred(self.model,x,self.n_samples, enable=enable)
-        return self.ensemble
+        ensemble = mcd_pred(self.model,x,self.n_samples, enable=enable)
+        return ensemble
 
     def deterministic(self,x):
         return super().deterministic(x)

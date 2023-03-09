@@ -7,8 +7,8 @@ from collections import defaultdict
 
 class MonteCarloBatchNormalization(ensemble.Ensemble):
     def __init__(self,model, n_samples:int, batch_loader,
-                      inference:str = 'mean'):
-        super().__init__(model, inference=inference)
+                      inference:str = 'mean', apply_softmax:bool = True):
+        super().__init__(model, inference=inference, apply_softmax=apply_softmax)
         self.batch_loader = batch_loader
         self.n_samples = n_samples
 
@@ -68,8 +68,8 @@ class MonteCarloBatchNormalization(ensemble.Ensemble):
         return super().deterministic(x)
 
 class Fast_MCBN(MonteCarloBatchNormalization):
-    def __init__(self, model, n_samples, batch_loader, inference = 'mean'):
-        super().__init__(model, n_samples, None, inference=inference)
+    def __init__(self, model, n_samples, batch_loader, inference = 'mean', apply_softmax:bool = True):
+        super().__init__(model, n_samples, None, inference=inference, apply_softmax=apply_softmax)
         self.__get_BN_parameters(batch_loader)
         self.reset_normal_mode()
         self.eval()
