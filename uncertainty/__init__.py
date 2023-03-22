@@ -78,3 +78,18 @@ def TCP_unc(y,label, normalize = True):
      as an uncertainty estimation, since TCP is a certainty quantification.
     '''
     return (1-get_TCP(y,label, normalize))
+
+def energy(z:torch.Tensor, T = 1.0):
+    return -T*((z/T).exp().sum(-1).log())
+class EnergyFunction(torch.nn.Module):
+    def __init__(self,T=1.0,reduction = 'none') -> None:
+        super().__init__()
+        self.T = T
+        self.reduction = reduction
+    def forward(self,z:torch.Tensor):
+        E = energy(z,self.T)
+        if self.reduction == 'mean':
+            E = E.mean()
+        elif self.reduction == 'sum':
+            E = E.sum()
+        return E
