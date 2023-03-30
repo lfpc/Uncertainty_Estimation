@@ -105,7 +105,7 @@ pytorch.efficientnet_v2_m:pytorch.EfficientNet_V2_M_Weights.DEFAULT,
 pytorch.vgg16_bn:pytorch.VGG16_BN_Weights.DEFAULT,
 pytorch.convnext_small:pytorch.ConvNeXt_Small_Weights.DEFAULT,
 pytorch.convnext_tiny:pytorch.ConvNeXt_Tiny_Weights.DEFAULT,
-wide_resnet50_2: pytorch.Wide_ResNet50_2_Weights,
-vit_b_16: pytorch.ViT_B_16_Weights,
+wide_resnet50_2: pytorch.Wide_ResNet50_2_Weights.DEFAULT,
+vit_b_16: pytorch.ViT_B_16_Weights.DEFAULT,
 efficientnetv2_xl: timm_wieghts('tf_efficientnetv2_xl.in21k_ft_in1k')}
 
