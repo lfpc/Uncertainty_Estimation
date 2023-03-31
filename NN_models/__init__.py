@@ -72,40 +72,42 @@ from .wide_resnet import WideResNet28_10, WideResNet
 from .CNN8 import CNN8
 from .pytorch_cifar import *
 from .resnet_dropout import ResNet18_Dropout, ResNet50_Dropout
-import torchvision.models as pytorch
-from torchvision.models import resnet18,vgg16,vgg16_bn, convnext_small,convnext_tiny, efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_v2_s, efficientnet_v2_m,resnet50
-from torchvision.models import wide_resnet50_2,vit_b_16
-
+import torchvision.models as torch_models
 import timm
+
+for m in torch_models.list_models():
+    if 'quantized' in m:
+        globals()[m] = getattr(torch_models.quantization,m.split('quantized_')[-1])
+    else:
+        try: globals()[m] = getattr(torch_models,m)
+        except: continue
+'''for m in timm.list_models():
+    if m in torch_models.list_models():
+        continue
+    else: 
+        try: globals()[m] = getattr(timm.models,m)
+        except: continue'''
+
+
 def efficientnetv2_xl(weights = True,**kwargs):
     if hasattr(weights,'pretrained'):
         pretrained = weights.pretrained
     else: pretrained = weights
     return timm.create_model('tf_efficientnetv2_xl.in21k_ft_in1k',pretrained=pretrained,**kwargs)
 
-class timm_wieghts():
-    def __init__(self, model):
-        self.pretrained = True
+class timm_weights():
+    def __init__(self, model:str):
+        self.pretrained = timm.is_model_pretrained(model)
         self.model = model
     def transforms(self):
         transform = timm.data.create_transform(**timm.data.resolve_data_config(timm.get_pretrained_cfg(self.model).__dict__))
         return transform
-
     
+def get_weight(model:str,weight:str = 'DEFAULT'):
+    if model in torch_models.list_models():
+        return torch_models.get_model_weights(model).__dict__[weight]
+    elif model in timm.list_pretrained():
+        return timm_weights(model)
 
 
-pretrained_models = {
-pytorch.resnet50: pytorch.ResNet50_Weights.DEFAULT,
-pytorch.resnet18: pytorch.ResNet18_Weights.DEFAULT,
-pytorch.efficientnet_b0:pytorch.EfficientNet_B0_Weights.DEFAULT,
-pytorch.efficientnet_b1:pytorch.EfficientNet_B1_Weights.DEFAULT,
-pytorch.efficientnet_b2:pytorch.EfficientNet_B2_Weights.DEFAULT,
-pytorch.efficientnet_v2_s:pytorch.EfficientNet_V2_S_Weights.DEFAULT,
-pytorch.efficientnet_v2_m:pytorch.EfficientNet_V2_M_Weights.DEFAULT,
-pytorch.vgg16_bn:pytorch.VGG16_BN_Weights.DEFAULT,
-pytorch.convnext_small:pytorch.ConvNeXt_Small_Weights.DEFAULT,
-pytorch.convnext_tiny:pytorch.ConvNeXt_Tiny_Weights.DEFAULT,
-wide_resnet50_2: pytorch.Wide_ResNet50_2_Weights.DEFAULT,
-vit_b_16: pytorch.ViT_B_16_Weights.DEFAULT,
-efficientnetv2_xl: timm_wieghts('tf_efficientnetv2_xl.in21k_ft_in1k')}
 
