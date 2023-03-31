@@ -7,11 +7,11 @@ from copy import copy
 from warnings import warn
 
 def get_transforms(model = 'resnet50'):
-    from NN_models import pytorch,pretrained_models
+    from NN_models import get_weight,torch_models
     import timm
 
-    if model in pytorch.__dict__:
-        return pretrained_models[pytorch.__dict__[model]].transforms()
+    if model in torch_models.list_models():
+        return get_weight(model).transforms()
     elif model in timm.list_models():
         return timm.data.create_transform(**timm.data.resolve_data_config(timm.models.generate_default_cfgs({model:timm.get_pretrained_cfg(model)})))
 
