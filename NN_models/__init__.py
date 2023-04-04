@@ -97,6 +97,8 @@ def efficientnetv2_xl(weights = True,**kwargs):
 
 class timm_weights():
     def __init__(self, model:str):
+        if model == 'efficientnetv2_xl':
+            model = 'tf_efficientnetv2_xl.in21k_ft_in1k'
         self.pretrained = timm.is_model_pretrained(model)
         self.model = model
     def transforms(self):
@@ -106,8 +108,9 @@ class timm_weights():
 def get_weight(model:str,weight:str = 'DEFAULT'):
     if model in torch_models.list_models():
         return torch_models.get_model_weights(model).__dict__[weight]
-    elif model in timm.list_pretrained():
+    elif model in timm.list_pretrained() or model == 'efficientnetv2_xl':
         return timm_weights(model)
+    
 
 
 
