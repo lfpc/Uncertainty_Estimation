@@ -85,20 +85,42 @@ for m in torch_models.list_models():
     if m in torch_models.list_models():
         continue
     else: 
+        m.replace('.','_')
         try: globals()[m] = getattr(timm.models,m)
         except: continue'''
 
+timm_special_models ={
+    'efficientnetv2_xl': 'tf_efficientnetv2_xl.in21k_ft_in1k',
+    'vit_l_16_384':'vit_large_patch16_384.augreg_in21k_ft_in1k',
+    'vit_b_16_sam':'vit_base_patch16_224.sam',
+    'vit_b_32_sam': 'vit_base_patch32_224.sam'
+}
 
 def efficientnetv2_xl(weights = True,**kwargs):
     if hasattr(weights,'pretrained'):
         pretrained = weights.pretrained
     else: pretrained = weights
-    return timm.create_model('tf_efficientnetv2_xl.in21k_ft_in1k',pretrained=pretrained,**kwargs)
+    return timm.create_model(timm_special_models['efficientnetv2_xl'],pretrained=pretrained,**kwargs)
+def vit_l_16_384(weights = True,**kwargs):
+    if hasattr(weights,'pretrained'):
+        pretrained = weights.pretrained
+    else: pretrained = weights
+    return timm.create_model(timm_special_models['vit_l_16_384'],pretrained=pretrained,**kwargs)
+def vit_b_16_sam(weights = True,**kwargs):
+    if hasattr(weights,'pretrained'):
+        pretrained = weights.pretrained
+    else: pretrained = weights
+    return timm.create_model(timm_special_models['vit_b_16_sam'],pretrained=pretrained,**kwargs)
+def vit_b_32_sam(weights = True,**kwargs):
+    if hasattr(weights,'pretrained'):
+        pretrained = weights.pretrained
+    else: pretrained = weights
+    return timm.create_model(timm_special_models['vit_b_32_sam'],pretrained=pretrained,**kwargs)
 
 class timm_weights():
     def __init__(self, model:str):
-        if model == 'efficientnetv2_xl':
-            model = 'tf_efficientnetv2_xl.in21k_ft_in1k'
+        if model in timm_special_models.keys():
+            model = timm_special_models[model]
         self.pretrained = timm.is_model_pretrained(model)
         self.model = model
     def transforms(self):
@@ -108,7 +130,7 @@ class timm_weights():
 def get_weight(model:str,weight:str = 'DEFAULT'):
     if model in torch_models.list_models():
         return torch_models.get_model_weights(model).__dict__[weight]
-    elif model in timm.list_pretrained() or model == 'efficientnetv2_xl':
+    elif timm.is_model_pretrained(model) or model in timm_special_models.keys():
         return timm_weights(model)
     
 
