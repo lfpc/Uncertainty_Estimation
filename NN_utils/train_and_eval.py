@@ -32,11 +32,11 @@ def train_NN(model,optimizer,data,loss_criterion,n_epochs=1, print_loss = True,s
     return running_loss/len(data)
 
 def predicted_class(y_pred):
-    '''Returns the predicted class for a given softmax output.'''
+    '''Returns the predicted class for a given output.'''
     with torch.no_grad():
         if y_pred.shape[-1] == 1:
             y_pred = y_pred.view(-1)
-            y_pred = (y_pred>0.5).float()
+            y_pred = (y_pred>0.5).int()
             
         else:
             y_pred = torch.argmax(y_pred, -1)
@@ -50,12 +50,13 @@ def correct_class(y_pred,y_true):
     
     return correct
 
+def wrong_class(y_pred,y_true):
+    '''Returns a bool tensor indicating if each prediction is wrong'''
+    return 1-correct_class(y_pred,y_true).int()
+
 def correct_total(y_pred,y_true):
-    '''Returns the number of correct predictions in a batch where dk_mask=0'''
-    with torch.no_grad():
-        correct = correct_class(y_pred,y_true)
-        correct_total = torch.sum(correct)
-    return correct_total
+    '''Returns the number of correct predictions in a batch'''
+    return correct_class(y_pred,y_true).sum()
 
 def calc_loss_batch(model,loss_criterion,data,set_eval = True):
     '''Calculate the average loss over a dataset.'''

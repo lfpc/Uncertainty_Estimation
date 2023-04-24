@@ -21,16 +21,20 @@ def get_n_biggest(vec,n):
     unc = torch.argsort(vec, descending = False)
     return unc[0:n]
 
-def masked_coverage(y_pred,y_true, uncertainty, coverage):
+def masked_coverage(y_pred,y_true, uncertainty:torch.tensor, coverage):
     
-    #dk_mask = unc_utils.dontknow_mask(uncertainty, coverage)
-    #y_pred, y_true = torch.masked_select(y_pred,1-dk_mask),torch.masked_select(y_true,1-dk_mask)#apply_mask(y_pred,y_true,1-dk_mask)
-    N = round((coverage)*uncertainty.shape[0])
-    id = get_n_biggest(uncertainty,N)
-    y_pred = y_pred[id]
-    y_true = y_true[id]
+    mask = uncertainty.le(torch.quantile(uncertainty,torch.as_tensor(coverage,device=uncertainty.device)))
+    y_pred = y_pred[mask,:]
+    y_true = y_true[mask]
     
     return y_pred,y_true
+
+class log_NLLLoss(torch.nn.NLLLoss):
+    def __init__(self, reduction: str = 'mean',eps = 1e-20) -> None:
+        super().__init__(reduction = reduction)
+        self.eps = eps
+    def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        return super().forward((input+self.eps).log(), target)
 
 def acc_coverage(y_pred,y_true, uncertainty, coverage):
     '''Returns the total accuracy of model in some dataset excluding the 1-c most uncertain samples'''
@@ -42,7 +46,7 @@ def error_coverage(y_pred,y_true, uncertainty, coverage):
     '''Returns the 0-1 loss of model in some dataset excluding the 1-c most uncertain samples'''
     return 1-acc_coverage(y_pred,y_true, uncertainty, coverage)
 
-def RC_curve(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
+def RC_curve_old(y_pred,y_true,uncertainty, risk = error_coverage, c_list = torch.arange(0.05,1.05,0.05)):
     ''' Returns an array with the accuracy of the model in the data dataset
      excluding the most uncertain (total number set by the coverage) samples.
      Each item in the output array is the accuracy when the coverage is given by same item in c_list'''
@@ -54,19 +58,41 @@ def RC_curve(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arang
             risk_list = torch.cat((risk_list,r.unsqueeze(-1)))
     return risk_list
 
+def RC_curve(y_pred,y_true,uncertainty,risk = TE.wrong_class, c_list = torch.arange(0.05,1.05,0.05)):
+    ''' Returns an array with the accuracy of the model in the data dataset
+     excluding the most uncertain (total number set by the coverage) samples.
+     Each item in the output array is the accuracy when the coverage is given by same item in c_list'''
+    N = y_true.size(0)
+    r = risk(y_pred,y_true)
+    r = r[uncertainty.argsort(descending=False)]
+    risk_list = []
+    with torch.no_grad():
+        for c in c_list:
+            cN = torch.floor(c*N).int()
+            risk_list.append((r[:cN].sum()/cN).item())
+    return risk_list
+
+def optimal_RC(y_pred,y_true,risk = TE.wrong_class, c_list = torch.arange(0.05,1.05,0.05)):
+    uncertainty = risk(y_pred,y_true)
+    return RC_curve(y_pred,y_true,uncertainty, risk, c_list)
+
 def ROC_curve(output,y_true, uncertainty, return_threholds = False):
     if callable(uncertainty):
         uncertainty = uncertainty(output)
-    y_true = np.logical_not(TE.correct_class(output,y_true).cpu().numpy())
+    y_true = TE.wrong_class(output,y_true).cpu().numpy()
     fpr, tpr, thresholds = ROC(y_true,uncertainty.cpu().numpy())
     if return_threholds:
         return fpr,tpr,thresholds
     else:
         return fpr,tpr
 
-def AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
-    risk_list = RC_curve(y_pred,y_true,uncertainty, risk, c_list)
+def AURC_torch(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
+    risk_list = RC_curve_old(y_pred,y_true,uncertainty, risk, c_list)
     return torch.trapz(risk_list,x = torch.tensor(c_list,device = risk_list.device), dim = -1)
+
+def AURC(y_pred,y_true,uncertainty, risk = TE.wrong_class, c_list = torch.arange(0.05,1.05,0.05)):
+    risk_list = RC_curve(y_pred,y_true,uncertainty, risk, c_list)
+    return auc(c_list,risk_list)
 
 def AUROC(output,y_true,uncertainty):
     fpr,tpr = ROC_curve(output,y_true,uncertainty)
@@ -82,15 +108,10 @@ def correlation(self,a,b,metric = 'spearman'):
         fn = spearmanr
     rho = fn(a,b)    
     return rho
-    
-
-def optimum_RC(y_pred,y_true,risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
-    uncertainty = torch.logical_not(TE.correct_class(y_pred,y_true)).float()
-    return RC_curve(y_pred,y_true,uncertainty, risk, c_list)
 
 def E_AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
     aurc = AURC(y_pred,y_true,uncertainty, risk, c_list)
-    opt_aurc = auc(c_list,optimum_RC(y_pred,y_true,risk, c_list))
+    opt_aurc = auc(c_list,optimal_RC(y_pred,y_true,risk, c_list))
     return aurc - opt_aurc
 
 def Brier(y_pred,y_true,n_classes = -1):
@@ -99,6 +120,15 @@ def Brier(y_pred,y_true,n_classes = -1):
     y_true = torch.nn.functional.one_hot(y_true, n_classes)
     return torch.mean(torch.sum(torch.square(y_pred-y_true),-1))
     #return brier_score_loss(TE.correct_class(y_pred,y_true), 1-uncertainty)
+
+    
+class log_NLLLoss(torch.nn.NLLLoss):
+    '''Cross Entropy for softmax input'''
+    def __init__(self, reduction: str = 'mean',eps = 1e-20) -> None:
+        super().__init__(reduction = reduction)
+        self.eps = eps
+    def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        return super().forward((input+self.eps).log(), target)
 
 
 def calibration_curve(
@@ -351,7 +381,7 @@ class selective_metrics():
         for name,un in self.d_uncs.items():
             self.risk[name] = RC_curve(self.output,self.label,un,risk, self.c_list)
         if optimal:
-            self.risk['Optimal'] = optimum_RC(self.output,self.label,risk, self.c_list)
+            self.risk['Optimal'] = optimal_RC(self.output,self.label,risk, self.c_list)
         if baseline is not None:
             self.risk['Baseline'] = baseline
         
@@ -408,7 +438,7 @@ class selective_metrics():
         d = {}
         for name,risk in self.risk.items():
             AURC = {auc(self.c_list,risk)}
-            opt_aurc = auc(self.c_list,optimum_RC(self.output,self.label,risk, self.c_list))
+            opt_aurc = auc(self.c_list,optimal_RC(self.output,self.label,risk, self.c_list))
             EAURC = AURC-opt_aurc
             d[name] = EAURC
         return d
