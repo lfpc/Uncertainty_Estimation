@@ -81,13 +81,13 @@ for m in torch_models.list_models():
     else:
         try: globals()[m] = getattr(torch_models,m)
         except: continue
-'''for m in timm.list_models():
+for m in timm.list_pretrained():
     if m in torch_models.list_models():
         continue
     else: 
         m.replace('.','_')
         try: globals()[m] = getattr(timm.models,m)
-        except: continue'''
+        except: continue
 
 timm_special_models ={
     'efficientnetv2_xl': 'tf_efficientnetv2_xl.in21k_ft_in1k',
