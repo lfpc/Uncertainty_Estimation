@@ -50,6 +50,7 @@ def correct_class(y_pred,y_true):
     
     return correct
 
+
 def wrong_class(y_pred,y_true):
     '''Returns a bool tensor indicating if each prediction is wrong'''
     return 1-correct_class(y_pred,y_true).int()
@@ -57,6 +58,18 @@ def wrong_class(y_pred,y_true):
 def correct_total(y_pred,y_true):
     '''Returns the number of correct predictions in a batch'''
     return correct_class(y_pred,y_true).sum()
+
+def accuracy(y_pred,y_true):
+    '''Returns the accuracy in a batch'''
+    return correct_total(y_pred,y_true)/y_true.size(0)
+
+def correct_class_topk(y_pred:torch.tensor,y_true,k:int):
+    '''Returns a bool tensor indicating if each prediction is correct'''
+    return y_pred.topk(k).indices.T.eq(y_true).sum(0)
+
+def top_k_accuracy(y_pred:torch.tensor,y_true,k:int):
+    '''top-k accuracy'''
+    return correct_class_topk(y_pred,y_true,k).sum()/(y_true.size(0))
 
 def calc_loss_batch(model,loss_criterion,data,set_eval = True):
     '''Calculate the average loss over a dataset.'''
