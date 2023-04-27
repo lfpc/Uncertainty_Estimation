@@ -133,6 +133,11 @@ def get_weight(model:str,weight:str = 'DEFAULT'):
     elif timm.is_model_pretrained(model) or model in timm_special_models.keys():
         return timm_weights(model)
     
+def list_models():
+    models = torch_models.list_models()
+    models.extend(list(timm_special_models.keys()))
+    return models
+    
 
 
 

@@ -20,6 +20,8 @@ class TempAnalysis():
         return metrics.RC_curve(self.y_pred,self.labels,method(self.y_pred))
     def AURC(self,method = MCP_unc):
         return metrics.AURC(self.y_pred,self.labels,method(self.y_pred))
+    def AUROC(self,method = MCP_unc):
+        return metrics.AUROC(self.y_pred,self.labels,method(self.y_pred))
     def ECE(self, bins = 10):
         fn = metrics.ECE(n_bins = bins)
         return fn(self.y_pred,self.labels)
