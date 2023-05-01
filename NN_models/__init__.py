@@ -68,10 +68,8 @@ class Softmax_Model(nn.Module):
     def forward(self,x):
         return F.softmax(self.model(x),dim=-1)
 
-from .wide_resnet import WideResNet28_10, WideResNet
-from .CNN8 import CNN8
+
 from .pytorch_cifar import *
-from .resnet_dropout import ResNet18_Dropout, ResNet50_Dropout
 import torchvision.models as torch_models
 import timm
 
@@ -133,10 +131,14 @@ def get_weight(model:str,weight:str = 'DEFAULT'):
     elif timm.is_model_pretrained(model) or model in timm_special_models.keys():
         return timm_weights(model)
     
-def list_models():
-    models = torch_models.list_models()
-    models.extend(list(timm_special_models.keys()))
-    return models
+def list_models(data:str = 'ImageNet'):
+    if data == 'ImageNet':
+        models = torch_models.list_models()
+        models.extend(list(timm_special_models.keys()))
+        return models
+    elif data == 'Cifar':
+        return list_models_cifar()
+    
     
 
 

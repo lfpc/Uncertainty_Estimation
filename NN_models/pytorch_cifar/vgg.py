@@ -52,9 +52,18 @@ class VGG_FCDropout(VGG):
             nn.Linear(512, num_classes),
         )
 
+class VGG_11(VGG):
+    def __init__(self, num_classes):
+        super().__init__('VGG11',num_classes)
+class VGG_13(VGG):
+    def __init__(self, num_classes):
+        super().__init__('VGG13',num_classes)
 class VGG_16(VGG):
     def __init__(self, num_classes):
         super().__init__('VGG16',num_classes)
+class VGG_19(VGG):
+    def __init__(self, num_classes):
+        super().__init__('VGG19',num_classes)
 
 class VGG_16_FCDropout(VGG_FCDropout):
     def __init__(self, num_classes, drop_rate = 0.5):
