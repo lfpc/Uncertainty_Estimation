@@ -38,8 +38,8 @@ class ImageNet_C_Dataset(Dataset):
 
         self.transforms_target = transforms_target
         self.transform = transforms
-        self.imgs = np.array([])
-        self.targets = np.array([])
+        self.imgs = []
+        self.targets = []
         if exists(join(data_dir,'ImageNet')):
             data_dir = join(data_dir,'ImageNet')
 
@@ -48,14 +48,13 @@ class ImageNet_C_Dataset(Dataset):
                 if lvl == 0:
                     if natural_data is None:
                         natural_data = datasets.imagenet.ImageNet(join(data_dir),split = 'val',transform = None)
-                    imgs = natural_data.imgs
-                    targets = natural_data.targets
-                    self.imgs = np.concatenate((self.imgs,imgs))
-                    self.targets = np.concatenate((self.targets,targets))
+                    self.imgs.extend(natural_data.imgs)
+                    self.targets.extend(natural_data.targets)
                 else:
                     data = datasets.ImageFolder(root=join(data_dir,'corrupted',name,str(lvl)),transform=None)
-                    self.imgs = np.concatenate((self.imgs,data.imgs))
-                    self.targets = np.concatenate((self.targets,data.targets))
+                    self.imgs.extend(data.imgs)
+                    self.targets.extend(data.targets)
+                    
     def __getitem__(self, index):
         img, targets = self.imgs[index], self.targets[index]
         img = Image.fromarray(img)
