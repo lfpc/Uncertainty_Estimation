@@ -54,7 +54,7 @@ class ImageNet_C_Dataset(Dataset):
                     data = datasets.ImageFolder(root=join(data_dir,'corrupted',name,str(lvl)),transform=None)
                     self.imgs.extend(data.imgs)
                     self.targets.extend(data.targets)
-                    
+
     def __getitem__(self, index):
         img, targets = self.imgs[index], self.targets[index]
         img = Image.fromarray(img)
@@ -67,7 +67,7 @@ class ImageNet_C_Dataset(Dataset):
         return img, np.int64(targets)
     
     def __len__(self):
-        return len(self.data)
+        return len(self.targets)
 
 class ImageNet_C(DataGenerator):
     corruptions = ['gaussian_noise',
