@@ -38,8 +38,7 @@ class ImageNet_C_Dataset(Dataset):
 
         self.transforms_target = transforms_target
         self.transform = transforms
-        im_size = (0,) + im_size
-        self.imgs = np.empty(im_size).astype(np.uint8)
+        self.imgs = np.array([])
         self.targets = np.array([])
         if exists(join(data_dir,'ImageNet')):
             data_dir = join(data_dir,'ImageNet')
@@ -54,7 +53,7 @@ class ImageNet_C_Dataset(Dataset):
                     self.imgs = np.concatenate((self.imgs,imgs))
                     self.targets = np.concatenate((self.targets,targets))
                 else:
-                    data = datasets.ImageFolder(root=join(data_dir,'ImageNet','corrupted',name,lvl),transform=None)
+                    data = datasets.ImageFolder(root=join(data_dir,'corrupted',name,lvl),transform=None)
                     self.imgs = np.concatenate((self.imgs,data.imgs))
                     self.targets = np.concatenate((self.targets,data.targets))
     def __getitem__(self, index):
