@@ -5,7 +5,7 @@ from os.path import exists, join
 from torchvision import datasets
 from copy import copy
 from warnings import warn
-from .corrupted import ImageNet_C
+from .corrupted import ImageNet_C as c_imagenet
 
 def get_transforms(model = 'resnet50'):
     from NN_models import get_weight,torch_models
@@ -51,10 +51,10 @@ class ImageNet(DataGenerator):
         from .imagenetv2 import ImageNetV2
         return ImageNetV2(data_dir=data_dir, **kwargs)
     @staticmethod
-    def ImageNet_C(data_dir="data",params=DataGenerator.params, corruptions = ImageNet_C.corruptions,levels:tuple = (0,1,2,3,4,5), 
+    def ImageNet_C(data_dir="data",params=DataGenerator.params, corruptions = c_imagenet.corruptions,levels:tuple = (0,1,2,3,4,5), 
                  seed=None, dataloader:bool = True,natural_data = None,transforms = transforms_test):
-        return ImageNet_C(data_dir,params,corruptions,levels,seed,dataloader,natural_data,transforms)
-    def corrupted(self,corruptions = ImageNet_C.corruptions,levels:tuple = (0,1,2,3,4,5)):
-        return ImageNet_C(self.test_data.root,self.params,corruptions,levels,None,True,self.test_data,self.transforms_test)
+        return c_imagenet(data_dir,params,corruptions,levels,seed,dataloader,natural_data,transforms)
+    def corrupted(self,corruptions = c_imagenet.corruptions,levels:tuple = (0,1,2,3,4,5)):
+        return c_imagenet(self.test_data.root,self.params,corruptions,levels,None,True,self.test_data,self.transforms_test)
 
 
