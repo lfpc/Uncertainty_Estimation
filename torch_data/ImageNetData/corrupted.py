@@ -1,10 +1,19 @@
 from torch_data.src import DataGenerator,CorruptedDataset
-from . import ImageNet,get_transforms
 import numpy as np
 from os.path import exists, join
 from torchvision import datasets
 from PIL import Image
 from torch.utils.data import Dataset
+
+def get_transforms(model = 'resnet50'):
+    from NN_models import get_weight,torch_models
+    import timm
+
+    if model in torch_models.list_models():
+        return get_weight(model).transforms()
+    elif model in timm.list_models():
+        return timm.data.create_transform(**timm.data.resolve_data_config(timm.models.generate_default_cfgs({model:timm.get_pretrained_cfg(model)})))
+
 
 class ImageNet_C_Dataset(Dataset):
     corruptions = ['gaussian_noise',
