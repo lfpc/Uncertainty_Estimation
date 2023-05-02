@@ -1,4 +1,5 @@
 from torch_data import cifar
+from torch_data.src import CorruptedDataset
 
 import os
 import numpy as np
@@ -8,69 +9,7 @@ from torch.utils.data import Subset,Dataset, DataLoader
 from torchvision import datasets
 import random
 
-class CorruptedDataset(datasets.VisionDataset):
-    corruptions = ['natural',
-                    'gaussian_noise',
-                    'shot_noise',
-                    'speckle_noise',
-                    'impulse_noise',
-                    'defocus_blur',
-                    'gaussian_blur',
-                    'motion_blur',
-                    'zoom_blur',
-                    'snow',
-                    'fog',
-                    'brightness',
-                    'contrast',
-                    'elastic_transform',
-                    'pixelate',
-                    'jpeg_compression',
-                    'spatter',
-                    'saturate',
-                    'frost']
 
-    def __init__(self, data_dir :str,im_size: tuple, names:list = corruptions,levels:tuple = (0,1,2,3,4,5),
-                 transform= None, target_transform = None, natural_data = None):
-        super().__init__(
-                   data_dir, transform=transform,
-                   target_transform=target_transform)
-        im_size = (0,) + im_size
-        self.data = np.empty(im_size).astype(np.uint8)
-        self.targets = np.array([])
-        
-        if 0 in levels:
-            data = natural_data.data
-            targets = natural_data.targets
-            self.data = np.concatenate((self.data,data))
-            self.targets = np.concatenate((self.targets,targets))
-
-
-        for name in names:
-            assert name in self.corruptions
-            data_path = os.path.join(data_dir, name + '.npy')
-            target_path = os.path.join(data_dir, 'labels.npy')
-            data = np.load(data_path)
-            targets = np.load(target_path)
-            for l in levels:
-                l1 = (l-1)*10000
-                l2 = l*10000
-                self.data = np.concatenate((self.data,data[l1:l2]))
-                self.targets = np.concatenate((self.targets,targets[l1:l2]))
-            
-        
-    def __getitem__(self, index):
-        img, targets = self.data[index], self.targets[index]
-        img = Image.fromarray(img)
-        
-        if self.transform is not None:
-            img = self.transform(img)
-        if self.target_transform is not None:
-            targets = self.target_transform(targets)
-            
-        return img, np.int64(targets)
-    
-    def __len__(self):
-        return len(self.data)
 
 
 class Cifar10C(CorruptedDataset):

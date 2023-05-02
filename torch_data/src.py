@@ -4,7 +4,10 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import numpy as np
 from random import randrange
+from torchvision import datasets
 import torch
+from PIL import Image
+import os
 
 def split_data(training_data,val_size,val_transforms = None, method = 'pre_defined', seed = 0):
     '''to develop'''
@@ -251,3 +254,63 @@ class custom_subset(Dataset):
 
     def __len__(self):
         return len(self.targets)
+    
+class CorruptedDataset(datasets.VisionDataset):
+    corruptions = ['gaussian_noise',
+                    'shot_noise',
+                    'impulse_noise',
+                    'defocus_blur',
+                    'gaussian_blur',
+                    'motion_blur',
+                    'zoom_blur',
+                    'snow',
+                    'fog',
+                    'brightness',
+                    'contrast',
+                    'elastic_transform',
+                    'pixelate',
+                    'jpeg_compression',
+                    'frost']
+    extra = ['glass_bur', 'saturate','spatter','speckle_noise']
+
+    def __init__(self, data_dir :str,im_size: tuple, corruptions:list = corruptions,levels:tuple = (0,1,2,3,4,5),
+                 transform= None, target_transform = None, natural_data = None):
+        super().__init__(
+                   data_dir, transform=transform,
+                   target_transform=target_transform)
+        im_size = (0,) + im_size
+        self.data = np.empty(im_size).astype(np.uint8)
+        self.targets = np.array([])
+        
+        if 0 in levels:
+            data = natural_data.data
+            targets = natural_data.targets
+            self.data = np.concatenate((self.data,data))
+            self.targets = np.concatenate((self.targets,targets))
+
+
+        for name in corruptions:
+            data_path = os.path.join(data_dir, name + '.npy')
+            target_path = os.path.join(data_dir, 'labels.npy')
+            data = np.load(data_path)
+            targets = np.load(target_path)
+            for l in levels:
+                l1 = (l-1)*10000
+                l2 = l*10000
+                self.data = np.concatenate((self.data,data[l1:l2]))
+                self.targets = np.concatenate((self.targets,targets[l1:l2]))
+            
+        
+    def __getitem__(self, index):
+        img, targets = self.data[index], self.targets[index]
+        img = Image.fromarray(img)
+        
+        if self.transform is not None:
+            img = self.transform(img)
+        if self.target_transform is not None:
+            targets = self.target_transform(targets)
+            
+        return img, np.int64(targets)
+    
+    def __len__(self):
+        return len(self.data)

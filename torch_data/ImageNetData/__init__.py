@@ -36,7 +36,7 @@ class ImageNet(DataGenerator):
         training_data = datasets.imagenet.ImageNet(join(data_dir),split = 'train', transform = self.transforms_train) if train else None
         if 'split_train' in params and train:
             training_data = torch.utils.data.random_split(training_data, [params['split_train'],1-params['split_train']])[0]
-        test_data = datasets.imagenet.ImageNet(join(data_dir),split = 'val',transform = transforms_test) if test else None
+        test_data = datasets.imagenet.ImageNet(join(data_dir),split = 'val',transform = self.transforms_test) if test else None
         super().__init__(params, training_data, None, test_data, dataloader,**kwargs)
         #self.classes = self.get_classes(join(data_dir,'imagenet1k_classes.txt'))
     def get_classes(self,file = 'imagenet1k_classes.txt'):
@@ -49,6 +49,7 @@ class ImageNet(DataGenerator):
     def v2(data_dir, **kwargs):
         from .imagenetv2 import ImageNetV2
         return ImageNetV2(data_dir=data_dir, **kwargs)
+    @staticmethod
     def corrupted():
         warn('Corrupted ImageNet not implemented')
 
