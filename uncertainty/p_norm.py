@@ -16,8 +16,8 @@ class TempAnalysis():
         self.T = T
         self.y_pred = y_pred
         self.labels = labels
-    def RC_curve(self, method = MCP_unc) -> torch.tensor:
-        return metrics.RC_curve(self.y_pred,self.labels,method(self.y_pred))
+    def RC_curve(self, method = MCP_unc,coverages = None,return_coverages = False) -> torch.tensor:
+        return metrics.RC_curve(self.y_pred,self.labels,method(self.y_pred),coverages=coverages,return_coverages=return_coverages)
     def AURC(self,method = MCP_unc):
         return metrics.AURC(self.y_pred,self.labels,method(self.y_pred))
     def AUROC(self,method = MCP_unc):
