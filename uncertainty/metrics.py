@@ -14,20 +14,6 @@ from scipy.stats import spearmanr,pearsonr
 from pandas import DataFrame
 #from sklearn.calibration import calibration_curve as sk_calibration_curve
 
-def get_n_biggest(vec,n):
-    '''Returns the indexes of the N biggest values in vec'''
-    if 0<n<1:
-        n = int(n*vec.size(0))
-    unc = torch.argsort(vec, descending = False)
-    return unc[0:n]
-
-def masked_coverage(y_pred,y_true, uncertainty:torch.tensor, coverage):
-    
-    mask = uncertainty.le(torch.quantile(uncertainty,torch.as_tensor(coverage,device=uncertainty.device)))
-    y_pred = y_pred[mask,:]
-    y_true = y_true[mask]
-    
-    return y_pred,y_true
 
 class log_NLLLoss(torch.nn.NLLLoss):
     def __init__(self, reduction: str = 'mean',eps = 1e-20) -> None:
@@ -36,29 +22,7 @@ class log_NLLLoss(torch.nn.NLLLoss):
     def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         return super().forward((input+self.eps).log(), target)
 
-def acc_coverage(y_pred,y_true, uncertainty, coverage):
-    '''Returns the total accuracy of model in some dataset excluding the 1-c most uncertain samples'''
-    y_pred,y_true = masked_coverage(y_pred,y_true, uncertainty, coverage)
-    acc = TE.correct_total(y_pred,y_true)/y_true.size(0)
-    return acc
-
-def error_coverage(y_pred,y_true, uncertainty, coverage):
-    '''Returns the 0-1 loss of model in some dataset excluding the 1-c most uncertain samples'''
-    return 1-acc_coverage(y_pred,y_true, uncertainty, coverage)
-
-def RC_curve_old(y_pred,y_true,uncertainty, risk = error_coverage, c_list = torch.arange(0.05,1.05,0.05)):
-    ''' Returns an array with the accuracy of the model in the data dataset
-     excluding the most uncertain (total number set by the coverage) samples.
-     Each item in the output array is the accuracy when the coverage is given by same item in c_list'''
-
-    risk_list = torch.tensor([],device = y_pred.device)
-    with torch.no_grad():
-        for c in c_list:
-            r = risk(y_pred,y_true, uncertainty, c)
-            risk_list = torch.cat((risk_list,r.unsqueeze(-1)))
-    return risk_list
-
-def RC_curve(y_pred,y_true,uncertainty,risk = TE.wrong_class, c_list = torch.arange(0.05,1.05,0.05)):
+def RC_curve_old(y_pred,y_true,uncertainty,risk = TE.wrong_class, c_list = torch.arange(0.01,1.01,0.01)):
     ''' Returns an array with the accuracy of the model in the data dataset
      excluding the most uncertain (total number set by the coverage) samples.
      Each item in the output array is the accuracy when the coverage is given by same item in c_list'''
@@ -72,9 +36,54 @@ def RC_curve(y_pred,y_true,uncertainty,risk = TE.wrong_class, c_list = torch.ara
             risk_list.append((r[:cN].sum()/cN).item())
     return risk_list
 
+def RC_curve_raw(y_pred:torch.tensor,y_true:torch.tensor,uncertainty = None,risk_fn = TE.wrong_class,
+                coverages = None, expert=False, expert_cost=0,confidence = None):
+    risk = risk_fn(y_pred,y_true)
+    if uncertainty is None:
+        if callable(confidence):
+            confidence = confidence(y_pred)
+        uncertainty = -confidence
+    elif callable(uncertainty):
+        uncertainty = uncertainty(y_pred)
+    return RC_curve(risk,uncertainty,coverages,expert,expert_cost)
+
+def RC_curve(loss:torch.tensor, uncertainty:torch.tensor = None,coverages = None, expert=False, expert_cost=0, confidence = None):
+    loss = loss.view(-1)
+    if uncertainty is None:
+        if confidence is not None:
+            uncertainty = -confidence
+    uncertainty = uncertainty.view(-1)
+    n = len(loss)
+    assert len(uncertainty) == n
+    uncertainty,indices = uncertainty.sort(descending = False)
+    loss = loss[indices]
+    if coverages is not None and len(coverages)>0:
+        thresholds = uncertainty.quantile(torch.as_tensor(coverages,device = uncertainty.device))
+        indices = torch.searchsorted(uncertainty,thresholds)
+    else:
+        thresholds,indices = uncertainty.unique_consecutive(return_inverse = True)
+    coverages = (1 + indices)/n
+    risks = (loss.cumsum(0)[indices])/n
+
+    if expert:
+        if np.any(expert_cost):
+            expert_cost = np.array(expert_cost).reshape(-1)
+            if expert_cost.size == 1:
+                risks += (1 - coverages)*expert_cost
+            else:
+                assert len(expert_cost) == n
+                expert_cost = np.cumsum(expert_cost)
+                expert_cost = expert_cost[-1] - expert_cost
+                risks += expert_cost[indices]/n
+    else:
+        risks /= coverages
+    
+    return coverages, risks
+
+
 def optimal_RC(y_pred,y_true,risk = TE.wrong_class, c_list = torch.arange(0.05,1.05,0.05)):
     uncertainty = risk(y_pred,y_true)
-    return RC_curve(y_pred,y_true,uncertainty, risk, c_list)
+    return RC_curve_raw(y_pred,y_true,uncertainty, risk, c_list)
 
 def ROC_curve(output,y_true, uncertainty, return_threholds = False):
     if callable(uncertainty):
@@ -86,12 +95,13 @@ def ROC_curve(output,y_true, uncertainty, return_threholds = False):
     else:
         return fpr,tpr
 
-def AURC_torch(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
-    risk_list = RC_curve_old(y_pred,y_true,uncertainty, risk, c_list)
-    return torch.trapz(risk_list,x = torch.tensor(c_list,device = risk_list.device), dim = -1)
 
-def AURC(y_pred,y_true,uncertainty, risk = TE.wrong_class, c_list = torch.arange(0.05,1.05,0.05)):
-    risk_list = RC_curve(y_pred,y_true,uncertainty, risk, c_list)
+def AURC_raw(y_pred,y_true,uncertainty, risk = TE.wrong_class, c_list = torch.arange(0.05,1.05,0.05)):
+    risk_list = RC_curve_raw(y_pred,y_true,uncertainty, risk, c_list)
+    return auc(c_list,risk_list)
+
+def AURC(loss,uncertainty, c_list = torch.arange(0.05,1.05,0.05)):
+    risk_list = RC_curve(loss,uncertainty, c_list)
     return auc(c_list,risk_list)
 
 def AUROC(output,y_true,uncertainty):
@@ -108,11 +118,6 @@ def correlation(self,a,b,metric = 'spearman'):
         fn = spearmanr
     rho = fn(a,b)    
     return rho
-
-def E_AURC(y_pred,y_true,uncertainty, risk = error_coverage, c_list = np.arange(0.05,1.05,0.05)):
-    aurc = AURC(y_pred,y_true,uncertainty, risk, c_list)
-    opt_aurc = auc(c_list,optimal_RC(y_pred,y_true,risk, c_list))
-    return aurc - opt_aurc
 
 def Brier(y_pred,y_true,n_classes = -1):
     if n_classes == -1:
