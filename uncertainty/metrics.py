@@ -37,7 +37,7 @@ def RC_curve_old(y_pred,y_true,uncertainty,risk = TE.wrong_class, coverages = to
     return risk_list
 
 def RC_curve(y_pred:torch.tensor,y_true:torch.tensor,uncertainty = None,risk_fn = TE.wrong_class,
-                coverages = None, expert=False, expert_cost=0,confidence = None,return_coverages = True):
+                coverages = None, expert=False, expert_cost=0,confidence = None,return_coverages = False):
     risk = risk_fn(y_pred,y_true)
     if uncertainty is None:
         if callable(confidence):
