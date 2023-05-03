@@ -97,7 +97,7 @@ def ROC_curve(output,y_true, uncertainty, return_threholds = False):
 
 
 def AURC_raw(y_pred,y_true,uncertainty, risk = TE.wrong_class, c_list = torch.arange(0.05,1.05,0.05)):
-    risk_list = RC_curve_raw(y_pred,y_true,uncertainty, risk, c_list)
+    c_list,risk_list = RC_curve_raw(y_pred,y_true,uncertainty, risk, c_list)
     return auc(c_list,risk_list)
 
 def AURC(loss,uncertainty, c_list = torch.arange(0.05,1.05,0.05)):
