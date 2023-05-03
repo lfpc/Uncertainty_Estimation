@@ -37,7 +37,7 @@ def RC_curve_old(y_pred,y_true,uncertainty,risk = TE.wrong_class, c_list = torch
     return risk_list
 
 def RC_curve(y_pred:torch.tensor,y_true:torch.tensor,uncertainty = None,risk_fn = TE.wrong_class,
-                coverages = None, expert=False, expert_cost=0,confidence = None):
+                coverages = None, expert=False, expert_cost=0,confidence = None,return_coverages = True):
     risk = risk_fn(y_pred,y_true)
     if uncertainty is None:
         if callable(confidence):
@@ -45,9 +45,9 @@ def RC_curve(y_pred:torch.tensor,y_true:torch.tensor,uncertainty = None,risk_fn 
         uncertainty = -confidence
     elif callable(uncertainty):
         uncertainty = uncertainty(y_pred)
-    return RC_curve_raw(risk,uncertainty,coverages,expert,expert_cost)
+    return RC_curve_raw(risk,uncertainty,coverages,expert,expert_cost,return_coverages=return_coverages)
 
-def RC_curve_raw(loss:torch.tensor, uncertainty:torch.tensor = None,coverages = None, expert=False, expert_cost=0, confidence = None):
+def RC_curve_raw(loss:torch.tensor, uncertainty:torch.tensor = None,coverages = None, expert=False, expert_cost=0, confidence = None,return_coverages = False):
     loss = loss.view(-1)
     if uncertainty is None:
         if confidence is not None:
@@ -77,8 +77,9 @@ def RC_curve_raw(loss:torch.tensor, uncertainty:torch.tensor = None,coverages = 
                 risks += expert_cost[indices]/n
     else:
         risks /= coverages
-    
-    return coverages.cpu().numpy(), risks.cpu().numpy()
+    if return_coverages:
+        return coverages.cpu().numpy(), risks.cpu().numpy()
+    else: return risks.cpu().numpy()
 
 
 def optimal_RC(y_pred,y_true,risk = TE.wrong_class, c_list = torch.arange(0.05,1.05,0.05)):
@@ -97,11 +98,11 @@ def ROC_curve(output,y_true, uncertainty, return_threholds = False):
 
 
 def AURC(y_pred,y_true,uncertainty, risk = TE.wrong_class, c_list = torch.arange(0.05,1.05,0.05)):
-    c_list,risk_list = RC_curve(y_pred,y_true,uncertainty, risk, c_list)
+    c_list,risk_list = RC_curve(y_pred,y_true,uncertainty, risk, c_list,return_coverages = True)
     return auc(c_list,risk_list)
 
 def AURC_raw(loss,uncertainty, c_list = torch.arange(0.05,1.05,0.05)):
-    c_list,risk_list = RC_curve_raw(loss,uncertainty, c_list)
+    c_list,risk_list = RC_curve_raw(loss,uncertainty, c_list,return_coverages = True)
     return auc(c_list,risk_list)
 
 def AUROC(output,y_true,uncertainty):
