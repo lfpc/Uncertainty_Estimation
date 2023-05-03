@@ -36,7 +36,7 @@ def RC_curve_old(y_pred,y_true,uncertainty,risk = TE.wrong_class, c_list = torch
             risk_list.append((r[:cN].sum()/cN).item())
     return risk_list
 
-def RC_curve_raw(y_pred:torch.tensor,y_true:torch.tensor,uncertainty = None,risk_fn = TE.wrong_class,
+def RC_curve(y_pred:torch.tensor,y_true:torch.tensor,uncertainty = None,risk_fn = TE.wrong_class,
                 coverages = None, expert=False, expert_cost=0,confidence = None):
     risk = risk_fn(y_pred,y_true)
     if uncertainty is None:
@@ -45,9 +45,9 @@ def RC_curve_raw(y_pred:torch.tensor,y_true:torch.tensor,uncertainty = None,risk
         uncertainty = -confidence
     elif callable(uncertainty):
         uncertainty = uncertainty(y_pred)
-    return RC_curve(risk,uncertainty,coverages,expert,expert_cost)
+    return RC_curve_raw(risk,uncertainty,coverages,expert,expert_cost)
 
-def RC_curve(loss:torch.tensor, uncertainty:torch.tensor = None,coverages = None, expert=False, expert_cost=0, confidence = None):
+def RC_curve_raw(loss:torch.tensor, uncertainty:torch.tensor = None,coverages = None, expert=False, expert_cost=0, confidence = None):
     loss = loss.view(-1)
     if uncertainty is None:
         if confidence is not None:
@@ -96,12 +96,12 @@ def ROC_curve(output,y_true, uncertainty, return_threholds = False):
         return fpr,tpr
 
 
-def AURC_raw(y_pred,y_true,uncertainty, risk = TE.wrong_class, c_list = torch.arange(0.05,1.05,0.05)):
-    c_list,risk_list = RC_curve_raw(y_pred,y_true,uncertainty, risk, c_list)
+def AURC(y_pred,y_true,uncertainty, risk = TE.wrong_class, c_list = torch.arange(0.05,1.05,0.05)):
+    c_list,risk_list = RC_curve(y_pred,y_true,uncertainty, risk, c_list)
     return auc(c_list,risk_list)
 
-def AURC(loss,uncertainty, c_list = torch.arange(0.05,1.05,0.05)):
-    c_list,risk_list = RC_curve(loss,uncertainty, c_list)
+def AURC_raw(loss,uncertainty, c_list = torch.arange(0.05,1.05,0.05)):
+    c_list,risk_list = RC_curve_raw(loss,uncertainty, c_list)
     return auc(c_list,risk_list)
 
 def AUROC(output,y_true,uncertainty):
