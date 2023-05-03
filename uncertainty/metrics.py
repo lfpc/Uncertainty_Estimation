@@ -381,7 +381,7 @@ class selective_metrics():
             else:
                 self.d_uncs[name] = un.view(-1)
         
-    def RC_curves(self,risk = error_coverage, optimal = False,baseline = None):
+    def RC_curves(self,risk = TE.wrong_class, optimal = False,baseline = None):
         self.risk = {}
         for name,un in self.d_uncs.items():
             self.risk[name] = RC_curve(self.output,self.label,un,risk, self.c_list)
