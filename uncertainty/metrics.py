@@ -78,7 +78,7 @@ def RC_curve(loss:torch.tensor, uncertainty:torch.tensor = None,coverages = None
     else:
         risks /= coverages
     
-    return coverages, risks
+    return coverages.cpu().numpy(), risks.cpu().numpy()
 
 
 def optimal_RC(y_pred,y_true,risk = TE.wrong_class, c_list = torch.arange(0.05,1.05,0.05)):
@@ -101,7 +101,7 @@ def AURC_raw(y_pred,y_true,uncertainty, risk = TE.wrong_class, c_list = torch.ar
     return auc(c_list,risk_list)
 
 def AURC(loss,uncertainty, c_list = torch.arange(0.05,1.05,0.05)):
-    risk_list = RC_curve(loss,uncertainty, c_list)
+    c_list,risk_list = RC_curve(loss,uncertainty, c_list)
     return auc(c_list,risk_list)
 
 def AUROC(output,y_true,uncertainty):
