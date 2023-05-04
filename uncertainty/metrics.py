@@ -53,12 +53,12 @@ def RC_curve_raw(loss:torch.tensor, uncertainty:torch.tensor = None,coverages = 
         if confidence is not None:
             uncertainty = -confidence
     uncertainty = uncertainty.view(-1)
-    coverages = torch.as_tensor(coverages,device = uncertainty.device)
     n = len(loss)
     assert len(uncertainty) == n
     uncertainty,indices = uncertainty.sort(descending = False)
     loss = loss[indices]
     if coverages is not None:
+        coverages = torch.as_tensor(coverages,device = uncertainty.device)
         thresholds = uncertainty.quantile(coverages)
         indices = torch.searchsorted(uncertainty,thresholds)
     else:
