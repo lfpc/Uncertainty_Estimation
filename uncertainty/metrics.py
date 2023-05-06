@@ -83,9 +83,9 @@ def RC_curve_raw(loss:torch.tensor, uncertainty:torch.tensor = None,coverages = 
     else: return risks.cpu().numpy()
 
 
-def optimal_RC(y_pred,y_true,risk = TE.wrong_class, coverages = torch.arange(0.05,1.05,0.05)):
+def optimal_RC(y_pred,y_true,risk = TE.wrong_class, coverages = torch.arange(0.05,1.05,0.05),return_coverages = True):
     uncertainty = risk(y_pred,y_true)
-    return RC_curve(y_pred,y_true,uncertainty, risk, coverages)
+    return RC_curve_raw(uncertainty,uncertainty, coverages,return_coverages=return_coverages)
 
 def ROC_curve(output,y_true, uncertainty, return_threholds = False):
     if callable(uncertainty):
