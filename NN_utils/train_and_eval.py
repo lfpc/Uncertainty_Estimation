@@ -129,6 +129,7 @@ def accumulate_results(model,data, set_eval = False):
     '''Accumulate output (of model) and label of a entire dataset.'''
 
     dev = next(model.parameters()).device
+    dtype = next(model.parameters()).dtype
     if set_eval:
         model.eval()
 
@@ -136,7 +137,7 @@ def accumulate_results(model,data, set_eval = False):
     label_list = torch.Tensor([]).to(dev)
     with torch.no_grad():
         for image,label in data:
-            image,label = image.to(dev), label.to(dev)
+            image,label = image.to(dev,dtype), label.to(dev)
             output = model(image)
 
             label_list = torch.cat((label_list,label))
