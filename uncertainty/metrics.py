@@ -60,11 +60,10 @@ def RC_curve_raw(loss:torch.tensor, uncertainty:torch.tensor = None,coverages = 
     if coverages is not None:
         coverages = torch.as_tensor(coverages,device = uncertainty.device)
         thresholds = uncertainty.quantile(coverages)
-        indices = torch.searchsorted(uncertainty,thresholds)
+        indices = torch.searchsorted(uncertainty,thresholds).minimum(torch.as_tensor(uncertainty.size(0)-1,device=uncertainty.device))
     else:
         thresholds,indices = uncertainty.unique_consecutive(return_inverse = True)
     coverages = (1 + indices)/n
-    print(indices)
     risks = (loss.cumsum(0)[indices])/n
 
     if expert:
