@@ -57,7 +57,7 @@ class ImageNet_C_Dataset(Dataset):
 
     def __getitem__(self, index):
         img, targets = self.imgs[index], self.targets[index]
-        img = Image.fromarray(img)
+        img = Image.fromarray(img[1])
         
         if self.transform is not None:
             img = self.transform(img)
